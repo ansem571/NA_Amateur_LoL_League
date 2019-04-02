@@ -4,9 +4,10 @@ using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 
-namespace Domain.Services.Interfaces
+namespace Domain.Repositories.Interfaces
 {
-    public interface IAccountService
+    public interface ILookupRepository
     {
+        Task<LookupEntity> GetLookupEntity(Guid id);
     }
 }

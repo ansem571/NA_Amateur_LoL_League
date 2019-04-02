@@ -19,6 +19,7 @@ namespace DAL.Entities.UserData
         public string PhoneNumber { get; set; }
         public bool PhoneNumberConfirmed { get; set; }
         public bool TwoFactorEnabled { get; set; }
+        public Guid? PhoneCarrierId { get; set; }
 
 
         public override string ToString()

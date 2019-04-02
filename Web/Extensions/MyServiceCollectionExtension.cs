@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DAL.Data.Implementations;
-using DAL.Data.Interfaces;
-using DAL.Databases;
+﻿using DAL.Data.Interfaces;
 using DAL.Databases.Implementations;
 using DAL.Databases.Interfaces;
 using DAL.Entities.Logging;
@@ -17,7 +11,6 @@ using Domain.Repositories.Interfaces;
 using Domain.Services.Implementations;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -63,17 +56,20 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<UserRoleRelationEntity>, UserRoleStore>();
             services.TryAddSingleton<IUserStore<UserEntity>, UserStore>();
             services.TryAddSingleton<IRoleStore<UserRoleEntity>, RoleStore>();
+            services.TryAddSingleton<ITableStorageRepository<LookupEntity>, LookupStore>();
             return services;
         }
 
         public static IServiceCollection AddMappers(this IServiceCollection services)
         {
             services.TryAddSingleton<ILogLevelMapper, LogLevelMapper>();
+            services.TryAddSingleton<IPhoneMapper, PhoneMapper>();
             return services;
         }
 
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
+            services.TryAddSingleton<ILookupRepository, LookupRepository>();
             services.TryAddSingleton<IUserRepository, UserRepository>();
             return services;
         }
@@ -82,7 +78,6 @@ namespace Web.Extensions
         {
             services.TryAddSingleton<IAccountService, AccountService>();
             services.TryAddSingleton<IEmailService, EmailService>();
-            services.TryAddSingleton<IPasswordService, PasswordService>();
             return services;
         }
     }
