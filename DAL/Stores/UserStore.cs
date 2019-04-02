@@ -77,7 +77,7 @@ namespace DAL.Stores
             {
                 await connection.OpenAsync(cancellationToken);
                 return await connection.QuerySingleOrDefaultAsync<UserEntity>($@"SELECT * FROM [User]
-                    WHERE [NormalizedUserName] = @{nameof(normalizedUserName)}", new { normalizedUserName });
+                    WHERE [NormalizedEmail] = @{nameof(normalizedUserName)}", new { normalizedUserName });
             }
         }
 
