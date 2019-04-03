@@ -251,8 +251,8 @@ namespace DAL.Stores
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                var roleId = await connection.ExecuteScalarAsync<int?>("SELECT [Id] FROM [UserRole] WHERE [NormalizedName] = @normalizedName", new { normalizedName = roleName.ToUpper() });
-                if (!roleId.HasValue)
+                var roleId = await connection.ExecuteScalarAsync<Guid?>("SELECT [Id] FROM [UserRole] WHERE [NormalizedName] = @normalizedName", new { normalizedName = roleName.ToUpper() });
+                if (roleId.HasValue)
                     await connection.ExecuteAsync($"DELETE FROM [UserRoleRelation] WHERE [UserId] = @userId AND [RoleId] = @{nameof(roleId)}", new { userId = user.Id, roleId });
             }
         }
@@ -277,9 +277,9 @@ namespace DAL.Stores
 
             using (var connection = new SqlConnection(_connectionString))
             {
-                var roleId = await connection.ExecuteScalarAsync<int?>("SELECT [Id] FROM [UserRole] WHERE [NormalizedName] = @normalizedName", new { normalizedName = roleName.ToUpper() });
-                if (roleId == default(int)) return false;
-                var matchingRoles = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM [UserRole] WHERE [UserRoleRelation] = @userId AND [RoleId] = @{nameof(roleId)}",
+                var roleId = await connection.ExecuteScalarAsync<Guid?>("SELECT [Id] FROM [UserRole] WHERE [NormalizedName] = @normalizedName", new { normalizedName = roleName.ToUpper() });
+                if (roleId == default(Guid)) return false;
+                var matchingRoles = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM [UserRoleRelation] WHERE [UserId] = @userId AND [RoleId] = @{nameof(roleId)}",
                     new { userId = user.Id, roleId });
 
                 return matchingRoles > 0;

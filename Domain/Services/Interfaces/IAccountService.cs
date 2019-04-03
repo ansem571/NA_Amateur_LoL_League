@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
-using DAL.Views;
+using Domain.Views;
 
 namespace Domain.Services.Interfaces
 {

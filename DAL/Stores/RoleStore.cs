@@ -30,8 +30,8 @@ namespace DAL.Stores
             {
                 await connection.OpenAsync(cancellationToken);
                 role.Id = Guid.NewGuid();
-                await connection.QuerySingleAsync($@"INSERT INTO [UserRoleEntity] ([Id], [Name], [NormalizedName])
-                    VALUES (@{nameof(UserRoleEntity.Id)}, @{nameof(UserRoleEntity.Name)}, @{nameof(UserRoleEntity.NormalizedName)});");
+                await connection.QueryAsync($@"INSERT INTO [UserRole] ([Id], [Name], [NormalizedName])
+                    VALUES (@{nameof(UserRoleEntity.Id)}, @{nameof(UserRoleEntity.Name)}, @{nameof(UserRoleEntity.NormalizedName)});", role, commandTimeout: 60 * 5);
             }
 
             return IdentityResult.Success;
@@ -44,7 +44,7 @@ namespace DAL.Stores
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($@"UPDATE [UserRoleEntity] SET
+                await connection.ExecuteAsync($@"UPDATE [UserRole] SET
                     [Name] = @{nameof(UserRoleEntity.Name)},
                     [NormalizedName] = @{nameof(UserRoleEntity.NormalizedName)}
                     WHERE [Id] = @{nameof(UserRoleEntity.Id)}", role);
@@ -60,7 +60,7 @@ namespace DAL.Stores
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($"DELETE FROM [UserRoleEntity] WHERE [Id] = @{nameof(UserRoleEntity.Id)}", role);
+                await connection.ExecuteAsync($"DELETE FROM [UserRole] WHERE [Id] = @{nameof(UserRoleEntity.Id)}", role);
             }
 
             return IdentityResult.Success;
@@ -100,7 +100,7 @@ namespace DAL.Stores
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<UserRoleEntity>($@"SELECT * FROM [UserRoleEntity]
+                return await connection.QuerySingleOrDefaultAsync<UserRoleEntity>($@"SELECT * FROM [UserRole]
                     WHERE [Id] = @{nameof(roleId)}", new { roleId });
             }
         }
@@ -112,7 +112,7 @@ namespace DAL.Stores
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<UserRoleEntity>($@"SELECT * FROM [UserRoleEntity]
+                return await connection.QuerySingleOrDefaultAsync<UserRoleEntity>($@"SELECT * FROM [UserRole]
                     WHERE [NormalizedName] = @{nameof(normalizedRoleName)}", new { normalizedRoleName });
             }
         }

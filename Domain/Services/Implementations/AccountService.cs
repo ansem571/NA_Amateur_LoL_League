@@ -4,11 +4,11 @@ using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.UserData;
-using DAL.Views;
 using Domain.Exceptions;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Domain.Views;
 using Microsoft.Extensions.Logging;
 
 namespace Domain.Services.Implementations
@@ -63,6 +63,21 @@ namespace Domain.Services.Implementations
         }
 
         public async Task<bool> UpdateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<SummonerInfoView>> GetRosterSummonerInfosAsync(Guid rosterId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<SummonerInfoView>> GetAllSummonerAsync()
         {
             throw new NotImplementedException();
         }

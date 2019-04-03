@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
+using DAL.Stores;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -34,7 +36,33 @@ namespace Web
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
 
+            Task.Run(() => CreateAdminRole(services)).Wait();
+
             services.AddMvc();
+        }
+
+        private async Task CreateAdminRole(IServiceCollection services)
+        {
+            var builder = services.BuildServiceProvider();
+            var roleManager = builder.GetService<RoleManager<UserRoleEntity>>();
+            var userManager = builder.GetService<UserManager<UserEntity>>();
+
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                var role = new UserRoleEntity
+                {
+                    Name = "Admin"
+                };
+                await roleManager.CreateAsync(role);
+
+                
+            }
+            //Add any other user who will NEED Admin privileges 
+            var user = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
+            if (!await userManager.IsInRoleAsync(user, "Admin"))
+            {
+                await userManager.AddToRoleAsync(user, "Admin");
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
