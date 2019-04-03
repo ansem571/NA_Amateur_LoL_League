@@ -5,8 +5,8 @@ using DAL.Enums;
 
 namespace Domain.Mappers.Interfaces
 {
-    public interface IPhoneMapper
+    public interface ISummonerRoleMapper
     {
-        Guid? MapFromEnum(PhoneCarrierEnum carrier);
+        Guid MapFromEnum(SummonerRoleEnum role);
     }
 }

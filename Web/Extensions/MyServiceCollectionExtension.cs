@@ -1,9 +1,11 @@
 ﻿using DAL.Data.Interfaces;
 using DAL.Databases.Implementations;
 using DAL.Databases.Interfaces;
+using DAL.Entities.LeagueInfo;
 using DAL.Entities.Logging;
 using DAL.Entities.UserData;
 using DAL.Stores;
+using DAL.Stores.TSR;
 using Domain.Mappers.Implementations;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Implementations;
@@ -52,11 +54,14 @@ namespace Web.Extensions
 
         public static IServiceCollection AddStores(this IServiceCollection services)
         {
-            services.TryAddSingleton<ITableStorageRepository<MessageLogEntity>, MessageLogStore>();
-            services.TryAddSingleton<ITableStorageRepository<UserRoleRelationEntity>, UserRoleStore>();
+            //For identity purposes
             services.TryAddSingleton<IUserStore<UserEntity>, UserStore>();
             services.TryAddSingleton<IRoleStore<UserRoleEntity>, RoleStore>();
+
+            services.TryAddSingleton<ITableStorageRepository<MessageLogEntity>, MessageLogStore>();
+            services.TryAddSingleton<ITableStorageRepository<UserRoleRelationEntity>, UserRoleStore>();
             services.TryAddSingleton<ITableStorageRepository<LookupEntity>, LookupStore>();
+            services.TryAddSingleton<ITableStorageRepository<SummonerInfoEntity>, SummonerInfoStore>();
             return services;
         }
 
@@ -64,13 +69,14 @@ namespace Web.Extensions
         {
             services.TryAddSingleton<ILogLevelMapper, LogLevelMapper>();
             services.TryAddSingleton<IPhoneMapper, PhoneMapper>();
+            services.TryAddSingleton<ISummonerRoleMapper, SummonerRoleMapper>();
             return services;
         }
 
         public static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.TryAddSingleton<ILookupRepository, LookupRepository>();
-            services.TryAddSingleton<IUserRepository, UserRepository>();
+            services.TryAddSingleton<ISummonerInfoRepository, SummonerInfoRepository>();
             return services;
         }
 

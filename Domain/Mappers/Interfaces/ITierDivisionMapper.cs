@@ -5,8 +5,8 @@ using DAL.Enums;
 
 namespace Domain.Mappers.Interfaces
 {
-    public interface IPhoneMapper
+    public interface ITierDivisionMapper
     {
-        Guid? MapFromEnum(PhoneCarrierEnum carrier);
+        Guid MapFromEnum(TierDivisionEnum tierDivision);
     }
 }

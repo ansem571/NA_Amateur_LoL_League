@@ -51,7 +51,7 @@ namespace Domain.Services.Implementations
             }
         }
 
-        public async Task SendTextAsEmailAsync(string to, string messageBody, string subject, PhoneCarrier carrier)
+        public async Task SendTextAsEmailAsync(string to, string messageBody, string subject, PhoneCarrierEnum carrier)
         {
             const string fromEmail = "ansem571@gmail.com";
             var carrierId = _phoneMapper.MapFromEnum(carrier);

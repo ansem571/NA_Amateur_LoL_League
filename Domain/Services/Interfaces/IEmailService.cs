@@ -9,7 +9,7 @@ namespace Domain.Services.Interfaces
     public interface IEmailService
     {
         Task SendEmailAsync(string to, string messageBody, string subject);
-        Task SendTextAsEmailAsync(string to, string messageBody, string subject, PhoneCarrier carrier);
+        Task SendTextAsEmailAsync(string to, string messageBody, string subject, PhoneCarrierEnum carrier);
         Task SendEmailConfirmationAsync(string email, string link);
     }
 }

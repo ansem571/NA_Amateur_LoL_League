@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DAL.Data.Implementations;
+﻿using DAL.Data.Implementations;
 using DAL.Databases.Interfaces;
 using DAL.Entities.UserData;
 
-namespace DAL.Stores
+namespace DAL.Stores.TSR
 {
     public class LookupStore : TableStorageRepository<LookupEntity>
     {

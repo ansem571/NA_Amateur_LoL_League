@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DAL.Enums
 {
-    public enum PhoneCarrier
+    public enum PhoneCarrierEnum
     {
         ATT,
         Verizon,
