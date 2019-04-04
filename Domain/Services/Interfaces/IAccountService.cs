@@ -13,6 +13,6 @@ namespace Domain.Services.Interfaces
 
         Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user);
         Task<IEnumerable<SummonerInfoView>> GetRosterSummonerInfosAsync(Guid rosterId);
-        Task<IEnumerable<SummonerInfoView>> GetAllSummonerAsync();
+        Task<IEnumerable<SummonerInfoView>> GetAllSummonersAsync();
     }
 }

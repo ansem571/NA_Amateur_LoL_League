@@ -1,0 +1,14 @@
+﻿@model Domain.Views.AlternateAccountView
+@using (Html.BeginForm("AlternateAccounts"))
+{
+<tr>
+    @Html.HiddenFor(m => m.AlternateName)
+    <td>@Html.DisplayFor(m => m.AlternateName)</td>
+    <td>@Html.DisplayFor(m => m.OpGgUrlLink)</td>
+    <td>
+        <button type="button" class="danger" data-id="@Model.Id">Delete</button>
+        @Html.HiddenFor(m=>m.AlternateName)
+        @Html.HiddenFor(m=>m.AlternateName)
+    </td>
+</tr>
+}

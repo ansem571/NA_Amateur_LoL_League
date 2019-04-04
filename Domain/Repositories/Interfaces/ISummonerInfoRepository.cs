@@ -10,6 +10,8 @@ namespace Domain.Repositories.Interfaces
         Task<SummonerInfoEntity> ReadOneBySummonerIdAsync(Guid summonerId);
         Task<SummonerInfoEntity> ReadOneByUserIdAsync(Guid userId);
         Task<IEnumerable<SummonerInfoEntity>> GetAllSummonersAsync();
+        Task<IEnumerable<SummonerInfoEntity>> GetAllValidSummonersAsync();
+        Task<IEnumerable<SummonerInfoEntity>> GetAllForSummonerIdsAsync(IEnumerable<Guid> summonerIds);
         Task<bool> InsertAsync(SummonerInfoEntity entity);
         Task<bool> UpdateAsync(SummonerInfoEntity entity);
     }

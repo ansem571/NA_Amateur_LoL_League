@@ -34,6 +34,29 @@
                 <label asp-for="OpGgUrl"></label>
                 <input asp-for="OpGgUrl" class="form-control" />
             </div>
+            <div class="form-group">
+                <div>
+                    <button type="button" id="add">Add</button>
+                </div>
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-6"></div>
+                    <table class="table table-striped table-bordered" id="Alternates">
+                        <tr>
+                            <th>ID</th>
+                            <th>AlternateName</th>
+                            <th>OpGgUrlLink</th>
+                        </tr>
+                        <tbody>
+                            @foreach (var item in Model.AlternateAccounts)
+                            {
+                                @Html.Partial("AlternateAccountsPartial", item)
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <button type="submit" class="btn btn-default">Save</button>
         </form>
     </div>
@@ -41,4 +64,17 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script type="text/javascript">
+    var tableBody = $("#Alternates tbody");
+    var url = "@Url.Action("Add", "Summoner")";
+    $('#add').click(function () {
+        $.get(url,
+            function (response) {
+                tableBody.append(response);
+            });
+        });
+        $('form').data('validator', null);
+    $.validator.unobtrusive.parse($('form'));
+    </script>
 }

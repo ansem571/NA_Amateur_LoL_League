@@ -64,5 +64,11 @@ namespace Web.Controllers
             StatusMessage = "Your profile has been updated";
             return RedirectToAction(nameof(Index));
         }
+
+        public PartialViewResult Add()
+        {
+            var model = new AlternateAccountView();
+            return PartialView("AlternateAccountsPartial", model);
+        }
     }
 }

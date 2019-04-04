@@ -32,6 +32,16 @@ namespace Domain.Repositories.Implementations
             return await _table.ReadAllAsync();
         }
 
+        public async Task<IEnumerable<SummonerInfoEntity>> GetAllValidSummonersAsync()
+        {
+            return await _table.ReadManyAsync("IsValidPlayer = 1");
+        }
+
+        public async Task<IEnumerable<SummonerInfoEntity>> GetAllForSummonerIdsAsync(IEnumerable<Guid> summonerIds)
+        {
+            return await _table.ReadManyAsync("Id in @summonerIds", new {summonerIds});
+        }
+
         public async Task<bool> InsertAsync(SummonerInfoEntity entity)
         {
             return await _table.InsertAsync(entity) == 1;

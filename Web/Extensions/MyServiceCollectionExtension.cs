@@ -62,6 +62,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<UserRoleRelationEntity>, UserRoleStore>();
             services.TryAddSingleton<ITableStorageRepository<LookupEntity>, LookupStore>();
             services.TryAddSingleton<ITableStorageRepository<SummonerInfoEntity>, SummonerInfoStore>();
+            services.TryAddSingleton<ITableStorageRepository<AlternateAccountEntity>, AlternateAccountStore>();
             return services;
         }
 
@@ -72,6 +73,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ISummonerRoleMapper, SummonerRoleMapper>();
             services.TryAddSingleton<ITierDivisionMapper, TierDivisionMapper>();
             services.TryAddSingleton<ISummonerMapper, SummonerMapper>();
+            services.TryAddSingleton<IAlternateAccountMapper, AlternateAccountMapper>();
             return services;
         }
 
@@ -79,6 +81,7 @@ namespace Web.Extensions
         {
             services.TryAddSingleton<ILookupRepository, LookupRepository>();
             services.TryAddSingleton<ISummonerInfoRepository, SummonerInfoRepository>();
+            services.TryAddSingleton<IAlternateAccountRepository, AlternateAccountRepository>();
             return services;
         }
 

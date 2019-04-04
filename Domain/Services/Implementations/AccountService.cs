@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.UserData;
@@ -17,13 +18,22 @@ namespace Domain.Services.Implementations
         private readonly ISummonerMapper _summonerMapper;
         private readonly ILookupRepository _lookupRepository;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
+        private readonly IAlternateAccountMapper _alternateAccountMapper;
+        private readonly IAlternateAccountRepository _alternateAccountRepository;
 
-        public AccountService(ILogger logger, ISummonerMapper summonerMapper, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository)
+
+        public AccountService(ILogger logger, ISummonerMapper summonerMapper, ILookupRepository lookupRepository,
+            ISummonerInfoRepository summonerInfoRepository, IAlternateAccountMapper alternateAccountMapper,
+            IAlternateAccountRepository alternateAccountRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _summonerMapper = summonerMapper ?? throw new ArgumentNullException(nameof(summonerMapper));
             _lookupRepository = lookupRepository ?? throw new ArgumentNullException(nameof(lookupRepository));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
+            _alternateAccountMapper = alternateAccountMapper ??
+                                      throw new ArgumentNullException(nameof(alternateAccountMapper));
+            _alternateAccountRepository = alternateAccountRepository ??
+                                          throw new ArgumentNullException(nameof(alternateAccountRepository));
         }
 
         public async Task<bool> CreateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
@@ -37,6 +47,18 @@ namespace Domain.Services.Implementations
                 newEntity.IsValidPlayer = false;
 
                 result = await _summonerInfoRepository.InsertAsync(newEntity);
+
+                if (view.AlternateAccounts.Any())
+                {
+                    var alternateAccounts = _alternateAccountMapper.Map(view.AlternateAccounts).ToList();
+                    foreach (var alternateAccount in alternateAccounts)
+                    {
+                        alternateAccount.Id = Guid.NewGuid();
+                        alternateAccount.SummonerId = newEntity.Id;
+                    }
+
+                    result = await _alternateAccountRepository.CreateAsync(alternateAccounts);
+                }
             }
             catch (Exception e)
             {
@@ -62,7 +84,9 @@ namespace Domain.Services.Implementations
                 summonerInfo.Id = readEntity.Id;
                 summonerInfo.UserId = readEntity.UserId;
 
-                result = await _summonerInfoRepository.UpdateAsync(summonerInfo);
+                var altAccountTask = UpdateAlternateAccountsAsync(summonerInfo.Id, view.AlternateAccounts);
+                var updateSummonerInfoTask = _summonerInfoRepository.UpdateAsync(summonerInfo);
+                result = await altAccountTask && await updateSummonerInfoTask;
             }
             catch (Exception e)
             {
@@ -72,6 +96,64 @@ namespace Domain.Services.Implementations
             return result;
         }
 
+        public async Task<bool> UpdateAlternateAccountsAsync(Guid summonerId, IEnumerable<AlternateAccountView> viewList)
+        {
+            var newList = viewList.ToList();
+
+            var existingAlternateAccounts =
+                (await _alternateAccountRepository.ReadAllForSummonerAsync(summonerId)).ToList();
+
+            var kvp = new Dictionary<AlternateAccountView, AlternateAccountEntity>();
+
+            foreach (var entity in existingAlternateAccounts)
+            {
+                var mapped = _alternateAccountMapper.Map(entity);
+                kvp.Add(mapped, entity);
+            }
+
+            var createList = new List<AlternateAccountEntity>();
+            var updateList = new List<AlternateAccountEntity>();
+            var deleteList = new List<AlternateAccountEntity>();
+
+            foreach (var newAltAccount in newList)
+            {
+                //create
+                if (!kvp.TryGetValue(newAltAccount, out var oldEntity))
+                {
+                    var newEntity = _alternateAccountMapper.Map(newAltAccount);
+                    newEntity.Id = Guid.NewGuid();
+                    newEntity.SummonerId = summonerId;
+
+                    createList.Add(newEntity);
+                }
+                //update
+                else
+                {
+                    if (oldEntity.AlternateName != newAltAccount.AlternateName
+                        || oldEntity.OpGGUrlLink != newAltAccount.OpGgUrlLink)
+                    {
+                        oldEntity.AlternateName = newAltAccount.AlternateName;
+                        oldEntity.OpGGUrlLink = newAltAccount.OpGgUrlLink;
+                        updateList.Add(oldEntity);
+                    }
+                }
+            }
+
+            //delete
+            foreach (var oldAltAccount in kvp)
+            {
+                if (!newList.Contains(oldAltAccount.Key))
+                {
+                    deleteList.Add(oldAltAccount.Value);
+                }
+            }
+
+            var createTask = _alternateAccountRepository.CreateAsync(createList);
+            var updateTask = _alternateAccountRepository.UpdateAsync(updateList);
+            var deleteTask = _alternateAccountRepository.DeleteAsync(deleteList);
+            return await createTask && await updateTask && await deleteTask;
+        }
+
         public async Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user)
         {
             var summonerEntity = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
@@ -79,8 +161,12 @@ namespace Domain.Services.Implementations
             {
                 return new SummonerInfoView();
             }
+            var alternateAccounts = await _alternateAccountRepository.ReadAllForSummonerAsync(summonerEntity.Id);
+            var altViews = _alternateAccountMapper.Map(alternateAccounts);
 
-            return _summonerMapper.Map(summonerEntity);
+            var summonerInfo = _summonerMapper.Map(summonerEntity);
+            summonerInfo.AlternateAccounts = altViews;
+            return summonerInfo;
         }
 
         public async Task<IEnumerable<SummonerInfoView>> GetRosterSummonerInfosAsync(Guid rosterId)
@@ -88,11 +174,20 @@ namespace Domain.Services.Implementations
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<SummonerInfoView>> GetAllSummonerAsync()
+        public async Task<IEnumerable<SummonerInfoView>> GetAllSummonersAsync()
         {
-            var entities = await _summonerInfoRepository.GetAllSummonersAsync();
-
-            return _summonerMapper.Map(entities);
+            var summonerEntities = (await _summonerInfoRepository.GetAllSummonersAsync()).ToList();
+            var views = new List<SummonerInfoView>();
+            foreach (var summoner in summonerEntities)
+            {
+                var altAccounts = await _alternateAccountRepository.ReadAllForSummonerAsync(summoner.Id);
+                var view = _summonerMapper.Map(summoner);
+                var altAccountViews = _alternateAccountMapper.Map(altAccounts);
+                view.AlternateAccounts = altAccountViews;
+                views.Add(view);
+            }
+           
+            return views;
         }
     }
 }

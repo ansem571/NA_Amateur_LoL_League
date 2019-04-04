@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
 
 namespace Domain.Views
@@ -17,6 +18,8 @@ namespace Domain.Views
         public string OpGgUrl { get; set; }
         [Required]
         public bool IsValid { get; set; }
+
+        public IEnumerable<AlternateAccountView> AlternateAccounts { get; set; } = new List<AlternateAccountView>();
 
         public string StatusMessage { get; set; }
     }
