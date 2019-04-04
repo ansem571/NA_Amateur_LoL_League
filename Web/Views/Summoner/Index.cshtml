@@ -1,8 +1,44 @@
-﻿@model object
+﻿@using Domain.Enums
+@using Web.Views.Manage
+@model Domain.Views.SummonerInfoView
 
 @{
-    ViewBag.Title = "title";
-    Layout = "_Layout";
+    ViewBag.Title = "Summoner Info";
+    ViewData.AddActivePage(ManageNavPages.Index);
 }
 
-<h2>title</h2>
+<h2>@ViewData["Title"]</h2>
+@Html.Partial("_StatusMessage", Model.StatusMessage)
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="SummonerName"></label>
+                <input asp-for="SummonerName" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Role"></label>
+                <select asp-items="Html.GetEnumSelectList<SummonerRoleEnum>()" asp-for="Role" class="form-control"></select>
+
+            </div>
+            <div class="form-group">
+                <label asp-for="TierDivision"></label>
+                <select asp-items="Html.GetEnumSelectList<TierDivisionEnum>()" asp-for="TierDivision" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="CurrentLp"></label>
+                <input asp-for="CurrentLp" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="OpGgUrl"></label>
+                <input asp-for="OpGgUrl" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-default">Save</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

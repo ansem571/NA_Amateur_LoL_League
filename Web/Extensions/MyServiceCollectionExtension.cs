@@ -70,6 +70,8 @@ namespace Web.Extensions
             services.TryAddSingleton<ILogLevelMapper, LogLevelMapper>();
             services.TryAddSingleton<IPhoneMapper, PhoneMapper>();
             services.TryAddSingleton<ISummonerRoleMapper, SummonerRoleMapper>();
+            services.TryAddSingleton<ITierDivisionMapper, TierDivisionMapper>();
+            services.TryAddSingleton<ISummonerMapper, SummonerMapper>();
             return services;
         }
 

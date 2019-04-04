@@ -29,4 +29,10 @@
     <None Include="wwwroot\images\league.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Views\Summoner\_StatusMessage.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+  </ItemGroup>
+
 </Project>

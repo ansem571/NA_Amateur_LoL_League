@@ -34,6 +34,7 @@ namespace Domain.Services.Implementations
                 var newEntity = _summonerMapper.Map(view);
                 newEntity.Id = Guid.NewGuid();
                 newEntity.UserId = user.Id;
+                newEntity.IsValidPlayer = false;
 
                 result = await _summonerInfoRepository.InsertAsync(newEntity);
             }
@@ -50,8 +51,6 @@ namespace Domain.Services.Implementations
             var result = false;
             try
             {
-                var summonerInfo = _summonerMapper.Map(view);
-
                 var readEntity = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
 
                 if (readEntity == null)
@@ -59,6 +58,7 @@ namespace Domain.Services.Implementations
                     return await CreateSummonerInfoAsync(view, user);
                 }
 
+                var summonerInfo = _summonerMapper.Map(view);
                 summonerInfo.Id = readEntity.Id;
                 summonerInfo.UserId = readEntity.UserId;
 
@@ -75,6 +75,10 @@ namespace Domain.Services.Implementations
         public async Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user)
         {
             var summonerEntity = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
+            if (summonerEntity == null)
+            {
+                return new SummonerInfoView();
+            }
 
             return _summonerMapper.Map(summonerEntity);
         }

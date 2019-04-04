@@ -17,5 +17,7 @@ namespace Domain.Views
         public string OpGgUrl { get; set; }
         [Required]
         public bool IsValid { get; set; }
+
+        public string StatusMessage { get; set; }
     }
 }
