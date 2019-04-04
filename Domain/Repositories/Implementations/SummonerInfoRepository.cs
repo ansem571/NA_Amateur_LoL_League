@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
 using DAL.Entities.LeagueInfo;
@@ -28,9 +27,19 @@ namespace Domain.Repositories.Implementations
             return (await _table.ReadManyAsync("UserId = @userId", new {userId})).FirstOrDefault();
         }
 
+        public async Task<IEnumerable<SummonerInfoEntity>> GetAllSummonersAsync()
+        {
+            return await _table.ReadAllAsync();
+        }
+
         public async Task<bool> InsertAsync(SummonerInfoEntity entity)
         {
             return await _table.InsertAsync(entity) == 1;
+        }
+
+        public async Task<bool> UpdateAsync(SummonerInfoEntity entity)
+        {
+            return await _table.UpdateAsync(entity);
         }
     }
 }

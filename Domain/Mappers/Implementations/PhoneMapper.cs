@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DAL.Enums;
+using Domain.Enums;
 using Domain.Mappers.Interfaces;
 
 namespace Domain.Mappers.Implementations

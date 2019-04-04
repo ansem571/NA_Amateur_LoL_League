@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
-using DAL.Data.Implementations;
-using DAL.Databases.Interfaces;
 using DAL.Entities.UserData;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.UserData;
-using Domain.Exceptions;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
@@ -16,17 +14,14 @@ namespace Domain.Services.Implementations
     public class AccountService : IAccountService
     {
         private readonly ILogger _logger;
-        private readonly ISummonerRoleMapper _summonerRoleMapper;
-        private readonly ITierDivisionMapper _tierDivisionMapper;
+        private readonly ISummonerMapper _summonerMapper;
         private readonly ILookupRepository _lookupRepository;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
 
-        public AccountService(ILogger logger, ISummonerRoleMapper summonerRoleMapper, ITierDivisionMapper tierDivisionMapper,
-            ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository)
+        public AccountService(ILogger logger, ISummonerMapper summonerMapper, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _summonerRoleMapper = summonerRoleMapper ?? throw new ArgumentNullException(nameof(summonerRoleMapper));
-            _tierDivisionMapper = tierDivisionMapper ?? throw new ArgumentNullException(nameof(tierDivisionMapper));
+            _summonerMapper = summonerMapper ?? throw new ArgumentNullException(nameof(summonerMapper));
             _lookupRepository = lookupRepository ?? throw new ArgumentNullException(nameof(lookupRepository));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
         }
@@ -36,27 +31,15 @@ namespace Domain.Services.Implementations
             var result = false;
             try
             {
-                var summonerRoleId = _summonerRoleMapper.MapFromEnum(view.Role);
-
-                var tierDivisionId = _tierDivisionMapper.MapFromEnum(view.TierDivision);
-
-                var newEntity = new SummonerInfoEntity
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = user.Id,
-                    SummonerName = view.SummonerName,
-                    RoleId = summonerRoleId,
-                    Tier_DivisionId = tierDivisionId,
-                    CurrentLp = view.CurrentLp,
-                    IsValidPlayer = false,
-                    OpGGUrlLink = view.OpGgUrl
-                };
+                var newEntity = _summonerMapper.Map(view);
+                newEntity.Id = Guid.NewGuid();
+                newEntity.UserId = user.Id;
 
                 result = await _summonerInfoRepository.InsertAsync(newEntity);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error creating summoner info. Please contact support.");
+                _logger.LogError(e, $"Error creating summoner info for: {user.Email}.");
             }
 
             return result;
@@ -64,22 +47,48 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> UpdateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
         {
-            throw new NotImplementedException();
+            var result = false;
+            try
+            {
+                var summonerInfo = _summonerMapper.Map(view);
+
+                var readEntity = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
+
+                if (readEntity == null)
+                {
+                    return await CreateSummonerInfoAsync(view, user);
+                }
+
+                summonerInfo.Id = readEntity.Id;
+                summonerInfo.UserId = readEntity.UserId;
+
+                result = await _summonerInfoRepository.UpdateAsync(summonerInfo);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Error updating summoner info for: {user.Email}");
+            }
+
+            return result;
         }
 
-        public Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user)
+        public async Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user)
+        {
+            var summonerEntity = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
+
+            return _summonerMapper.Map(summonerEntity);
+        }
+
+        public async Task<IEnumerable<SummonerInfoView>> GetRosterSummonerInfosAsync(Guid rosterId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<SummonerInfoView>> GetRosterSummonerInfosAsync(Guid rosterId)
+        public async Task<IEnumerable<SummonerInfoView>> GetAllSummonerAsync()
         {
-            throw new NotImplementedException();
-        }
+            var entities = await _summonerInfoRepository.GetAllSummonersAsync();
 
-        public Task<IEnumerable<SummonerInfoView>> GetAllSummonerAsync()
-        {
-            throw new NotImplementedException();
+            return _summonerMapper.Map(entities);
         }
     }
 }

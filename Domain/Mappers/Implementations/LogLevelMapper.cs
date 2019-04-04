@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Domain.Mappers.Interfaces;
 using Microsoft.Extensions.Logging;
 

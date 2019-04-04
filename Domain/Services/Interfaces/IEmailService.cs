@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using DAL.Enums;
+﻿using System.Threading.Tasks;
+using Domain.Enums;
 
 namespace Domain.Services.Interfaces
 {

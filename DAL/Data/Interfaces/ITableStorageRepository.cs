@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Text;
 using System.Threading.Tasks;
-using DAL.Databases;
 using DAL.Databases.Interfaces;
 
 namespace DAL.Data.Interfaces

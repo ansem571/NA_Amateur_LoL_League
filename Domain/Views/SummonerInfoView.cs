@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DAL.Enums;
+using Domain.Enums;
 
 namespace Domain.Views
 {

@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using DAL.Enums;
+using Domain.Enums;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using SendGrid;
 
 namespace Domain.Services.Implementations
 {
@@ -30,14 +26,14 @@ namespace Domain.Services.Implementations
 
         public async Task SendEmailAsync(string to, string messageBody, string subject)
         {
-            const string fromEmail = "ansem571@gmail.com";
+            const string fromEmail = "casualesportsamateurleague@gmail.com";
 
             var message = new MailMessage(fromEmail, to, subject, messageBody);
             var client = new SmtpClient("smtp.gmail.com", 587)
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromEmail, "txlzxjycigiwadwm")
+                Credentials = new NetworkCredential(fromEmail, "zjxpzupexbqpigjg")
             };
             message.IsBodyHtml = true;
 

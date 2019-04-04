@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DAL.Enums;
+using Domain.Enums;
 
 namespace Domain.Mappers.Interfaces
 {
     public interface ISummonerRoleMapper
     {
-        Guid MapFromEnum(SummonerRoleEnum role);
+        Guid Map(SummonerRoleEnum role);
+        SummonerRoleEnum Map(Guid roleId);
     }
 }

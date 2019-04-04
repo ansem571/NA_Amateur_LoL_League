@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using DAL.Data.Implementations;
-using DAL.Data.Interfaces;
-using DAL.Entities.UserData;
-using DAL.Stores;
-using Domain.Repositories.Interfaces;
-using Microsoft.AspNetCore.Identity;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
 
@@ -23,14 +13,16 @@ namespace Web.Controllers
 
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
+            ViewData["Message"] = "Mission statement";
 
             return View();
         }
 
         public IActionResult Contact()
         {
-            ViewData["Message"] = "Your contact page.";
+            ViewData["Message"] = "Contact information" +
+                                  "\r Please attempt to contact a member of the Court before sending an email to support. " +
+                                  "\r If it is an issue regarding payment, go ahead and contact support.";
 
             return View();
         }

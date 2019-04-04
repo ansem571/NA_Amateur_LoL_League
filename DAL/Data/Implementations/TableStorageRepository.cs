@@ -11,7 +11,6 @@ using Dapper.Contrib.Extensions;
 using DAL.Data.Interfaces;
 using DAL.Databases.Interfaces;
 using DAL.Extensions;
-using Microsoft.AspNetCore.Identity;
 
 namespace DAL.Data.Implementations
 {
