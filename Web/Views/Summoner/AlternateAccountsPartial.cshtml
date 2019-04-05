@@ -2,13 +2,13 @@
 @using (Html.BeginForm("AlternateAccounts"))
 {
 <tr>
-    @Html.HiddenFor(m => m.AlternateName)
-    <td>@Html.DisplayFor(m => m.AlternateName)</td>
-    <td>@Html.DisplayFor(m => m.OpGgUrlLink)</td>
     <td>
-        <button type="button" class="danger" data-id="@Model.Id">Delete</button>
-        @Html.HiddenFor(m=>m.AlternateName)
-        @Html.HiddenFor(m=>m.AlternateName)
+        <label asp-for="AlternateName"></label>
+        <input asp-for="AlternateName"/>
+    </td>
+    <td>
+        <label asp-for="OpGgUrlLink"></label>
+        <input asp-for="OpGgUrlLink"/>
     </td>
 </tr>
 }

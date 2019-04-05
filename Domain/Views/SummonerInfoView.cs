@@ -19,8 +19,23 @@ namespace Domain.Views
         [Required]
         public bool IsValid { get; set; }
 
-        public IEnumerable<AlternateAccountView> AlternateAccounts { get; set; } = new List<AlternateAccountView>();
+        public List<AlternateAccountView> AlternateAccounts { get; set; }
 
         public string StatusMessage { get; set; }
+
+        //Remove empty views
+        public void RemoveEmptyViewsForDb()
+        {
+            for (var i = 0; i < AlternateAccounts.Count; i++)
+            {
+                var alternateAccount = AlternateAccounts[i];
+                if (string.IsNullOrEmpty(alternateAccount.AlternateName) ||
+                    string.IsNullOrEmpty(alternateAccount.OpGgUrlLink))
+                {
+                    AlternateAccounts.Remove(alternateAccount);
+                    i--;
+                }
+            }
+        }
     }
 }

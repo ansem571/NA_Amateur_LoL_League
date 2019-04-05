@@ -7,11 +7,7 @@ namespace Domain.Views
 {
     public class AlternateAccountView
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-
-        [Required]
         public string AlternateName { get; set; }
-        [Required]
         public string OpGgUrlLink { get; set; }
 
         public override bool Equals(object obj)

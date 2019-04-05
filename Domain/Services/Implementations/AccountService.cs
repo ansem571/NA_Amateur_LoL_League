@@ -20,7 +20,7 @@ namespace Domain.Services.Implementations
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IAlternateAccountMapper _alternateAccountMapper;
         private readonly IAlternateAccountRepository _alternateAccountRepository;
-
+        private const int AltenateAccountsCount = 3;
 
         public AccountService(ILogger logger, ISummonerMapper summonerMapper, ILookupRepository lookupRepository,
             ISummonerInfoRepository summonerInfoRepository, IAlternateAccountMapper alternateAccountMapper,
@@ -68,11 +68,18 @@ namespace Domain.Services.Implementations
             return result;
         }
 
+        /// <summary>
+        /// Will always go through here
+        /// </summary>
+        /// <param name="view"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public async Task<bool> UpdateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
         {
             var result = false;
             try
             {
+                view.RemoveEmptyViewsForDb();
                 var readEntity = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
 
                 if (readEntity == null)
@@ -165,7 +172,14 @@ namespace Domain.Services.Implementations
             var altViews = _alternateAccountMapper.Map(alternateAccounts);
 
             var summonerInfo = _summonerMapper.Map(summonerEntity);
-            summonerInfo.AlternateAccounts = altViews;
+            summonerInfo.AlternateAccounts = altViews.ToList();
+            if (summonerInfo.AlternateAccounts == null)
+            {
+                summonerInfo.AlternateAccounts = new List<AlternateAccountView>();
+            }
+
+            var missingCount = AltenateAccountsCount - summonerInfo.AlternateAccounts.Count;
+            summonerInfo.AlternateAccounts.AddRange(AddEmptyAlternateAccountViews(missingCount));
             return summonerInfo;
         }
 
@@ -183,11 +197,26 @@ namespace Domain.Services.Implementations
                 var altAccounts = await _alternateAccountRepository.ReadAllForSummonerAsync(summoner.Id);
                 var view = _summonerMapper.Map(summoner);
                 var altAccountViews = _alternateAccountMapper.Map(altAccounts);
-                view.AlternateAccounts = altAccountViews;
+                view.AlternateAccounts = altAccountViews.ToList();
+
+                var missingCount = AltenateAccountsCount - view.AlternateAccounts.Count;
+                view.AlternateAccounts.AddRange(AddEmptyAlternateAccountViews(missingCount));
+
                 views.Add(view);
             }
            
             return views;
+        }
+
+        private IEnumerable<AlternateAccountView> AddEmptyAlternateAccountViews(int missingCount)
+        {
+            var list = new List<AlternateAccountView>();
+            for (var i = 0; i < missingCount; i++)
+            {
+                list.Add(new AlternateAccountView());
+            }
+
+            return list;
         }
     }
 }

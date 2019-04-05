@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Services.Interfaces;
 using Domain.Views;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,7 +41,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Index(SummonerInfoView model)
         {
             if (!ModelState.IsValid)
@@ -63,12 +64,6 @@ namespace Web.Controllers
 
             StatusMessage = "Your profile has been updated";
             return RedirectToAction(nameof(Index));
-        }
-
-        public PartialViewResult Add()
-        {
-            var model = new AlternateAccountView();
-            return PartialView("AlternateAccountsPartial", model);
         }
     }
 }
