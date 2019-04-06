@@ -19,7 +19,7 @@ namespace Domain.Views
         [Required]
         public bool IsValid { get; set; }
 
-        public List<AlternateAccountView> AlternateAccounts { get; set; }
+        public List<AlternateAccountView> AlternateAccounts { get; set; } = new List<AlternateAccountView>();
 
         public string StatusMessage { get; set; }
 

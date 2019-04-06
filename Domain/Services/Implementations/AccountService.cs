@@ -166,17 +166,15 @@ namespace Domain.Services.Implementations
             var summonerEntity = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
             if (summonerEntity == null)
             {
-                return new SummonerInfoView();
+                var emptyInfo = new SummonerInfoView();
+                emptyInfo.AlternateAccounts.AddRange(AddEmptyAlternateAccountViews(AltenateAccountsCount));
+                return emptyInfo;
             }
             var alternateAccounts = await _alternateAccountRepository.ReadAllForSummonerAsync(summonerEntity.Id);
             var altViews = _alternateAccountMapper.Map(alternateAccounts);
 
             var summonerInfo = _summonerMapper.Map(summonerEntity);
             summonerInfo.AlternateAccounts = altViews.ToList();
-            if (summonerInfo.AlternateAccounts == null)
-            {
-                summonerInfo.AlternateAccounts = new List<AlternateAccountView>();
-            }
 
             var missingCount = AltenateAccountsCount - summonerInfo.AlternateAccounts.Count;
             summonerInfo.AlternateAccounts.AddRange(AddEmptyAlternateAccountViews(missingCount));
