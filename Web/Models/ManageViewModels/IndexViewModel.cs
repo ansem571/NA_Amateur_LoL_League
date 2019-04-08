@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebApp.Models.ManageViewModels
+namespace Web.Models.ManageViewModels
 {
     public class IndexViewModel
     {

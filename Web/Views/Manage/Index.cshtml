@@ -1,50 +1,53 @@
 ﻿@using Web.Views.Manage
-@model WebApp.Models.ManageViewModels.IndexViewModel
+@model Web.Models.Summoner.AccountSummonerJointModel
 @{
     ViewData["Title"] = "Profile";
     ViewData.AddActivePage(ManageNavPages.Index);
 }
 
 <h4>@ViewData["Title"]</h4>
-@Html.Partial("_StatusMessage", Model.StatusMessage)
+@Html.Partial("_StatusMessage", Model.ProfileInfo.StatusMessage)
 <div class="row">
     <div class="col-md-6">
         <form method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Username"></label>
-                <input asp-for="Username" class="form-control" />
+                <label asp-for="ProfileInfo.Username"></label>
+                <input asp-for="ProfileInfo.Username" class="form-control" />
             </div>
             <div class="form-group">
-                <label asp-for="Email"></label>
-                @if (Model.IsEmailConfirmed)
+                <label asp-for="ProfileInfo.Email"></label>
+                @if (Model.ProfileInfo.IsEmailConfirmed)
                 {
                     <div class="input-group">
-                        <input asp-for="Email" class="form-control" />
+                        <input asp-for="ProfileInfo.Email" class="form-control" />
                         <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
                     </div>
                 }
                 else
                 {
-                    <input asp-for="Email" class="form-control" />
+                    <input asp-for="ProfileInfo.Email" class="form-control" />
                     <button asp-action="SendVerificationEmail" class="btn btn-link">Send verification email</button>
                 }
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <span asp-validation-for="ProfileInfo.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PhoneNumber"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                <label asp-for="ProfileInfo.PhoneNumber"></label>
+                <input asp-for="ProfileInfo.PhoneNumber" class="form-control" />
+                <span asp-validation-for="ProfileInfo.PhoneNumber" class="text-danger"></span>
             </div>
             <button type="submit" class="btn btn-default">Save</button>
         </form>
     </div>
 </div>
 <div class="row">
-    @if (Model.IsEmailConfirmed)
+    @if (Model.ProfileInfo.IsEmailConfirmed)
     {
         <br />
+        <div class="col-md-2">
             <button onclick="@("window.location.href='" + @Url.Action("Index", "Summoner") + "'");" class="btn">Update Summoner Info</button>
+        </div>
+        @Html.Partial("~/Views/Summoner/_RequestSummonerPartial.cshtml", Model.SummonerInfo);
     }
 </div>
 

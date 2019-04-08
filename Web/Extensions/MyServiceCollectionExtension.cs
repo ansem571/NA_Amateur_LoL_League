@@ -63,6 +63,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<LookupEntity>, LookupStore>();
             services.TryAddSingleton<ITableStorageRepository<SummonerInfoEntity>, SummonerInfoStore>();
             services.TryAddSingleton<ITableStorageRepository<AlternateAccountEntity>, AlternateAccountStore>();
+            services.TryAddSingleton<ITableStorageRepository<SummonerRequestEntity>, SummonerRequestStore>();
             return services;
         }
 
@@ -82,6 +83,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ILookupRepository, LookupRepository>();
             services.TryAddSingleton<ISummonerInfoRepository, SummonerInfoRepository>();
             services.TryAddSingleton<IAlternateAccountRepository, AlternateAccountRepository>();
+            services.TryAddSingleton<IRequestedSummonerRepository, RequestedSummonerRepository>();
             return services;
         }
 

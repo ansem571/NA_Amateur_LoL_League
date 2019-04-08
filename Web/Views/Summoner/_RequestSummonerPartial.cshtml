@@ -1,0 +1,10 @@
+﻿@model Domain.Views.SummonerInfoView
+
+<div class="col-md-2">
+    @if (Model.IsValid)
+    {
+        <button onclick="@("window.location.href='" + @Url.Action("RequestPlayers", "Summoner") + "'");" class="btn">
+            Request Summoners
+        </button>
+    }
+</div>

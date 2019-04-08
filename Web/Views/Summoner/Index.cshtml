@@ -1,5 +1,4 @@
 ﻿@using Domain.Enums
-@using Microsoft.CodeAnalysis
 @using Web.Views.Manage
 @model Domain.Views.SummonerInfoView
 
@@ -56,24 +55,6 @@
                     }
                     </tbody>
                 </table>
-                @*<div class="row">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-2"></div>
-                    <div class="col-md-6"></div>
-                    <table class="table table-striped table-bordered">
-                        <tr>
-                            <th>AlternateName</th>
-                            <th>OpGgUrlLink</th>
-                        </tr>
-                        <tbody>
-
-                            @foreach (var item in Model.AlternateAccounts)
-                            {
-                                @Html.Partial("AlternateAccountsPartial", item)
-                            }
-                        </tbody>
-                    </table>
-                </div>*@
             </div>
             <button type="submit" class="btn btn-default">Save</button>
         </form>

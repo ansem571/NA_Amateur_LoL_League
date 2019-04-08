@@ -5,13 +5,15 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Services.Interfaces;
+using Domain.Views;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Extensions;
-using WebApp.Models.ManageViewModels;
+using Web.Models.ManageViewModels;
+using Web.Models.Summoner;
 
 namespace Web.Controllers
 {
@@ -24,6 +26,7 @@ namespace Web.Controllers
         private readonly IEmailService _emailSender;
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
+        private readonly IAccountService _accountService;
 
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
@@ -32,13 +35,15 @@ namespace Web.Controllers
           SignInManager<UserEntity> signInManager,
           IEmailService emailSender,
           ILogger logger,
-          UrlEncoder urlEncoder)
+          UrlEncoder urlEncoder, 
+          IAccountService accountService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _urlEncoder = urlEncoder;
+            _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
         }
 
         [TempData]
@@ -53,7 +58,7 @@ namespace Web.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var model = new IndexViewModel
+            var accountInfo = new IndexViewModel
             {
                 Username = user.UserName,
                 Email = user.Email,
@@ -62,12 +67,18 @@ namespace Web.Controllers
                 StatusMessage = StatusMessage
             };
 
+            var summonerInfo = await _accountService.GetSummonerViewAsync(user);
+            var model = new AccountSummonerJointModel
+            {
+                ProfileInfo = accountInfo,
+                SummonerInfo = summonerInfo
+            };
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(IndexViewModel model)
+        public async Task<IActionResult> Index(AccountSummonerJointModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -81,9 +92,9 @@ namespace Web.Controllers
             }
 
             var userName = user.UserName;
-            if (model.Username != userName)
+            if (model.ProfileInfo.Username != userName)
             {
-                var setUserNameResult = await _userManager.SetUserNameAsync(user, model.Username);
+                var setUserNameResult = await _userManager.SetUserNameAsync(user, model.ProfileInfo.Username);
                 if (!setUserNameResult.Succeeded)
                 {
                     throw new ApplicationException($"Unexpected error occurred setting userName for user with ID '{user.Id}'.");
@@ -91,9 +102,9 @@ namespace Web.Controllers
             }
 
             var email = user.Email;
-            if (model.Email != email)
+            if (model.ProfileInfo.Email != email)
             {
-                var setEmailResult = await _userManager.SetEmailAsync(user, model.Email);
+                var setEmailResult = await _userManager.SetEmailAsync(user, model.ProfileInfo.Email);
                 if (!setEmailResult.Succeeded)
                 {
                     throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
@@ -101,9 +112,9 @@ namespace Web.Controllers
             }
 
             var phoneNumber = user.PhoneNumber;
-            if (model.PhoneNumber != phoneNumber)
+            if (model.ProfileInfo.PhoneNumber != phoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
+                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.ProfileInfo.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
                     throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");

@@ -1,14 +1,43 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using DAL.Entities.UserData;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebApp.Models;
+using Web.Models;
+using Web.Models.ManageViewModels;
 
 namespace Web.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly UserManager<UserEntity> _userManager;
+
+        public HomeController(UserManager<UserEntity> userManager)
         {
-            return View();
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        }
+
+        [TempData]
+        public string StatusMessage { get; set; }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var model = new IndexViewModel();
+
+            if (user != null)
+            {
+                model = new IndexViewModel
+                {
+                    Username = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    IsEmailConfirmed = user.ConfirmedEmail,
+                    StatusMessage = StatusMessage
+                };
+            }
+            return View(model);
         }
 
         public IActionResult About()

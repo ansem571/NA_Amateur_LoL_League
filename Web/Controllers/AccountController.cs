@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Extensions;
-using WebApp.Models.AccountViewModels;
+using Web.Models.AccountViewModels;
 
 namespace Web.Controllers
 {

@@ -1,13 +1,22 @@
-﻿@{
+﻿@model Web.Models.ManageViewModels.IndexViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
-<br/>
-<img src="images/league.png" alt="" class="center-block" style="width: 50%"/>
-<br/>
+<br />
+<img src="images/league.png" alt="" class="center-block" style="width: 50%" />
+<br />
+@if (Model.IsEmailConfirmed)
+{
+    <p class="center-block" style="width: 50%">
+        Now that you have registered, please read our <a href="https://docs.google.com/document/d/1vNQLBbPZJyJdSX7Hl1bR-ciu6NZ-sxxMAkrtbe168wE/edit?usp=sharing">rules</a>
+        document. For links to our social media sites and support. Go to the <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a> section.
+    </p>
+    <br />
+}
 <p class="center-block" style="width: 50%">
     The site is currently in Alpha. We will be updating all users on the Discord Server's #developmentcenter channel.
     As we are in Alpha, please be aware that any bugs/errors may occur and to contact support immediately on the manner or post in the
-    #developmentcenter channel with screen captures of the page and an explanation of what you were doing prior to the error occuring. 
+    #developmentcenter channel with screen captures of the page and an explanation of what you were doing prior to the error occuring.
     Thank you for your patience and we will be notifying all users once the site has moved to Beta and beyond.
     <br />
     If you wish to join the discord server please navigate to the Contacts section of the website to see our social media links and support email.

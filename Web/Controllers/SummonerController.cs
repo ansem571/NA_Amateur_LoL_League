@@ -65,5 +65,55 @@ namespace Web.Controllers
             StatusMessage = "Your profile has been updated";
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> RequestPlayers()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var model = await _accountService.GetRequestedSummonersAsync(user);
+            model.StatusMessage = StatusMessage;
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> RequestPlayers(SummonerRequestView model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var tempList = new List<RequestedSummoner>();
+            foreach (var summoner in model.RequestedSummoners)
+            {
+                if (!tempList.Select(x => x.SummonerName).Contains(summoner.SummonerName))
+                {
+                    tempList.Add(summoner);
+                }
+            }
+
+            model.RequestedSummoners = tempList;
+
+            var result = await _accountService.UpdateSummonerRequestsAsync(user, model);
+            if (!result)
+            {
+                throw new ApplicationException($"Unexpected error occurred updating Summoner Requests for user '{user.Id}'.");
+            }
+
+            StatusMessage = "Your requests have been updated";
+            return RedirectToAction(nameof(RequestPlayers));
+        }
     }
 }

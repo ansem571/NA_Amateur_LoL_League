@@ -14,5 +14,8 @@ namespace Domain.Services.Interfaces
         Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user);
         Task<IEnumerable<SummonerInfoView>> GetRosterSummonerInfosAsync(Guid rosterId);
         Task<IEnumerable<SummonerInfoView>> GetAllSummonersAsync();
+
+        Task<SummonerRequestView> GetRequestedSummonersAsync(UserEntity user);
+        Task<bool> UpdateSummonerRequestsAsync(UserEntity user, SummonerRequestView view);
     }
 }
