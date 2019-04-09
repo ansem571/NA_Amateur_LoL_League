@@ -105,6 +105,7 @@ namespace Domain.Services.Implementations
                 var summonerInfo = _summonerMapper.Map(view);
                 summonerInfo.Id = readEntity.Id;
                 summonerInfo.UserId = readEntity.UserId;
+                summonerInfo.IsValidPlayer = readEntity.IsValidPlayer;
 
                 var altAccountTask = UpdateAlternateAccountsAsync(summonerInfo.Id, view.AlternateAccounts);
                 var updateSummonerInfoTask = _summonerInfoRepository.UpdateAsync(summonerInfo);
