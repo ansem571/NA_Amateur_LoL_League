@@ -1,0 +1,31 @@
+﻿@model Domain.Views.FpSummonerView
+@{
+    ViewBag.Title = "Registered Summoners";
+}
+
+@*
+    ViewBag["SummonerSort"] = string.IsNullOrEmpty(sortOrder) ? "summoner_desc" : "";
+    ViewBag["Role"] = string.IsNullOrEmpty(sortOrder) ? "role_desc" : "";
+    ViewBag["TierDivision"] = string.IsNullOrEmpty(sortOrder) ? "tierDivision_desc" : "";
+    ViewBag["TeamName"] = string.IsNullOrEmpty(sortOrder) ? "teamName_desc" : "";
+*@
+<h2>@ViewData["Title"]</h2>
+<table class="table table-bordered">
+    <tr>
+        <th>@Html.ActionLink("Summoner Name", "Index", new {sortOrder = ViewBag.SummonerName })</th>
+        <th>@Html.ActionLink("Role", "Index", new { sortOrder = ViewBag.Role })</th>
+        <th>@Html.ActionLink("Rank", "Index", new {sortOrder = ViewBag.TierDivision })</th>
+        <th>op.gg link</th>
+        <th>@Html.ActionLink("Team Name", "Index", new {sortOrder = ViewBag.TeamName })</th>
+    </tr>
+    @foreach (var item in Model.SummonerInfos)
+    {
+        <tr>
+            <td>@item.SummonerName</td>
+            <td>@item.Role.ToString()</td>
+            <td>@item.TierDivision.ToString()</td>
+            <td>@item.OpGgUrl</td>
+            <td>@item.TeamName</td>
+        </tr>
+    }
+</table>

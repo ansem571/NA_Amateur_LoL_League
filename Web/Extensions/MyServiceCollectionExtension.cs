@@ -64,6 +64,8 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<SummonerInfoEntity>, SummonerInfoStore>();
             services.TryAddSingleton<ITableStorageRepository<AlternateAccountEntity>, AlternateAccountStore>();
             services.TryAddSingleton<ITableStorageRepository<SummonerRequestEntity>, SummonerRequestStore>();
+            services.TryAddSingleton<ITableStorageRepository<TeamRosterEntity>, TeamRosterStore>();
+            services.TryAddSingleton<ITableStorageRepository<TeamPlayerEntity>, TeamPlayerStore>();
             return services;
         }
 
@@ -84,6 +86,9 @@ namespace Web.Extensions
             services.TryAddSingleton<ISummonerInfoRepository, SummonerInfoRepository>();
             services.TryAddSingleton<IAlternateAccountRepository, AlternateAccountRepository>();
             services.TryAddSingleton<IRequestedSummonerRepository, RequestedSummonerRepository>();
+            services.TryAddSingleton<ITeamRosterRepository, TeamRosterRepository>();
+            services.TryAddSingleton<ITeamPlayerRepository, TeamPlayerRepository>();
+
             return services;
         }
 

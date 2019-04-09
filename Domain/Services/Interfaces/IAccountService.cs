@@ -17,5 +17,7 @@ namespace Domain.Services.Interfaces
 
         Task<SummonerRequestView> GetRequestedSummonersAsync(UserEntity user);
         Task<bool> UpdateSummonerRequestsAsync(UserEntity user, SummonerRequestView view);
+
+        Task<FpSummonerView> GetFpSummonerView();
     }
 }

@@ -24,12 +24,15 @@ namespace Domain.Services.Implementations
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IAlternateAccountRepository _alternateAccountRepository;
         private readonly IRequestedSummonerRepository _requestedSummonerRepository;
+        private readonly ITeamPlayerRepository _teamPlayerRepository;
+        private readonly ITeamRosterRepository _teamRosterRepository;
         private const int AltenateAccountsCount = 3;
         private const int RequestingSummonerCount = 6;
 
         public AccountService(ILogger logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
             ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
-            IAlternateAccountRepository alternateAccountRepository, IRequestedSummonerRepository requestedSummonerRepository)
+            IAlternateAccountRepository alternateAccountRepository, IRequestedSummonerRepository requestedSummonerRepository,
+            ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _summonerMapper = summonerMapper ?? throw new ArgumentNullException(nameof(summonerMapper));
@@ -42,6 +45,10 @@ namespace Domain.Services.Implementations
                                           throw new ArgumentNullException(nameof(alternateAccountRepository));
             _requestedSummonerRepository = requestedSummonerRepository ??
                                            throw new ArgumentNullException(nameof(requestedSummonerRepository));
+            _teamPlayerRepository = teamPlayerRepository ??
+                                    throw new ArgumentNullException(nameof(teamPlayerRepository));
+            _teamRosterRepository = teamRosterRepository ??
+                                    throw new ArgumentNullException(nameof(teamRosterRepository));
         }
 
         public async Task<bool> CreateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
@@ -320,6 +327,57 @@ namespace Domain.Services.Implementations
             var updateTask = _requestedSummonerRepository.UpdateAsync(updateList);
             var deleteTask = _requestedSummonerRepository.DeleteAsync(deleteList);
             return await createTask && await updateTask && await deleteTask;
+        }
+
+        public async Task<FpSummonerView> GetFpSummonerView()
+        {
+            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
+            var teams = (await _teamRosterRepository.GetAllTeamsAsync()).ToDictionary(x => x.Id, x => x);
+
+            var usedSummoners = new Dictionary<Guid, SummonerInfoEntity>();
+            var fpSummonerView = new FpSummonerView();
+
+            foreach (var team in teams)
+            {
+                var players = await _teamPlayerRepository.ReadAllForRosterAsync(team.Key);
+                foreach (var player in players)
+                {
+                    if (summoners.TryGetValue(player.SummonerId, out var summoner) && !usedSummoners.TryGetValue(player.SummonerId, out _))
+                    {
+                        usedSummoners.Add(player.SummonerId, summoner);
+                        var mapped = _summonerMapper.Map(summoner);
+                        fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
+                        {
+                            SummonerName = summoner.SummonerName,
+                            Role = mapped.Role,
+                            TierDivision = mapped.TierDivision,
+                            OpGgUrl = summoner.OpGGUrlLink,
+                            TeamName = team.Value.TeamName
+                        });
+                    }
+                    else
+                    {
+                        _logger.LogError($"Dupe player alert for: {summoner?.SummonerName ?? player.SummonerId.ToString()}");
+                    }
+                }
+            }
+
+            var remainingSummoners = summoners.Except(usedSummoners).Concat(usedSummoners.Except(summoners));
+
+            foreach (var remainingSummoner in remainingSummoners)
+            {
+                var mapped = _summonerMapper.Map(remainingSummoner.Value);
+                fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
+                {
+                    SummonerName = mapped.SummonerName,
+                    Role = mapped.Role,
+                    TierDivision = mapped.TierDivision,
+                    OpGgUrl = mapped.OpGgUrl,
+                    TeamName = "Unassigned"
+                });
+            }
+
+            return fpSummonerView;
         }
 
         #region private helpers
