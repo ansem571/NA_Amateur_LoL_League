@@ -232,8 +232,8 @@ namespace Domain.Services.Implementations
             var view = new SummonerRequestView
             {
                 SummonerName = summonerEntity.SummonerName,
-                SummonerNames = summoners.Select(x => x.SummonerName).ToList(),
-                Names = GetSelectListItems(summoners.Select(x => x.SummonerName))
+                SummonerNames = summoners.Select(x => x.SummonerName).OrderBy(x => x).ToList(),
+                Names = GetSelectListItems(summoners.Select(x => x.SummonerName).OrderBy(x => x))
             };
             if (!requestedSummonerEntities.Any())
             {
