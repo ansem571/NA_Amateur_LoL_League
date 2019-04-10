@@ -1,10 +1,21 @@
 ﻿@model Domain.Views.SummonerInfoView
 
-<div class="col-md-2">
-    @if (Model.IsValid)
-    {
+@if (Model.IsValid)
+{
+    <div class="col-md-2">
         <button onclick="@("window.location.href='" + @Url.Action("RequestPlayers", "Summoner") + "'");" class="btn">
             Request Summoners
         </button>
-    }
-</div>
+    </div>
+}
+else
+{
+    <br />
+    <div>
+        <p>
+            Once you have confirmed your Email and Registered your Summoner Information,
+            you will be able to request to play with other players.
+            As well as other players will be enabled to request to play with you.
+        </p>
+    </div>
+}

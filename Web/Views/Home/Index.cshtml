@@ -13,6 +13,18 @@
     </p>
     <br />
 }
+else if (!Model.IsEmailConfirmed && !string.IsNullOrEmpty(Model.Username))
+{
+    <div>
+        <p>
+            You are almost done Registering. Please confirm your email and you will be able to Provide your Summoner information in your Profile Page.
+            If you have already confirmed your email, then refresh the page.
+            Once you have confirmed your Email and Registered your Summoner Information, you will be able to request to play with other players.
+            As well as other players will be enabled to request to play with you.
+        </p>
+    </div>
+    <br />
+}
 <p class="center-block" style="width: 50%">
     The site is currently in Alpha. We will be updating all users on the Discord Server's #developmentcenter channel.
     As we are in Alpha, please be aware that any bugs/errors may occur and to contact support immediately on the manner or post in the

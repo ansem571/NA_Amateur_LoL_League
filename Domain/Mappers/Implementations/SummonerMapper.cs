@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DAL.Entities.LeagueInfo;
+using Domain.Enums;
 using Domain.Mappers.Interfaces;
 using Domain.Views;
 
@@ -24,6 +25,7 @@ namespace Domain.Mappers.Implementations
             {
                 SummonerName = entity.SummonerName,
                 Role = _summonerRoleMapper.Map(entity.RoleId),
+                OffRole = entity.OffRoleId.HasValue ? _summonerRoleMapper.Map(entity.OffRoleId.Value) : SummonerRoleEnum.None,
                 TierDivision = _tierDivisionMapper.Map(entity.Tier_DivisionId),
                 CurrentLp = entity.CurrentLp,
                 OpGgUrl = entity.OpGGUrlLink,
@@ -42,6 +44,7 @@ namespace Domain.Mappers.Implementations
             {
                 SummonerName = view.SummonerName,
                 RoleId = _summonerRoleMapper.Map(view.Role),
+                OffRoleId = view.OffRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.OffRole) : default(Guid),
                 Tier_DivisionId = _tierDivisionMapper.Map(view.TierDivision),
                 OpGGUrlLink = view.OpGgUrl,
                 IsValidPlayer = view.IsValid,

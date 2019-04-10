@@ -10,6 +10,8 @@ namespace Domain.Views
         public string SummonerName { get; set; }
         [Required]
         public SummonerRoleEnum Role { get; set; }
+
+        public SummonerRoleEnum OffRole { get; set; }
         [Required]
         public TierDivisionEnum TierDivision { get; set; }
         [Required]

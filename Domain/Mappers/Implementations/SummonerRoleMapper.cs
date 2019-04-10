@@ -30,6 +30,10 @@ namespace Domain.Mappers.Implementations
                     {
                         return new Guid("3A2502EB-F104-43B9-9FC1-2FC189C27F0E");
                     }
+                case SummonerRoleEnum.Fill:
+                {
+                    return new Guid("C499F51B-5EA6-4195-B2FF-983E8E9D98BC");
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(role), role, null);
             }
@@ -57,6 +61,10 @@ namespace Domain.Mappers.Implementations
             else if (roleId == new Guid("3A2502EB-F104-43B9-9FC1-2FC189C27F0E"))
             {
                 summonerRole = SummonerRoleEnum.Sup;
+            }
+            else if (roleId == new Guid("C499F51B-5EA6-4195-B2FF-983E8E9D98BC"))
+            {
+                summonerRole = SummonerRoleEnum.Fill;
             }
 
             return summonerRole;

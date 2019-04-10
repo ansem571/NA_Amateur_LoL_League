@@ -16,5 +16,6 @@ namespace DAL.Entities.LeagueInfo
         public string OpGGUrlLink { get; set; }
         public bool IsValidPlayer { get; set; }
         public int CurrentLp { get; set; }
+        public Guid? OffRoleId { get; set; }
     }
 }

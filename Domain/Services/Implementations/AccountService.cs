@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.UserData;
+using Domain.Exceptions;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
@@ -53,7 +54,6 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> CreateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
         {
-            var result = false;
             try
             {
                 var newEntity = _summonerMapper.Map(view);
@@ -61,9 +61,9 @@ namespace Domain.Services.Implementations
                 newEntity.UserId = user.Id;
                 newEntity.IsValidPlayer = true;
 
-                result = await _summonerInfoRepository.InsertAsync(newEntity);
+                var result = await _summonerInfoRepository.InsertAsync(newEntity);
 
-                if (view.AlternateAccounts.Any())
+                if (result && view.AlternateAccounts.Any())
                 {
                     var alternateAccounts = _alternateAccountMapper.Map(view.AlternateAccounts).ToList();
                     foreach (var alternateAccount in alternateAccounts)
@@ -74,13 +74,15 @@ namespace Domain.Services.Implementations
 
                     result = await _alternateAccountRepository.CreateAsync(alternateAccounts);
                 }
+
+                return result;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Error creating summoner info for: {user.Email}.");
+                var message = $"Error creating summoner info for: {user.Email}";
+                _logger.LogError(e, message);
+                throw new SummonerInfoException(message, e);
             }
-
-            return result;
         }
 
         /// <summary>
@@ -91,7 +93,6 @@ namespace Domain.Services.Implementations
         /// <returns></returns>
         public async Task<bool> UpdateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
         {
-            var result = false;
             try
             {
                 view.RemoveEmptyViewsForDb();
@@ -109,14 +110,18 @@ namespace Domain.Services.Implementations
 
                 var altAccountTask = UpdateAlternateAccountsAsync(summonerInfo.Id, view.AlternateAccounts);
                 var updateSummonerInfoTask = _summonerInfoRepository.UpdateAsync(summonerInfo);
-                result = await altAccountTask && await updateSummonerInfoTask;
+                return await altAccountTask && await updateSummonerInfoTask;
+            }
+            catch (SummonerInfoException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Error updating summoner info for: {user.Email}");
+                var message = $"Error updating summoner info for: {user.Email}";
+                _logger.LogError(e, message);
+                throw new Exception(message, e);
             }
-
-            return result;
         }
 
         public async Task<bool> UpdateAlternateAccountsAsync(Guid summonerId, IEnumerable<AlternateAccountView> viewList)

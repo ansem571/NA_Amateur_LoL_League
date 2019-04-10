@@ -2,10 +2,12 @@
 {
     public enum SummonerRoleEnum
     {
+        None,
         Top,
         Jungle,
         Mid,
         Adc,
-        Sup
+        Sup,
+        Fill
     }
 }

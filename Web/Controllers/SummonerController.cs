@@ -55,11 +55,14 @@ namespace Web.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var result = await _accountService.UpdateSummonerInfoAsync(model, user);
-
-            if (!result)
+            try
             {
-                throw new ApplicationException($"Unexpected error occurred setting Summoner Info for user '{user.Id}'.");
+                await _accountService.UpdateSummonerInfoAsync(model, user);
+            }
+            catch (Exception e)
+            {
+                StatusMessage = e.Message;
+                return RedirectToAction(nameof(Index));
             }
 
             StatusMessage = "Your profile has been updated";
