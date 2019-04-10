@@ -14,6 +14,7 @@
     <tr>
         <th>@Html.ActionLink("Summoner Name", "Index", new {sortOrder = ViewBag.SummonerName })</th>
         <th>@Html.ActionLink("Role", "Index", new { sortOrder = ViewBag.Role })</th>
+        <th>Off Role</th>
         <th>@Html.ActionLink("Rank", "Index", new {sortOrder = ViewBag.TierDivision })</th>
         <th>op.gg link</th>
         <th>@Html.ActionLink("Team Name", "Index", new {sortOrder = ViewBag.TeamName })</th>
@@ -23,6 +24,7 @@
         <tr>
             <td>@item.SummonerName</td>
             <td>@item.Role.ToString()</td>
+            <td>@item.OffRole.ToString()</td>
             <td>@item.TierDivision.ToString()</td>
             <td>@item.OpGgUrl</td>
             <td>@item.TeamName</td>

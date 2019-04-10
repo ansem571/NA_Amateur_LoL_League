@@ -35,12 +35,12 @@ namespace Web.Controllers
                     }
                 case "role_desc":
                     {
-                        model.SummonerInfos = model.SummonerInfos.OrderByDescending(x => x.Role).ToList();
+                        model.SummonerInfos = model.SummonerInfos.OrderByDescending(x => x.Role).ThenBy(x => x.OffRole.ToString()).ToList();
                         break;
                     }
                 case "Role":
                     {
-                        model.SummonerInfos = model.SummonerInfos.OrderBy(x => x.Role).ToList();
+                        model.SummonerInfos = model.SummonerInfos.OrderBy(x => x.Role).ThenBy(x=>x.OffRole.ToString()).ToList();
                         break;
                     }
                 case "tierDivision_desc":

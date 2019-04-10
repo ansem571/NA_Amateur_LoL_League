@@ -356,6 +356,7 @@ namespace Domain.Services.Implementations
                         {
                             SummonerName = summoner.SummonerName,
                             Role = mapped.Role,
+                            OffRole = mapped.OffRole,
                             TierDivision = mapped.TierDivision,
                             OpGgUrl = summoner.OpGGUrlLink,
                             TeamName = team.Value.TeamName
@@ -377,6 +378,7 @@ namespace Domain.Services.Implementations
                 {
                     SummonerName = mapped.SummonerName,
                     Role = mapped.Role,
+                    OffRole = mapped.OffRole,
                     TierDivision = mapped.TierDivision,
                     OpGgUrl = mapped.OpGgUrl,
                     TeamName = "Unassigned"
