@@ -66,7 +66,7 @@ namespace Web.Controllers
                     if (result.Succeeded)
                     {
                         _logger.LogInformation("User logged in.");
-                        return RedirectToLocal(returnUrl);
+                        return RedirectToAction("Index", "Manage");
                     }
 
                     if (result.RequiresTwoFactor)
@@ -244,7 +244,7 @@ namespace Web.Controllers
 
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created a new account with password.");
-                        return RedirectToLocal(returnUrl);
+                        return RedirectToAction("Index", "Manage");
                     }
 
                     AddErrors(result);
