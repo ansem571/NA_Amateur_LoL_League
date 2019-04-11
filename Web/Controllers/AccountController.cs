@@ -65,7 +65,7 @@ namespace Web.Controllers
                         lockoutOnFailure: false);
                     if (result.Succeeded)
                     {
-                        _logger.LogInformation("User logged in.");
+                        _logger.LogInformation($"User {model.Email} was signed in successfully.");
                         return RedirectToAction("Index", "Manage");
                     }
 
@@ -236,14 +236,14 @@ namespace Web.Controllers
                     var result = await _userManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
                     {
-                        _logger.LogInformation("User created a new account with password.");
+                        _logger.LogInformation($"User {user.Email} created a new account with password.");
 
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
                         await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
                         await _signInManager.SignInAsync(user, isPersistent: false);
-                        _logger.LogInformation("User created a new account with password.");
+                        _logger.LogInformation($"User {user.Email} was signed in successfully on registration.");
                         return RedirectToAction("Index", "Manage");
                     }
 
