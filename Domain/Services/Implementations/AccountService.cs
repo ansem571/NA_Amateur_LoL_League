@@ -388,6 +388,59 @@ namespace Domain.Services.Implementations
             return fpSummonerView;
         }
 
+        public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
+        {
+            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
+
+            var tempTeams = new List<RequestedPlayersView>();
+            foreach (var summonerInfoEntity in summoners)
+            {
+                var mappedPartial = _summonerMapper.Map(summonerInfoEntity.Value);
+                var partialSummonerView = new PartialSummonerView
+                {
+                    SummonerName = mappedPartial.SummonerName,
+                    RoleForTeam = mappedPartial.Role,
+                    Rank = mappedPartial.TierDivision
+                };
+                var record =
+                    tempTeams.FirstOrDefault(x => x.Summoners.Contains(partialSummonerView));
+                if (record == null)
+                {
+                    record = new RequestedPlayersView
+                    {
+                        TeamId = Guid.NewGuid(),
+                        Summoners = new List<PartialSummonerView>
+                        {
+                            partialSummonerView
+                        }
+                    };
+                    tempTeams.Add(record);
+                }
+
+                var requests = await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerInfoEntity.Key);
+                var requestedSummoners =
+                    (await _summonerInfoRepository.GetAllForSummonerIdsAsync(requests.Select(x =>
+                        x.SummonerRequestedId))).ToList();
+
+                var mapped = _summonerMapper.Map(requestedSummoners).ToList();
+                var partials = new List<PartialSummonerView>();
+                foreach (var view in mapped)
+                {
+                    partials.Add(new PartialSummonerView
+                    {
+                        SummonerName = view.SummonerName,
+                        RoleForTeam = view.Role,
+                        Rank = view.TierDivision
+                    });
+                }
+                
+                record.Summoners.AddRange(partials);
+                record.Summoners = record.Summoners.Distinct().ToList();
+            }
+
+            return tempTeams;
+        }
+
         #region private helpers
         private IEnumerable<AlternateAccountView> AddEmptyAlternateAccountViews(int missingCount)
         {
