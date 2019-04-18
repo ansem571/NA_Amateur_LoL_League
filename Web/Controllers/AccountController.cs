@@ -226,14 +226,15 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
         {
-            try
-            {
-                ViewData["ReturnUrl"] = returnUrl;
-                if (ModelState.IsValid)
-                {
 
+            ViewData["ReturnUrl"] = returnUrl;
+            if (ModelState.IsValid)
+            {
+                IdentityResult result = new IdentityResult();
+                try
+                {
                     var user = new UserEntity { UserName = model.Email, Email = model.Email };
-                    var result = await _userManager.CreateAsync(user, model.Password);
+                    result = await _userManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
                     {
                         _logger.LogInformation($"User {user.Email} created a new account with password.");
@@ -246,23 +247,23 @@ namespace Web.Controllers
                         _logger.LogInformation($"User {user.Email} was signed in successfully on registration.");
                         return RedirectToAction("Index", "Manage");
                     }
-
-                    foreach (var error in result.Errors)
-                    {
-                        _logger.LogError(error.Description);
-                    }
-
-                    AddErrors(result);
                 }
+                catch (Exception e)
+                {
+                    ErrorMessage = $"Error creating account for: {model.Email}. Contact support or DM Ansem571 on discord.";
+                    _logger.LogError(e, ErrorMessage);
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError(error.Description);
+                }
+                AddErrors(result);
             }
 
-            catch (Exception e)
-            {
-                ErrorMessage = $"Error creating account for: {model.Email}. Contact support or DM Ansem571 on discord.";
-                _logger.LogError(e, ErrorMessage);
-            }
+
             // If we got this far, something failed, redisplay form
-            return View();
+            return View(model);
         }
 
         [HttpPost]
