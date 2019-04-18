@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Team Creation";
 }
+<!DOCTYPE html>
 
 <h2>@ViewData["Title"]</h2>
 <table class="table table-bordered">
@@ -17,14 +18,14 @@
                 var index = i + 1;
                 <th>
                     <div>
-                        
-                        @if (index > 5)
+
+                        @if (index > minTeamCount)
                         {
-                        <div>P@(index): Name - Rank - Role</div>
+                            <div>Sub@(index - minTeamCount)</div>
                         }
                         else
                         {
-                        <div>@((SummonerRoleEnum)index)</div>
+                            <div>@((SummonerRoleEnum)index)</div>
                         }
                     </div>
                 </th>
@@ -63,5 +64,3 @@
         </tr>
     }
 </table>
-
-
