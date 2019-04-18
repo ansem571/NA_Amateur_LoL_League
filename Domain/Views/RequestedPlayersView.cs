@@ -8,13 +8,15 @@ namespace Domain.Views
 {
     public class RequestedPlayersView
     {
-        public Guid TeamId { get; set; }
         public List<PartialSummonerView> Summoners { get; set; }
         public List<SummonerRoleEnum> LookingFor => LookingForRoles();
+        public string LookingForString => string.Join(", ", LookingFor);
 
         private List<SummonerRoleEnum> LookingForRoles()
         {
             var listOfRoles = Enum.GetValues(typeof(SummonerRoleEnum)).Cast<SummonerRoleEnum>().ToList();
+            listOfRoles.Remove(SummonerRoleEnum.None);
+            listOfRoles.Remove(SummonerRoleEnum.Fill);
 
             foreach (var partialSummonerView in Summoners)
             {

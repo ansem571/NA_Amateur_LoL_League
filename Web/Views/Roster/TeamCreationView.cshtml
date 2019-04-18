@@ -1,0 +1,41 @@
+﻿@model List<Domain.Views.RequestedPlayersView>
+@{
+    ViewBag.Title = "Team Creation";
+}
+
+<h2>@ViewData["Title"]</h2>
+<table class="table table-bordered">
+    <tr>
+        @{
+            var minTeamCount = 5;
+            var maxTeamSize = Model.Max(x => x.Summoners.Count);
+            var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+            for (var i = 0; i < teamCount; i++)
+            {
+                var index = i + 1;
+                <th>P@(index): Name - Role - Rank</th>
+            }
+        }
+        <th>Looking For</th>
+    </tr>
+    @foreach (var group in Model)
+    {
+        <tr>
+            @foreach (var player in group.Summoners)
+            {
+                if (string.IsNullOrEmpty(player.SummonerName))
+                {
+                    <td>Unfilled</td>
+                }
+                else
+                {
+                    <td>@player.SummonerName - @player.RoleForTeam - @player.Rank</td>
+                }
+            }
+            <td>@group.LookingForString</td>
+        </tr>
+    }
+</table>
+
+

@@ -29,6 +29,7 @@ namespace Domain.Services.Implementations
         private readonly ITeamRosterRepository _teamRosterRepository;
         private const int AltenateAccountsCount = 3;
         private const int RequestingSummonerCount = 6;
+        private const int TeamRosterMaxCount = 7;
 
         public AccountService(ILogger logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
             ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
@@ -404,11 +405,36 @@ namespace Domain.Services.Implementations
                 };
                 var record =
                     tempTeams.FirstOrDefault(x => x.Summoners.Contains(partialSummonerView));
+                
+
+                var requests = await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerInfoEntity.Key);
+                var requestedSummoners =
+                    (await _summonerInfoRepository.GetAllForSummonerIdsAsync(requests.Select(x =>
+                        x.SummonerRequestedId))).ToList();
+                var mapped = _summonerMapper.Map(requestedSummoners).ToList();
+
+                var partials = new List<PartialSummonerView>();
+                foreach (var view in mapped)
+                {
+                    var t = new PartialSummonerView
+                    {
+                        SummonerName = view.SummonerName,
+                        RoleForTeam = view.Role,
+                        Rank = view.TierDivision
+                    };
+                    var existingGroup = tempTeams.FirstOrDefault(x => x.Summoners.Contains(t));
+                    if (existingGroup != null)
+                    {
+                        record = existingGroup;
+                        record.Summoners.Add(partialSummonerView);
+                    }
+                    partials.Add(t);
+                }
+
                 if (record == null)
                 {
                     record = new RequestedPlayersView
                     {
-                        TeamId = Guid.NewGuid(),
                         Summoners = new List<PartialSummonerView>
                         {
                             partialSummonerView
@@ -417,27 +443,19 @@ namespace Domain.Services.Implementations
                     tempTeams.Add(record);
                 }
 
-                var requests = await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerInfoEntity.Key);
-                var requestedSummoners =
-                    (await _summonerInfoRepository.GetAllForSummonerIdsAsync(requests.Select(x =>
-                        x.SummonerRequestedId))).ToList();
-
-                var mapped = _summonerMapper.Map(requestedSummoners).ToList();
-                var partials = new List<PartialSummonerView>();
-                foreach (var view in mapped)
-                {
-                    partials.Add(new PartialSummonerView
-                    {
-                        SummonerName = view.SummonerName,
-                        RoleForTeam = view.Role,
-                        Rank = view.TierDivision
-                    });
-                }
-                
                 record.Summoners.AddRange(partials);
                 record.Summoners = record.Summoners.Distinct().ToList();
             }
 
+            foreach (var tempTeam in tempTeams)
+            {
+                var missingCount = TeamRosterMaxCount - tempTeam.Summoners.Count;
+                if (missingCount > 0)
+                {
+                    tempTeam.Summoners.AddRange(AddEmptyPartialViews(missingCount));
+                }
+            }
+          
             return tempTeams;
         }
 
@@ -448,6 +466,17 @@ namespace Domain.Services.Implementations
             for (var i = 0; i < missingCount; i++)
             {
                 list.Add(new AlternateAccountView());
+            }
+
+            return list;
+        }
+
+        private IEnumerable<PartialSummonerView> AddEmptyPartialViews(int missingCount)
+        {
+            var list = new List<PartialSummonerView>();
+            for (var i = 0; i < missingCount; i++)
+            {
+                list.Add(new PartialSummonerView());
             }
 
             return list;

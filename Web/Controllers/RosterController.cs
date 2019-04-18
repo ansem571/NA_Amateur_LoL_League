@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Services.Interfaces;
+using Domain.Views;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers
@@ -69,6 +70,14 @@ namespace Web.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TeamCreationViewAsync()
+        {
+            var model = await _accountService.GetRequestedPlayersAsync();
+
+            return View("TeamCreationView", model);
         }
     }
 }

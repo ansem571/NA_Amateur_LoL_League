@@ -1,4 +1,5 @@
-﻿@model Domain.Views.FpSummonerView
+﻿@using System.Web
+@model Domain.Views.FpSummonerView
 @{
     ViewBag.Title = "Registered Summoners";
 }
@@ -6,12 +7,12 @@
 <h2>@ViewData["Title"]</h2>
 <table class="table table-bordered">
     <tr>
-        <th>@Html.ActionLink("Summoner Name", "Index", new {sortOrder = ViewBag.SummonerName })</th>
-        <th>@Html.ActionLink("Role", "Index", new { sortOrder = ViewBag.Role })</th>
+        <th>@Html.ActionLink(string.Concat("Summoner Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new {sortOrder = ViewBag.SummonerName })</th>
+        <th>@Html.ActionLink(string.Concat("Role ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.Role })</th>
         <th>Off Role</th>
-        <th>@Html.ActionLink("Rank", "Index", new {sortOrder = ViewBag.TierDivision })</th>
+        <th>@Html.ActionLink(string.Concat("Rank ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new {sortOrder = ViewBag.TierDivision })</th>
         <th>op.gg link</th>
-        <th>@Html.ActionLink("Team Name", "Index", new {sortOrder = ViewBag.TeamName })</th>
+        <th>@Html.ActionLink(string.Concat("Team Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new {sortOrder = ViewBag.TeamName })</th>
     </tr>
     @foreach (var item in Model.SummonerInfos)
     {

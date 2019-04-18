@@ -17,11 +17,15 @@ namespace Domain.Repositories.Implementations
         {
             _table = table ?? throw new ArgumentNullException(nameof(table));
         }
-        
 
         public async Task<TeamRosterEntity> GetByTeamNameAsync(string teamName)
         {
             return (await _table.ReadManyAsync("TeamName = @teamName", new {teamName})).FirstOrDefault();
+        }
+
+        public async Task<TeamRosterEntity> GetByTeamIdAsync(Guid id)
+        {
+            return await _table.ReadOneAsync(id);
         }
 
         public async Task<IEnumerable<TeamRosterEntity>> GetAllTeamsAsync()
