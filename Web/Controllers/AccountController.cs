@@ -71,7 +71,7 @@ namespace Web.Controllers
 
                     if (result.RequiresTwoFactor)
                     {
-                        return RedirectToAction(nameof(LoginWith2fa), new {returnUrl, model.RememberMe});
+                        return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
                     }
 
                     if (result.IsLockedOut)
@@ -226,14 +226,15 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
         {
+
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
+                IdentityResult result = new IdentityResult();
                 try
                 {
-
-                    var user = new UserEntity {UserName = model.Email, Email = model.Email};
-                    var result = await _userManager.CreateAsync(user, model.Password);
+                    var user = new UserEntity { UserName = model.Email, Email = model.Email };
+                    result = await _userManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
                     {
                         _logger.LogInformation($"User {user.Email} created a new account with password.");
@@ -246,21 +247,20 @@ namespace Web.Controllers
                         _logger.LogInformation($"User {user.Email} was signed in successfully on registration.");
                         return RedirectToAction("Index", "Manage");
                     }
-
-                    AddErrors(result);
                 }
                 catch (Exception e)
                 {
-                    ErrorMessage = $"User already exists with email: {model.Email}";
-                    var result = new IdentityResult();
-                    result.Errors.ToList().Add(new IdentityError
-                    {
-                        Code = "409",
-                        Description = ErrorMessage
-                    });
-                    AddErrors(result);
+                    ErrorMessage = $"Error creating account for: {model.Email}. Contact support or DM Ansem571 on discord.";
+                    _logger.LogError(e, ErrorMessage);
                 }
+
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError(error.Description);
+                }
+                AddErrors(result);
             }
+
 
             // If we got this far, something failed, redisplay form
             return View(model);
@@ -397,7 +397,7 @@ namespace Web.Controllers
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
                 await _emailSender.SendEmailAsync(model.Email,
-                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>", 
+                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>",
                     "Reset Password");
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));
             }
