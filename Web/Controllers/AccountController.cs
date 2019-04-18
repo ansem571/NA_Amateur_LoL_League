@@ -251,14 +251,8 @@ namespace Web.Controllers
                 }
                 catch (Exception e)
                 {
-                    ErrorMessage = $"User already exists with email: {model.Email}";
-                    var result = new IdentityResult();
-                    result.Errors.ToList().Add(new IdentityError
-                    {
-                        Code = "409",
-                        Description = ErrorMessage
-                    });
-                    AddErrors(result);
+                    ErrorMessage = $"Error creating account for: {model.Email}. Contact support or DM Ansem571 on discord.";
+                    _logger.LogError(e, ErrorMessage);
                 }
             }
 
