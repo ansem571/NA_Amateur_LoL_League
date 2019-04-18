@@ -23,6 +23,17 @@ namespace Domain.Repositories.Implementations
             return await _table.ReadManyAsync("TeamRosterId = @rosterId", new {rosterId});
         }
 
+        public async Task<Guid?> GetRosterIdForExistingGroupAsync(IEnumerable<Guid> summonerIds)
+        {
+            var player = (await _table.ReadManyAsync("SummonerId in @summonerIds", new {summonerIds})).FirstOrDefault();
+            return player?.TeamRosterId;
+        }
+
+        public async Task<TeamPlayerEntity> GetBySummonerIdAsync(Guid summonerId)
+        {
+            return (await _table.ReadManyAsync("SummonerId = @summonerId", new {summonerId})).FirstOrDefault();
+        }
+
         public async Task<bool> CreateAsync(IEnumerable<TeamPlayerEntity> entities)
         {
             var list = entities.ToList();

@@ -38,11 +38,11 @@ namespace Web.Controllers
           UrlEncoder urlEncoder, 
           IAccountService accountService)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = emailSender;
-            _logger = logger;
-            _urlEncoder = urlEncoder;
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+            _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _urlEncoder = urlEncoder ?? throw new ArgumentNullException(nameof(urlEncoder));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
         }
 

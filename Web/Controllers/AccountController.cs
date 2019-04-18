@@ -29,10 +29,10 @@ namespace Web.Controllers
             IEmailService emailSender,
             ILogger logger)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = emailSender;
-            _logger = logger;
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+            _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [TempData]

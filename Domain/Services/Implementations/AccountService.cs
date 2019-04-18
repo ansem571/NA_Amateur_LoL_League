@@ -449,6 +449,7 @@ namespace Domain.Services.Implementations
 
             foreach (var tempTeam in tempTeams)
             {
+                tempTeam.CleanupList();
                 var missingCount = TeamRosterMaxCount - tempTeam.Summoners.Count;
                 if (missingCount > 0)
                 {
@@ -460,7 +461,7 @@ namespace Domain.Services.Implementations
         }
 
         #region private helpers
-        private IEnumerable<AlternateAccountView> AddEmptyAlternateAccountViews(int missingCount)
+        private static IEnumerable<AlternateAccountView> AddEmptyAlternateAccountViews(int missingCount)
         {
             var list = new List<AlternateAccountView>();
             for (var i = 0; i < missingCount; i++)
@@ -471,7 +472,7 @@ namespace Domain.Services.Implementations
             return list;
         }
 
-        private IEnumerable<PartialSummonerView> AddEmptyPartialViews(int missingCount)
+        private static IEnumerable<PartialSummonerView> AddEmptyPartialViews(int missingCount)
         {
             var list = new List<PartialSummonerView>();
             for (var i = 0; i < missingCount; i++)
@@ -482,7 +483,7 @@ namespace Domain.Services.Implementations
             return list;
         }
 
-        private IEnumerable<RequestedSummoner> AddEmptyRequestedSummonerViews(int missingCount)
+        private static IEnumerable<RequestedSummoner> AddEmptyRequestedSummonerViews(int missingCount)
         {
             var list = new List<RequestedSummoner>();
             for (var i = 0; i < missingCount; i++)

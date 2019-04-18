@@ -76,7 +76,7 @@ namespace Web.Controllers
         public async Task<IActionResult> TeamCreationViewAsync()
         {
             var model = await _accountService.GetRequestedPlayersAsync();
-
+            
             return View("TeamCreationView", model);
         }
     }

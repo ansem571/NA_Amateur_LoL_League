@@ -13,6 +13,7 @@ namespace Domain.Views
     public class FpSummonerInfo
     {
         public string SummonerName { get; set; }
+        public bool IsTeamCaptain { get; set; }
         public SummonerRoleEnum Role { get; set; }
         public SummonerRoleEnum OffRole { get; set; }
         public TierDivisionEnum TierDivision { get; set; }

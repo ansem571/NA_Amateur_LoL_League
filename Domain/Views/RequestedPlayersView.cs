@@ -9,8 +9,8 @@ namespace Domain.Views
     public class RequestedPlayersView
     {
         public List<PartialSummonerView> Summoners { get; set; }
-        public List<SummonerRoleEnum> LookingFor => LookingForRoles();
-        public string LookingForString => string.Join(", ", LookingFor);
+        public List<SummonerRoleEnum> LookingForSummonerRoles => LookingForRoles();
+        public string LookingForString => string.Join(", ", LookingForSummonerRoles);
 
         private List<SummonerRoleEnum> LookingForRoles()
         {
@@ -27,6 +27,59 @@ namespace Domain.Views
             }
 
             return listOfRoles;
+        }
+
+        public void CleanupList()
+        {
+            var tempDictionary = new Dictionary<SummonerRoleEnum, PartialSummonerView>
+            {
+                {SummonerRoleEnum.Top, new PartialSummonerView() },
+                {SummonerRoleEnum.Jungle, new PartialSummonerView() },
+                {SummonerRoleEnum.Mid, new PartialSummonerView() },
+                {SummonerRoleEnum.Adc, new PartialSummonerView() },
+                {SummonerRoleEnum.Sup, new PartialSummonerView() }
+            };
+
+            var unUsedList = new List<PartialSummonerView>(Summoners);
+
+            var firstTop = unUsedList.FirstOrDefault(x => x.RoleForTeam == SummonerRoleEnum.Top);
+            if (firstTop != null)
+            {
+                tempDictionary[SummonerRoleEnum.Top] = firstTop;
+                unUsedList.Remove(firstTop);
+            }
+
+            var firstJungle = unUsedList.FirstOrDefault(x => x.RoleForTeam == SummonerRoleEnum.Jungle);
+            if (firstJungle != null)
+            {
+                tempDictionary[SummonerRoleEnum.Jungle] = firstJungle;
+                unUsedList.Remove(firstJungle);
+            }
+
+            var firstMid = unUsedList.FirstOrDefault(x => x.RoleForTeam == SummonerRoleEnum.Mid);
+            if (firstMid != null)
+            {
+                tempDictionary[SummonerRoleEnum.Mid] = firstMid;
+                unUsedList.Remove(firstMid);
+            }
+
+            var firstAdc = unUsedList.FirstOrDefault(x => x.RoleForTeam == SummonerRoleEnum.Adc);
+            if (firstAdc != null)
+            {
+                tempDictionary[SummonerRoleEnum.Adc] = firstAdc;
+                unUsedList.Remove(firstAdc);
+            }
+
+            var firstSup = unUsedList.FirstOrDefault(x => x.RoleForTeam == SummonerRoleEnum.Sup);
+            if (firstSup != null)
+            {
+                tempDictionary[SummonerRoleEnum.Sup] = firstSup;
+                unUsedList.Remove(firstSup);
+            }
+
+            var tempList = tempDictionary.Values.ToList();
+            tempList.AddRange(unUsedList);
+            Summoners = tempList;
         }
     }
 
