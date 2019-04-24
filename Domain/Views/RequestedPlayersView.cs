@@ -8,6 +8,7 @@ namespace Domain.Views
 {
     public class RequestedPlayersView
     {
+        public Guid Id { get; set; }
         public List<PartialSummonerView> Summoners { get; set; }
         public List<SummonerRoleEnum> LookingForSummonerRoles => LookingForRoles();
         public string LookingForString => string.Join(", ", LookingForSummonerRoles);

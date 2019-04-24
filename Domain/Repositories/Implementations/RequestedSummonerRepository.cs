@@ -24,6 +24,11 @@ namespace Domain.Repositories.Implementations
             return entities;
         }
 
+        public async Task<IEnumerable<SummonerRequestEntity>> ReadAllAsync()
+        {
+            return await _table.ReadAllAsync();
+        }
+
         public async Task<bool> CreateAsync(IEnumerable<SummonerRequestEntity> entities)
         {
             var list = entities.ToList();

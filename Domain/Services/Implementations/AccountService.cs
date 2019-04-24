@@ -389,7 +389,7 @@ namespace Domain.Services.Implementations
             return fpSummonerView;
         }
 
-        public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
+        public async Task<List<RequestedPlayersView>> GetRequestedPlayersV3Async()
         {
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
 
@@ -405,7 +405,6 @@ namespace Domain.Services.Implementations
                 };
                 var record =
                     tempTeams.FirstOrDefault(x => x.Summoners.Contains(partialSummonerView));
-                
 
                 var requests = await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerInfoEntity.Key);
                 var requestedSummoners =
@@ -456,7 +455,124 @@ namespace Domain.Services.Implementations
                     tempTeam.Summoners.AddRange(AddEmptyPartialViews(missingCount));
                 }
             }
-          
+
+            return tempTeams;
+        }
+
+        public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
+        {
+            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
+            var requests = (await _requestedSummonerRepository.ReadAllAsync()).GroupBy(x => x.SummonerId)
+                .ToDictionary(y => y.Key, y => y.ToList());
+
+            var usedSummoners = new List<Guid>();
+            var tempTeams = new List<RequestedPlayersView>();
+            foreach (var requestedList in requests.Values)
+            {
+                var summoner = summoners[requestedList.First().SummonerId];
+                if (!usedSummoners.Contains(summoner.Id))
+                {
+                    usedSummoners.Add(summoner.Id);
+                }
+                var summonerMapped = _summonerMapper.Map(summoner);
+                var partial = new PartialSummonerView
+                {
+                    SummonerName = summonerMapped.SummonerName,
+                    RoleForTeam = summonerMapped.Role,
+                    Rank = summonerMapped.TierDivision
+                };
+
+                var existingGroup = tempTeams.FirstOrDefault(x => x.Summoners.Contains(partial));
+                if (existingGroup == null)
+                {
+                    existingGroup = new RequestedPlayersView
+                    {
+                        Summoners = new List<PartialSummonerView>
+                        {
+                            partial
+                        },
+                        Id = Guid.NewGuid()
+                    };
+                }
+
+                foreach (var requestEntity in requestedList)
+                {
+                    var requestedSummoner = summoners[requestEntity.SummonerRequestedId];
+                    if (!usedSummoners.Contains(requestedSummoner.Id))
+                    {
+                        usedSummoners.Add(requestedSummoner.Id);
+                    }
+                    var requestedMapped = _summonerMapper.Map(requestedSummoner);
+                    var requestedPartail = new PartialSummonerView
+                    {
+                        SummonerName = requestedMapped.SummonerName,
+                        RoleForTeam = requestedMapped.Role,
+                        Rank = requestedMapped.TierDivision
+                    };
+
+                    var view = tempTeams.FirstOrDefault(x => x.Summoners.Contains(requestedPartail));
+                    if (view == null)
+                    {
+                        existingGroup.Summoners.Add(requestedPartail);
+                    }
+                    else
+                    {
+                        if (view == existingGroup)
+                        {
+                            //Do nothing
+                        }
+                        else
+                        {
+                            view.Summoners.AddRange(existingGroup.Summoners);
+                            existingGroup = view;
+                        }
+                    }
+                }
+
+                var oldGroup = tempTeams.FirstOrDefault(x => x.Id == existingGroup.Id);
+                if (oldGroup == null)
+                {
+                    existingGroup.Summoners = existingGroup.Summoners.Distinct().ToList();
+                    tempTeams.Add(existingGroup);
+                }
+                else
+                {
+                    oldGroup.Summoners.AddRange(existingGroup.Summoners);
+                    oldGroup.Summoners = oldGroup.Summoners.Distinct().ToList();
+                }
+            }
+
+            foreach (var usedSummoner in usedSummoners)
+            {
+                summoners.Remove(usedSummoner);
+            }
+
+            foreach (var summonerInfoEntity in summoners.Values)
+            {
+                var summonerMapped = _summonerMapper.Map(summonerInfoEntity);
+                tempTeams.Add(new RequestedPlayersView
+                {
+                    Summoners = new List<PartialSummonerView>
+                    {
+                        new PartialSummonerView
+                        {
+                            SummonerName = summonerMapped.SummonerName,
+                            RoleForTeam = summonerMapped.Role,
+                            Rank = summonerMapped.TierDivision
+                        }
+                    }
+                });
+            }
+            foreach (var tempTeam in tempTeams)
+            {
+                tempTeam.CleanupList();
+                var missingCount = TeamRosterMaxCount - tempTeam.Summoners.Count;
+                if (missingCount > 0)
+                {
+                    tempTeam.Summoners.AddRange(AddEmptyPartialViews(missingCount));
+                }
+            }
+
             return tempTeams;
         }
 
