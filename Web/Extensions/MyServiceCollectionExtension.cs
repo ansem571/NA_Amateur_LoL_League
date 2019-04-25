@@ -92,6 +92,8 @@ namespace Web.Extensions
             services.TryAddSingleton<ITeamRosterRepository, TeamRosterRepository>();
             services.TryAddSingleton<ITeamPlayerRepository, TeamPlayerRepository>();
             services.TryAddSingleton<ITeamCaptainRepository, TeamCaptainRepository>();
+            services.TryAddSingleton<ISeasonInfoRepository, SeasonInfoRepository>();
+            services.TryAddSingleton<IDivisionRepository, DivisionRepository>();
             return services;
         }
 
@@ -100,6 +102,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IAccountService, AccountService>();
             services.TryAddSingleton<IEmailService, EmailService>();
             services.TryAddSingleton<IAdminService, AdminService>();
+            services.TryAddSingleton<IRosterService, RosterService>();
             return services;
         }
     }

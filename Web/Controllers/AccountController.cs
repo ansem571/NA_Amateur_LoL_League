@@ -85,7 +85,7 @@ namespace Web.Controllers
                         return View(model);
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return View(model);

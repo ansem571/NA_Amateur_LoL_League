@@ -1,0 +1,90 @@
+﻿@using Domain.Enums
+@using Domain.Views
+@model Domain.Views.SeasonInfoView
+@{
+    ViewBag.Title = "Official Rosters";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div>
+        @Model.SeasonInfo.SeasonName
+    </div>
+    <div>
+        Season Starts: @Model.SeasonInfo.SeasonStartDate
+    </div>
+    <div>
+        Registration Closes: @Model.SeasonInfo.ClosedRegistrationDate
+    </div>
+    <div>
+        &#x2605; means they are the captain
+    </div>
+</div>
+@{
+    if (!Model.Rosters.ToList().Any())
+    {
+        <div class="row">No official rosters yet. Check back later.</div>
+    }
+    else
+    {
+        var divisions = Model.Rosters.GroupBy(x => x.DivisionName).ToDictionary(x => x.Key, x => x.ToList());
+        foreach (var division in divisions)
+        {
+            <div class="row">
+                <label>@division.Key</label>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Team Name</th>
+                        @{
+                            const int minTeamCount = 5;
+                            var maxTeamSize = division.Value.Max(x => x.Players.Count());
+                            var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+                            for (var i = 0; i < teamCount; i++)
+                            {
+                                var index = i + 1;
+                                <th>
+                                    <div>
+
+                                        @if (index > minTeamCount)
+                                        {
+                                            <div>Sub@(index - minTeamCount)</div>
+                                        }
+                                        else
+                                        {
+                                            <div>@((SummonerRoleEnum)index)</div>
+                                        }
+                                    </div>
+                                </th>
+                            }
+                        }
+                        <th>Wins</th>
+                        <th>Loses</th>
+                    </tr>
+                    @foreach (var team in division.Value)
+                    {
+                    <tr>
+                        <td>@team.TeamName</td>
+                        @{
+                            foreach (var player in team.Players)
+                            {
+                                if (player.SummonerName == team.Captain)
+                                {
+                                    <td>@player.SummonerName &#x2605;</td>
+                                }
+                                else
+                                {
+                                    <td>@player.SummonerName</td>
+                                }
+                            }
+                        }
+                        <td>@team.Wins</td>
+                        <td>@team.Loses</td>
+                    </tr>
+                }
+                </table>
+            </div>
+        }
+    }
+}

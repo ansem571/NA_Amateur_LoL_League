@@ -11,11 +11,15 @@ namespace Web.Controllers
     public class RosterController : Controller
     {
         private readonly IAccountService _accountService;
+        private readonly IRosterService _rosterService;
 
-        public RosterController(IAccountService accountService)
+        public RosterController(IAccountService accountService, IRosterService rosterService)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
+            _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
         }
+        [TempData]
+        public string StatusMessage { get; set; }
 
         //Views all summoners
         public async Task<IActionResult> Index(string sortOrder)
@@ -78,6 +82,14 @@ namespace Web.Controllers
             var model = await _accountService.GetRequestedPlayersAsync();
             
             return View("TeamCreationView", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewAllRostersAsync()
+        {
+            var model = await _rosterService.GetSeasonInfoView();
+            model.StatusMessage = StatusMessage;
+            return View(model);
         }
     }
 }

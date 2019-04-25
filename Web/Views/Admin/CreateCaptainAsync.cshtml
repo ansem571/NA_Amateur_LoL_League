@@ -11,51 +11,56 @@
 @Html.Partial("_StatusMessage", Model.StatusMessage)
 <div class="row">
     <div class="col-lg-3">
-
-        <div>
-            <table class="table table-bordered">
-                <tr>
-                    <th>Team Name</th>
-                    @{
-                        var minTeamCount = 5;
-                        var maxTeamSize = Model.Rosters.Max(x => x.Players.Count());
-                        var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
-
-                        for (var i = 0; i < teamCount; i++)
-                        {
-                            <th>
-                                Player Name
-                            </th>
-                        }
-                    }
-                </tr>
-                @foreach (var item in Model.Rosters)
-                {
-
+        @if (!Model.Rosters.ToList().Any())
+        {
+            <div class="row">No official rosters yet. Check back later.</div>
+        }
+        @if (Model.Rosters.ToList().Any())
+        {
+            <div>
+                <table class="table table-bordered">
                     <tr>
-                        <td>@item.TeamName</td>
+                        <th>Team Name</th>
                         @{
+                            var minTeamCount = 5;
+                            var maxTeamSize = Model.Rosters.Max(x => x.Players.Count());
+                            var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
                             for (var i = 0; i < teamCount; i++)
                             {
-                                var index = i;
-                                var player = item.Players.ElementAtOrDefault(index);
-                                if (player != default(SummonerInfoView))
-                                {
-                                    if (player.SummonerName == item.Captain)
-                                    {
-                                        <th>@player.SummonerName &#x2605;</th>
-                                    }
-                                    if (player.SummonerName != item.Captain)
-                                    {
-                                        <th>@player.SummonerName</th>
-                                    }
-                                }
+                                <th>
+                                    Player Name
+                                </th>
                             }
                         }
                     </tr>
-                }
-            </table>
-        </div>
+                    @foreach (var item in Model.Rosters)
+                    {
+                        <tr>
+                            <td>@item.TeamName</td>
+                            @{
+                                for (var i = 0; i < teamCount; i++)
+                                {
+                                    var index = i;
+                                    var player = item.Players.ElementAtOrDefault(index);
+                                    if (player != default(SummonerInfoView))
+                                    {
+                                        if (player.SummonerName == item.Captain)
+                                        {
+                                            <th>@player.SummonerName &#x2605;</th>
+                                        }
+                                        if (player.SummonerName != item.Captain)
+                                        {
+                                            <th>@player.SummonerName</th>
+                                        }
+                                    }
+                                }
+                            }
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
     </div>
 </div>
 <div class="row">

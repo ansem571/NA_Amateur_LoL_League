@@ -15,41 +15,33 @@ namespace Domain.Services.Implementations
     public class AdminService : IAdminService
     {
         private readonly ILogger _logger;
-        private readonly ISummonerMapper _summonerMapper;
-        private readonly IAlternateAccountMapper _alternateAccountMapper;
         private readonly ILookupRepository _lookupRepository;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
-        private readonly IAlternateAccountRepository _alternateAccountRepository;
-        private readonly IRequestedSummonerRepository _requestedSummonerRepository;
         private readonly ITeamPlayerRepository _teamPlayerRepository;
         private readonly ITeamRosterRepository _teamRosterRepository;
         private readonly ITeamCaptainRepository _teamCaptainRepository;
+        private readonly IRosterService _rosterService;
 
         private const int MinTeamCountRequirement = 5;
 
-        public AdminService(ILogger logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
-            ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
-            IAlternateAccountRepository alternateAccountRepository, IRequestedSummonerRepository requestedSummonerRepository,
+        public AdminService(ILogger logger, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
-            ITeamCaptainRepository teamCaptainRepository)
+            ITeamCaptainRepository teamCaptainRepository, IRosterService rosterService)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _summonerMapper = summonerMapper ?? throw new ArgumentNullException(nameof(summonerMapper));
-            _alternateAccountMapper = alternateAccountMapper ??
-                                      throw new ArgumentNullException(nameof(alternateAccountMapper));
-
-            _lookupRepository = lookupRepository ?? throw new ArgumentNullException(nameof(lookupRepository));
-            _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
-            _alternateAccountRepository = alternateAccountRepository ??
-                                          throw new ArgumentNullException(nameof(alternateAccountRepository));
-            _requestedSummonerRepository = requestedSummonerRepository ??
-                                           throw new ArgumentNullException(nameof(requestedSummonerRepository));
+            _logger = logger ?? 
+                      throw new ArgumentNullException(nameof(logger));
+            _lookupRepository = lookupRepository ?? 
+                                throw new ArgumentNullException(nameof(lookupRepository));
+            _summonerInfoRepository = summonerInfoRepository ?? 
+                                      throw new ArgumentNullException(nameof(summonerInfoRepository));
             _teamPlayerRepository = teamPlayerRepository ??
                                     throw new ArgumentNullException(nameof(teamPlayerRepository));
             _teamRosterRepository = teamRosterRepository ??
                                     throw new ArgumentNullException(nameof(teamRosterRepository));
             _teamCaptainRepository = teamCaptainRepository ??
                                      throw new ArgumentNullException(nameof(teamCaptainRepository));
+            _rosterService = rosterService ?? 
+                             throw new ArgumentNullException(nameof(rosterService));
         }
 
         public async Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync()
@@ -93,30 +85,7 @@ namespace Domain.Services.Implementations
 
         public async Task<IEnumerable<RosterView>> GetAllRosters()
         {
-            var rosters = await _teamRosterRepository.GetAllTeamsAsync();
-            var captains = (await _teamCaptainRepository.GetAllTeamCaptainsAsync()).ToList();
-            var list = new List<RosterView>();
-            foreach (var roster in rosters)
-            {
-                var players = await _teamPlayerRepository.ReadAllForRosterAsync(roster.Id);
-                var captain = captains.FirstOrDefault(x => x.TeamRosterId == roster.Id);
-
-                var summoners =
-                    (await _summonerInfoRepository.GetAllForSummonerIdsAsync(players.Select(x => x.SummonerId))).ToList();
-
-                var summonerViews = _summonerMapper.Map(summoners);
-                var rosterView = new RosterView
-                {
-                    Captain = summoners.FirstOrDefault(x=>x.Id == captain?.SummonerId)?.SummonerName,
-                    TeamName = roster.TeamName,
-                    Wins = roster.Wins ?? 0,
-                    Loses = roster.Loses ?? 0,
-                    Players = summonerViews
-                };
-                list.Add(rosterView);
-            }
-
-            return list;
+            return await _rosterService.GetAllRosters();
         }
 
         public async Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerIds)
