@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using DAL.Entities.LeagueInfo;
+using Domain.Views;
 
 namespace Domain.Services.Interfaces
 {
     public interface IAdminService
     {
-        Task<IEnumerable<string>> GetSummonersToCreateTeamAsync();
-        Task<bool> CreateNewTeamAsync(IEnumerable<string> summonerNames);
-        Task<bool> RemovePlayerFromRosterAsync(string name, Guid rosterId);
+        Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync();
+        Task<IEnumerable<RosterView>> GetAllRosters();
+
+        Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerNames);
+        Task<bool> RemovePlayerFromRosterAsync(Guid summonerId, Guid rosterId);
+        Task<bool> AssignTeamCaptain(TeamCaptainView view);
     }
 }

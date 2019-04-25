@@ -66,6 +66,9 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<SummonerRequestEntity>, SummonerRequestStore>();
             services.TryAddSingleton<ITableStorageRepository<TeamRosterEntity>, TeamRosterStore>();
             services.TryAddSingleton<ITableStorageRepository<TeamPlayerEntity>, TeamPlayerStore>();
+            services.TryAddSingleton<ITableStorageRepository<TeamCaptainEntity>, TeamCaptainStore>();
+            services.TryAddSingleton<ITableStorageRepository<SeasonInfoEntity>, SeasonInfoStore>();
+            services.TryAddSingleton<ITableStorageRepository<DivisionEntity>, DivisionStore>();
             return services;
         }
 
@@ -88,7 +91,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IRequestedSummonerRepository, RequestedSummonerRepository>();
             services.TryAddSingleton<ITeamRosterRepository, TeamRosterRepository>();
             services.TryAddSingleton<ITeamPlayerRepository, TeamPlayerRepository>();
-
+            services.TryAddSingleton<ITeamCaptainRepository, TeamCaptainRepository>();
             return services;
         }
 
@@ -96,6 +99,7 @@ namespace Web.Extensions
         {
             services.TryAddSingleton<IAccountService, AccountService>();
             services.TryAddSingleton<IEmailService, EmailService>();
+            services.TryAddSingleton<IAdminService, AdminService>();
             return services;
         }
     }

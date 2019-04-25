@@ -1,0 +1,77 @@
+﻿@model Web.Models.Admin.RosterCaptainViewModel
+@using Domain.Enums
+@using Domain.Views
+@using Web.Views.Manage
+@{
+    ViewData["Title"] = "Assigning Captain";
+    ViewData.AddActivePage(ManageNavPages.Index);
+}
+
+<h4>@ViewData["Title"]</h4>
+@Html.Partial("_StatusMessage", Model.StatusMessage)
+<div class="row">
+    <div class="col-lg-3">
+
+        <div>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Team Name</th>
+                    @{
+                        var minTeamCount = 5;
+                        var maxTeamSize = Model.Rosters.Max(x => x.Players.Count());
+                        var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+                        for (var i = 0; i < teamCount; i++)
+                        {
+                            <th>
+                                Player Name
+                            </th>
+                        }
+                    }
+                </tr>
+                @foreach (var item in Model.Rosters)
+                {
+
+                    <tr>
+                        <td>@item.TeamName</td>
+                        @{
+                            for (var i = 0; i < teamCount; i++)
+                            {
+                                var index = i;
+                                var player = item.Players.ElementAtOrDefault(index);
+                                if (player != default(SummonerInfoView))
+                                {
+                                    if (player.SummonerName == item.Captain)
+                                    {
+                                        <th>@player.SummonerName &#x2605;</th>
+                                    }
+                                    if (player.SummonerName != item.Captain)
+                                    {
+                                        <th>@player.SummonerName</th>
+                                    }
+                                }
+                            }
+                        }
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <form method="post">
+            <label asp-for="Captain.SummonerName"></label>
+            <input type="text" asp-for="Captain.SummonerName" class="form-control" />
+            <label asp-for="Captain.RosterName"></label>
+            <input type="text" asp-for="Captain.RosterName" class="form-control" />
+            <button type="submit" class="btn btn-default">Save team</button>
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

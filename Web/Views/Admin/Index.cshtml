@@ -1,4 +1,4 @@
-﻿@model List<string>
+﻿@model Web.Models.Admin.TeamCreationViewModel
 @using Web.Views.Manage
 @{
     ViewData["Title"] = "Admin page";
@@ -6,3 +6,5 @@
 }
 
 <h4>@ViewData["Title"]</h4>
+<button onclick="@("window.location.href='" + Url.Action("CreateTeamAsync", "Admin") + "'");" class="btn">Create New Team</button>
+<button onclick="@("window.location.href='" + Url.Action("CreateCaptainAsync", "Admin") + "'");" class="btn">Assign Captain</button>

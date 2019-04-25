@@ -53,7 +53,7 @@ namespace Domain.Repositories.Implementations
                 return true;
             }
 
-            return await _table.UpdateAsync(list);
+            return await _table.InsertAsync(list) == list.Count;
         }
 
         public async Task<bool> DeleteAsync(IEnumerable<TeamPlayerEntity> entities)

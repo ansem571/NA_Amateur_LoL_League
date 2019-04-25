@@ -1,0 +1,44 @@
+﻿@model Web.Models.Admin.TeamCreationViewModel
+@using Web.Views.Manage
+@{
+    ViewData["Title"] = "Creating Team Page";
+    ViewData.AddActivePage(ManageNavPages.Index);
+}
+
+<h4>@ViewData["Title"]</h4>
+@Html.Partial("_StatusMessage", Model.StatusMessage)
+<div class="row">
+    <div class="col-lg-3">
+
+        <div>
+            <table class="table table-bordered">
+                <tr>
+                    <th>SummonerId</th>
+                    <th>SummonerName</th>
+                </tr>
+                @foreach (var item in Model.AllSummoners.SummonerInfos)
+                {
+                    <tr>
+                        <td>@item.SummonerId</td>
+                        <td>@item.SummonerName</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <form method="post">            
+            <label asp-for="SelectedSummonersJoint"></label>
+            <input type="text" asp-for="SelectedSummonersJoint" class="form-control" />
+            <button type="submit" class="btn btn-default">Save team</button>
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
