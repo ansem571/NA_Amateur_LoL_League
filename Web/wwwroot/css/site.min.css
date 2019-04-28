@@ -3,6 +3,11 @@ body {
     padding-bottom: 20px
 }
 
+.navbar {
+    background: #1c2951;
+    color: #f0f0f0;
+}
+
 .body-content {
     padding-left: 15px;
     padding-right: 15px
@@ -30,4 +35,32 @@ body {
 table, th, td {
     border-width: 5px !important;
     border-color: black !important;
+}
+
+
+.primary {
+    background: #ffbf00;
+}
+
+.secondary {
+    background: #1c2951
+}
+
+
+.center-text {
+    margin: auto;
+    width: 70%
+}
+
+.card .card-body {
+    background: #1c2951 !important;
+    color: #f0f0f0 !important;
+    border-radius: 25px !important;
+    padding: 20px !important;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+}
+
+.icon-row {
+    text-align: center;
+    margin: 15px;
 }

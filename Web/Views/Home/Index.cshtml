@@ -3,7 +3,7 @@
     ViewData["Title"] = "Home Page";
 }
 <br />
-<img src="images/league.png" alt="" class="center-block" style="width: 50%" />
+<img src="images/csalTitle.png" alt="" class="center-block"/>
 <br />
 @if (Model.IsEmailConfirmed)
 {
@@ -25,11 +25,29 @@ else if (!Model.IsEmailConfirmed && !string.IsNullOrEmpty(Model.Username))
     </div>
     <br />
 }
-<p class="center-block" style="width: 50%">
-    The site is currently in Beta. We will be updating all users on the Discord Server's #developmentcenter channel.
-    As we are in Beta, please be aware that any bugs/errors may occur and to contact support immediately on the manner or post in the
-    #developmentcenter channel with screen captures of the page and an explanation of what you were doing prior to the error occuring.
-    Thank you for your patience and we will be notifying all users once the site has moved to Beta and beyond.
-    <br />
-    If you wish to join the discord server please navigate to the Contacts section of the website to see our social media links and support email.
-</p>
+        <div class="container">
+            <div class="row center-text">
+                <div class="col-sm-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <p>
+                            The site is currently in Beta. We will be updating all users on the Discord Server's #developmentcenter channel.</p>
+                            <p>As we are in Beta, please be aware that any bugs/errors may occur and to contact support immediately on the manner or post in the  #developmentcenter channel with screen captures of the page and an explanation of what you were doing prior to the error occuring.</p>
+                            <p>Thank you for your patience and we will be notifying all users once the site has moved to Beta and beyond.</p>
+                            <p> If you wish to join the discord server please navigate to the Contacts section of the website to see our social media links and support email.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul>
+                            <li><a href="https://discord.gg/ZXDdyAh"><img src="images/icons8-discord-new-logo-48.png">Join our Discord</a></li>
+                            <li><a href="https://www.twitch.tv/casualeal"><img src="images/icons8-twitch-48.png">Watch us live</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
