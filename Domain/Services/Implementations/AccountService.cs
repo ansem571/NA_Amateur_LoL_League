@@ -372,6 +372,7 @@ namespace Domain.Services.Implementations
                 .ToDictionary(y => y.Key, y => y.ToList());
             var players = (await _teamPlayerRepository.ReadAllAsync()).ToList();
 
+            var onRosters = new List<string>();
             var usedSummoners = new List<Guid>();
             var tempTeams = new List<RequestedPlayersView>();
             foreach (var requestedList in requests.Values)
@@ -385,8 +386,7 @@ namespace Domain.Services.Implementations
                 var onRoster = players.FirstOrDefault(x => x.SummonerId == summoner.Id);
                 if (onRoster != null)
                 {
-                    usedSummoners.Add(summoner.Id);
-                    continue;
+                    onRosters.Add(summoner.SummonerName);
                 }
                 var summonerMapped = _summonerMapper.Map(summoner);
                 var partial = new PartialSummonerView
@@ -415,6 +415,11 @@ namespace Domain.Services.Implementations
                     if (!usedSummoners.Contains(requestedSummoner.Id))
                     {
                         usedSummoners.Add(requestedSummoner.Id);
+                    }
+                    onRoster = players.FirstOrDefault(x => x.SummonerId == requestedSummoner.Id);
+                    if (onRoster != null)
+                    {
+                        onRosters.Add(requestedSummoner.SummonerName);
                     }
                     var requestedMapped = _summonerMapper.Map(requestedSummoner);
                     var requestedPartail = new PartialSummonerView
@@ -477,14 +482,24 @@ namespace Domain.Services.Implementations
                     }
                 });
             }
-            foreach (var tempTeam in tempTeams)
+
+            var tempList = new List<RequestedPlayersView>(tempTeams);
+            foreach (var tempTeam in tempList)
             {
+                var summonerNames = tempTeam.Summoners.Select(x => x.SummonerName).ToList();
+                var match = summonerNames.Intersect(onRosters);
+                if (match.Any())
+                {
+                    tempTeams.Remove(tempTeam);
+                }
+
                 tempTeam.CleanupList();
                 var missingCount = TeamRosterMaxCount - tempTeam.Summoners.Count;
                 if (missingCount > 0)
                 {
                     tempTeam.Summoners.AddRange(AddEmptyPartialViews(missingCount));
                 }
+
             }
 
             return tempTeams;
