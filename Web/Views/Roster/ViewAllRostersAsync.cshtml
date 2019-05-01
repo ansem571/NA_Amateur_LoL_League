@@ -1,5 +1,4 @@
 ﻿@using Domain.Enums
-@using Domain.Views
 @model Domain.Views.SeasonInfoView
 @{
     ViewBag.Title = "Official Rosters";
@@ -77,7 +76,7 @@
                     @foreach (var team in division.Value)
                     {
                     <tr>
-                        <td>@team.TeamName</td>
+                        <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
                         @{
                             foreach (var player in team.Players)
                             {

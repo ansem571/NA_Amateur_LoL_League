@@ -40,9 +40,9 @@
                 {
                     SummonerRoleEnum.Top, SummonerRoleEnum.Jungle, SummonerRoleEnum.Mid, SummonerRoleEnum.Adc, SummonerRoleEnum.Sup
                 };
-                for (var index = 0; index < @group.Summoners.Count; index++)
+                for (var index = 0; index < group.Summoners.Count; index++)
                 {
-                    var player = @group.Summoners[index];
+                    var player = group.Summoners[index];
                     if (string.IsNullOrEmpty(player.SummonerName))
                     {
                         <td>Unfilled</td>

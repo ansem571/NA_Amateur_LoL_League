@@ -1,33 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Domain.Enums;
 
 namespace Domain.Views
 {
     public class RosterView
     {
+        public Guid RosterId { get; set; }
         public string Captain { get; set; }
         public string TeamName { get; set; }
         public int TeamTierScore { get; set; }
         public string DivisionName { get; set; }
         public int Wins { get; set; }
         public int Loses { get; set; }
-        public IEnumerable<SummonerInfoView> Players { get; set; } = new List<SummonerInfoView>();
+        public IEnumerable<DetailedSummonerInfoView> Players { get; set; } = new List<DetailedSummonerInfoView>();
+        public string filePath { get; set; }
+        public string fileSource { get; set; }
 
         public void Cleanup()
         {
-            var tempDictionary = new Dictionary<SummonerRoleEnum, SummonerInfoView>
+            var tempDictionary = new Dictionary<SummonerRoleEnum, DetailedSummonerInfoView>
             {
-                {SummonerRoleEnum.Top, new SummonerInfoView() },
-                {SummonerRoleEnum.Jungle, new SummonerInfoView() },
-                {SummonerRoleEnum.Mid, new SummonerInfoView() },
-                {SummonerRoleEnum.Adc, new SummonerInfoView() },
-                {SummonerRoleEnum.Sup, new SummonerInfoView() }
+                {SummonerRoleEnum.Top, new DetailedSummonerInfoView() },
+                {SummonerRoleEnum.Jungle, new DetailedSummonerInfoView() },
+                {SummonerRoleEnum.Mid, new DetailedSummonerInfoView() },
+                {SummonerRoleEnum.Adc, new DetailedSummonerInfoView() },
+                {SummonerRoleEnum.Sup, new DetailedSummonerInfoView() }
             };
 
-            var unUsedList = new List<SummonerInfoView>(Players);
+            var unUsedList = new List<DetailedSummonerInfoView>(Players);
 
             var firstTop = unUsedList.FirstOrDefault(x => x.Role == SummonerRoleEnum.Top);
             if (firstTop != null)

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DAL.Entities.LeagueInfo;
+﻿using System.Collections.Generic;
 using Domain.Views;
 
 namespace Web.Models.Admin

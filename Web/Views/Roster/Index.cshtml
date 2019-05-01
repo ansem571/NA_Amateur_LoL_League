@@ -16,13 +16,22 @@
     </tr>
     @foreach (var item in Model.SummonerInfos)
     {
-        <tr>
-            <td>@item.SummonerName</td>
-            <td>@item.Role.ToString()</td>
-            <td>@item.OffRole.ToString()</td>
-            <td>@item.TierDivision.ToString()</td>
-            <td>@item.OpGgUrl</td>
-            <td>@item.TeamName</td>
-        </tr>
+    <tr>
+        <td>@item.SummonerName</td>
+        <td>@item.Role.ToString()</td>
+        <td>@item.OffRole.ToString()</td>
+        <td>@item.TierDivision.ToString()</td>
+        <td>@item.OpGgUrl</td>
+        @{
+            if (item.TeamName == "Unassigned")
+            {
+                <td>@item.TeamName</td>
+            }
+            else
+            {
+                <td>@Html.ActionLink(item.TeamName, "ViewRosterAsync", "Roster", new {rosterId = item.RosterId})</td>
+            }
+        }
+    </tr>
     }
 </table>

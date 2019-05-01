@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Extensions;
+using Web.Models;
 using Web.Models.AccountViewModels;
 
 namespace Web.Controllers
@@ -358,17 +358,31 @@ namespace Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
-            if (userId == null || code == null)
+            try
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+
+                if (userId == null || code == null)
+                {
+                    return RedirectToAction(nameof(HomeController.Index), "Home");
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+                }
+
+                var result = await _userManager.ConfirmEmailAsync(user, code);
+                return View(result.Succeeded ? "ConfirmEmail" : "Error");
             }
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+            catch (Exception e)
             {
-                throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+                _logger.LogError(e, "Error confirming email");
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = code
+                });
             }
-            var result = await _userManager.ConfirmEmailAsync(user, code);
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
         [HttpGet]

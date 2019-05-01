@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Domain.Services.Implementations
@@ -80,8 +81,10 @@ namespace Domain.Services.Implementations
             return view;
         }
 
-
-
+        /// <summary>
+        /// For Admin usage only
+        /// </summary>
+        /// <returns></returns>
         public async Task<IEnumerable<RosterView>> GetAllRosters()
         {
             var rosters = await _teamRosterRepository.GetAllTeamsAsync();
@@ -95,9 +98,10 @@ namespace Domain.Services.Implementations
                 var summoners =
                     (await _summonerInfoRepository.GetAllForSummonerIdsAsync(players.Select(x => x.SummonerId))).ToList();
 
-                var summonerViews = _summonerMapper.Map(summoners);
+                var summonerViews = _summonerMapper.MapDetailed(summoners);
                 var rosterView = new RosterView
                 {
+                    RosterId = roster.Id,
                     Captain = summoners.FirstOrDefault(x => x.Id == captain?.SummonerId)?.SummonerName,
                     TeamName = roster.TeamName,
                     Wins = roster.Wins ?? 0,
@@ -105,11 +109,127 @@ namespace Domain.Services.Implementations
                     Players = summonerViews,
                     TeamTierScore = roster.TeamTierScore.GetValueOrDefault()
                 };
+
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/logos", roster.Id.ToString());
+                if (File.Exists(path))
+                {
+                    var byteData = await File.ReadAllBytesAsync(path);
+                    var base64 = Convert.ToBase64String(byteData);
+                    var type = GetContentType(path);
+                    var imgSrc = String.Format($"data:{type};base64,{base64}");
+                    rosterView.fileSource = imgSrc;
+                    rosterView.filePath = path;
+                }
                 rosterView.Cleanup();
                 list.Add(rosterView);
             }
 
             return list;
+        }
+
+
+        /// <summary>
+        /// For Roster specific View
+        /// </summary>
+        /// <param name="rosterId"></param>
+        /// <returns></returns>
+        public async Task<RosterView> GetRosterAsync(Guid rosterId)
+        {
+            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);
+            var captainTask = _teamCaptainRepository.GetCaptainByRosterId(rosterId);
+            var players = await _teamPlayerRepository.ReadAllForRosterAsync(rosterId);
+            var summoners = (await _summonerInfoRepository.GetAllForSummonerIdsAsync(players.Select(x => x.SummonerId))).ToList();
+            var summonerViews = _summonerMapper.MapDetailed(summoners);
+
+
+            var seasonInfo = await seasonInfoTask;
+            var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
+            var captain = await captainTask;
+            var roster = await rosterTask;
+
+            var rosterView = new RosterView
+            {
+                RosterId = roster.Id,
+                Captain = summoners.FirstOrDefault(x => x.Id == captain?.SummonerId)?.SummonerName,
+                TeamName = roster.TeamName,
+                Wins = roster.Wins ?? 0,
+                Loses = roster.Loses ?? 0,
+                Players = summonerViews,
+                TeamTierScore = roster.TeamTierScore.GetValueOrDefault(),
+                DivisionName = divisions.First(x =>
+                    x.LowerLimit <= roster.TeamTierScore && x.UpperLimit >= roster.TeamTierScore).Name
+            };
+
+            var directory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
+            var path = Directory.GetFiles(directory).FirstOrDefault(x=>x.Contains(rosterId.ToString()));
+
+            if (File.Exists(path))
+            {
+                var byteData = await File.ReadAllBytesAsync(path);
+                var base64 = Convert.ToBase64String(byteData);
+                var type = GetContentType(path);
+                var imgSrc = String.Format($"data:{type};base64,{base64}");
+                rosterView.fileSource = imgSrc;
+                rosterView.filePath = path;
+
+            }
+            rosterView.Cleanup();
+
+            return rosterView;
+        }
+
+        public async Task<(bool result, string message)> SaveFileAsync(IFormFile file, Guid rosterId)
+        {
+            if (file == null || file.Length == 0)
+                return (false, "file not selected");
+
+            var roster = await _teamRosterRepository.GetByTeamIdAsync(rosterId);
+            var extension = GetMimeTypes().FirstOrDefault(x => x.Value.Equals(file.ContentType)).Key;
+
+            var directory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
+            var files = Directory.GetFiles(directory).Where(x => x.Contains(rosterId.ToString()));
+
+
+            foreach (var fileName in files)
+            {
+                File.Delete(fileName);
+            }
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos", $"{roster.Id.ToString()}{extension}");
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return (true, "");
+        }
+
+        public async Task<bool> UpdateTeamNameAsync(string newTeamName, Guid rosterId)
+        {
+            var roster = await _teamRosterRepository.GetByTeamIdAsync(rosterId);
+            roster.TeamName = newTeamName;
+            var updateResult = await _teamRosterRepository.UpdateAsync(roster);
+            return updateResult;
+        }
+
+        private string GetContentType(string path)
+        {
+            var types = GetMimeTypes();
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types[ext];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                { ".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"}
+            };
         }
     }
 }

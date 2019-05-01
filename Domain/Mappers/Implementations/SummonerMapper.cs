@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using DAL.Entities.LeagueInfo;
 using Domain.Enums;
 using Domain.Mappers.Interfaces;
@@ -55,6 +54,44 @@ namespace Domain.Mappers.Implementations
         public IEnumerable<SummonerInfoEntity> Map(IEnumerable<SummonerInfoView> views)
         {
             return views.Select(Map);
+        }
+
+        public DetailedSummonerInfoView MapDetailed(SummonerInfoEntity entity)
+        {
+            return new DetailedSummonerInfoView
+            {
+                SummonerName = entity.SummonerName,
+                Role = _summonerRoleMapper.Map(entity.RoleId),
+                OffRole = entity.OffRoleId.HasValue ? _summonerRoleMapper.Map(entity.OffRoleId.Value) : SummonerRoleEnum.None,
+                TierDivision = _tierDivisionMapper.Map(entity.Tier_DivisionId),
+                CurrentLp = entity.CurrentLp,
+                OpGgUrl = entity.OpGGUrlLink,
+                IsValid = entity.IsValidPlayer
+            };
+        }
+
+        public IEnumerable<DetailedSummonerInfoView> MapDetailed(IEnumerable<SummonerInfoEntity> entities)
+        {
+            return entities.Select(MapDetailed);
+        }
+
+        public SummonerInfoEntity MapDetailed(DetailedSummonerInfoView view)
+        {
+            return new SummonerInfoEntity
+            {
+                SummonerName = view.SummonerName,
+                RoleId = _summonerRoleMapper.Map(view.Role),
+                OffRoleId = view.OffRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.OffRole) : default(Guid),
+                Tier_DivisionId = _tierDivisionMapper.Map(view.TierDivision),
+                OpGGUrlLink = view.OpGgUrl,
+                IsValidPlayer = view.IsValid,
+                CurrentLp = view.CurrentLp
+            };
+        }
+
+        public IEnumerable<SummonerInfoEntity> MapDetailed(IEnumerable<DetailedSummonerInfoView> views)
+        {
+            return views.Select(MapDetailed);
         }
     }
 }

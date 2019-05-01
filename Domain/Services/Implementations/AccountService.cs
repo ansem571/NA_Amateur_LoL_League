@@ -330,6 +330,7 @@ namespace Domain.Services.Implementations
                         var mapped = _summonerMapper.Map(summoner);
                         fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
                         {
+                            RosterId = team.Key,
                             SummonerName = summoner.SummonerName,
                             Role = mapped.Role,
                             OffRole = mapped.OffRole,

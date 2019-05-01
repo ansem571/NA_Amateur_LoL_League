@@ -1,0 +1,144 @@
+﻿@using Domain.Enums
+@model Web.Models.Roster.RosterViewModel
+
+@{
+    ViewBag.Title = Model.RosterView.TeamName;
+}
+<h2>@ViewData["Title"]</h2>
+@{
+    if (Model.IsCaptain)
+    {
+        <button onclick="myFunction()">Rename team?</button>
+
+        <form asp-controller="Roster" asp-action="UpdateTeamNameAsync" method="post" id="updateRoster" style="display: none">
+            <input type="text" name="newTeamName" />
+            <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+            <button type="submit">Submit name change</button>
+        </form>
+    }
+}
+@Model.StatusMessage
+<div class="row icon-row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                Division: @Model.RosterView.DivisionName
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-2">
+        <div class="card">
+            <div class="card-body">
+                Win/Loss: @Model.RosterView.Wins-@Model.RosterView.Loses
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-2">
+        <div class="card">
+            <div class="card-body">
+                Team Logo
+            </div>
+        </div>
+        <a class="thumbnail" target="_blank" href="@Model.RosterView.fileSource">
+            <img src="@Model.RosterView.fileSource" alt="Default Image" />
+        </a>
+        @if (Model.IsCaptain)
+        {
+            <form asp-controller="Roster" asp-action="UploadLogoAsync" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" />
+                <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+                <button type="submit">Upload File</button>
+            </form>
+        }
+    </div>
+</div>
+<div class="row">
+    <table class="table table-bordered">
+        <tr>
+            <th></th>
+            <th>Name (&#x2605; is captain)</th>
+            <th>Rank</th>
+            <th>Kills</th>
+            <th>Deaths</th>
+            <th>Assists</th>
+            <th>Wards Placed</th>
+            <th>Game Time</th>
+            <th>Damage to Champs</th>
+        </tr>
+        @{
+            const int minTeamCount = 5;
+            var maxTeamSize = Model.RosterView.Players.Count();
+            var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+            //TODO: put stats for players here
+            for (var i = 0; i < teamCount; i++)
+            {
+                var player = Model.RosterView.Players.ToList()[i];
+                var index = i + 1;
+                <tr>
+                    <td>
+                        @if (index > minTeamCount)
+                        {
+                            <div>Sub@(index - minTeamCount)</div>
+                        }
+                        else
+                        {
+                            <div>@((SummonerRoleEnum)index)</div>
+                        }
+                    </td>
+                    @if (player.SummonerName == Model.RosterView.Captain)
+                    {
+                        <td>@player.SummonerName &#x2605;</td>
+                    }
+                    else
+                    {
+                        <td>@player.SummonerName</td>
+                    }
+                    <td>
+                        @*Rank*@
+                        @player.TierDivision
+                    </td>
+                    <td>
+                        @*Kills*@
+                        TBD
+                    </td>
+                    <td>
+                        @*Deaths*@
+                        TBD
+                    </td>
+                    <td>
+                        @*Assists*@
+                        TBD
+                    </td>
+                    <td>
+                        @*Wards Placed*@
+                        TBD
+                    </td>
+                    <td>
+                        @*Game Time*@
+                        TBD
+                    </td>
+                    <td>
+                        @*Damage to Champs*@
+                        TBD
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</div>
+
+<div class="row">
+    Schedule tbd
+</div>
+
+<script>
+    function myFunction() {
+        var x = document.getElementById("updateRoster");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+</script>

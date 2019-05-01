@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Domain.Enums;
 
 namespace Domain.Views
@@ -19,5 +18,6 @@ namespace Domain.Views
         public TierDivisionEnum TierDivision { get; set; }
         public string OpGgUrl { get; set; }
         public string TeamName { get; set; }
+        public Guid RosterId { get; set; }
     }
 }

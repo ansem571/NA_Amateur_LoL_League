@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Folder Include="Scripts\" />
+    <Folder Include="wwwroot\logos\" />
   </ItemGroup>
 
   <ItemGroup>

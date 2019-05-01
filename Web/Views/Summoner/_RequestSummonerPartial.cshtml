@@ -3,7 +3,7 @@
 @if (Model.IsValid)
 {
     <div class="col-md-2">
-        <button onclick="@("window.location.href='" + @Url.Action("RequestPlayers", "Summoner") + "'");" class="btn">
+        <button onclick="@("window.location.href='" + Url.Action("RequestPlayers", "Summoner") + "'");" class="btn">
             Request Summoners
         </button>
     </div>
