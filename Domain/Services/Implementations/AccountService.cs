@@ -370,6 +370,7 @@ namespace Domain.Services.Implementations
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var requests = (await _requestedSummonerRepository.ReadAllAsync()).GroupBy(x => x.SummonerId)
                 .ToDictionary(y => y.Key, y => y.ToList());
+            var players = (await _teamPlayerRepository.ReadAllAsync()).ToList();
 
             var usedSummoners = new List<Guid>();
             var tempTeams = new List<RequestedPlayersView>();
@@ -379,6 +380,13 @@ namespace Domain.Services.Implementations
                 if (!usedSummoners.Contains(summoner.Id))
                 {
                     usedSummoners.Add(summoner.Id);
+                }
+
+                var onRoster = players.FirstOrDefault(x => x.SummonerId == summoner.Id);
+                if (onRoster != null)
+                {
+                    usedSummoners.Add(summoner.Id);
+                    continue;
                 }
                 var summonerMapped = _summonerMapper.Map(summoner);
                 var partial = new PartialSummonerView
