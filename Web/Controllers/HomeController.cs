@@ -50,7 +50,7 @@ namespace Web.Controllers
         public IActionResult Contact()
         {
             ViewData["Message"] = "Contact information" +
-                                  "\r Please attempt to contact a member of the Court before sending an email to support. " +
+                                  "\r Please attempt to contact a member of the Tribunal before sending an email to support. " +
                                   "\r If it is an issue regarding payment, go ahead and contact support.";
 
             return View();
