@@ -22,11 +22,13 @@ namespace Domain.Services.Implementations
         private readonly ITeamCaptainRepository _teamCaptainRepository;
         private readonly ISeasonInfoRepository _seasonInfoRepository;
         private readonly IDivisionRepository _divisionRepository;
+        private readonly IPlayerStatsRepository _playerStatsRepository;
+        private readonly IPlayerStatsMapper _playerStatsMapper;
 
         public RosterService(ILogger logger, ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, ISeasonInfoRepository seasonInfoRepository,
-            IDivisionRepository divisionRepository)
+            IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -44,6 +46,10 @@ namespace Domain.Services.Implementations
                                     throw new ArgumentNullException(nameof(seasonInfoRepository));
             _divisionRepository = divisionRepository ??
                                   throw new ArgumentNullException(nameof(divisionRepository));
+            _playerStatsRepository = playerStatsRepository ??
+                                     throw new ArgumentNullException(nameof(playerStatsRepository));
+            _playerStatsMapper = playerStatsMapper ??
+                                 throw new ArgumentNullException(nameof(playerStatsMapper));
         }
 
         public async Task<SeasonInfoView> GetSeasonInfoView()
@@ -98,7 +104,7 @@ namespace Domain.Services.Implementations
                 var summoners =
                     (await _summonerInfoRepository.GetAllForSummonerIdsAsync(players.Select(x => x.SummonerId))).ToList();
 
-                var summonerViews = _summonerMapper.MapDetailed(summoners);
+                var summonerViews = _summonerMapper.MapDetailed(summoners, new List<PlayerStatsView>());
                 var rosterView = new RosterView
                 {
                     RosterId = roster.Id,
@@ -117,8 +123,7 @@ namespace Domain.Services.Implementations
                     var base64 = Convert.ToBase64String(byteData);
                     var type = GetContentType(path);
                     var imgSrc = String.Format($"data:{type};base64,{base64}");
-                    rosterView.fileSource = imgSrc;
-                    rosterView.filePath = path;
+                    rosterView.FileSource = imgSrc;
                 }
                 rosterView.Cleanup();
                 list.Add(rosterView);
@@ -138,10 +143,11 @@ namespace Domain.Services.Implementations
             var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
             var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);
             var captainTask = _teamCaptainRepository.GetCaptainByRosterId(rosterId);
-            var players = await _teamPlayerRepository.ReadAllForRosterAsync(rosterId);
-            var summoners = (await _summonerInfoRepository.GetAllForSummonerIdsAsync(players.Select(x => x.SummonerId))).ToList();
-            var summonerViews = _summonerMapper.MapDetailed(summoners);
-
+            var playersSummonerIds = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).Select(x=>x.SummonerId).ToList();
+            var summoners = (await _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummonerIds)).ToList();
+            var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummonerIds);
+            var mappedStats = _playerStatsMapper.Map(playerStats).ToList();
+            var summonerViews = _summonerMapper.MapDetailed(summoners, mappedStats).ToList();
 
             var seasonInfo = await seasonInfoTask;
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
@@ -170,8 +176,7 @@ namespace Domain.Services.Implementations
                 var base64 = Convert.ToBase64String(byteData);
                 var type = GetContentType(path);
                 var imgSrc = String.Format($"data:{type};base64,{base64}");
-                rosterView.fileSource = imgSrc;
-                rosterView.filePath = path;
+                rosterView.FileSource = imgSrc;
 
             }
             rosterView.Cleanup();

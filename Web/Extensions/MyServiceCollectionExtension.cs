@@ -69,6 +69,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<TeamCaptainEntity>, TeamCaptainStore>();
             services.TryAddSingleton<ITableStorageRepository<SeasonInfoEntity>, SeasonInfoStore>();
             services.TryAddSingleton<ITableStorageRepository<DivisionEntity>, DivisionStore>();
+            services.TryAddSingleton<ITableStorageRepository<PlayerStatsEntity>, PlayerStatsStore>();
             return services;
         }
 
@@ -80,6 +81,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITierDivisionMapper, TierDivisionMapper>();
             services.TryAddSingleton<ISummonerMapper, SummonerMapper>();
             services.TryAddSingleton<IAlternateAccountMapper, AlternateAccountMapper>();
+            services.TryAddSingleton<IPlayerStatsMapper, PlayerStatsMapper>();
             return services;
         }
 
@@ -94,6 +96,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITeamCaptainRepository, TeamCaptainRepository>();
             services.TryAddSingleton<ISeasonInfoRepository, SeasonInfoRepository>();
             services.TryAddSingleton<IDivisionRepository, DivisionRepository>();
+            services.TryAddSingleton<IPlayerStatsRepository, PlayerStatsRepository>();
             return services;
         }
 

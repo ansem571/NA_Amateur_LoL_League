@@ -39,8 +39,8 @@
                 Team Logo
             </div>
         </div>
-        <a class="thumbnail" target="_blank" href="@Model.RosterView.fileSource">
-            <img src="@Model.RosterView.fileSource" alt="Default Image" />
+        <a class="thumbnail" target="_blank" href="@Model.RosterView.FileSource">
+            <img src="@Model.RosterView.FileSource" alt="Default Image" />
         </a>
         @if (Model.IsCaptain)
         {
@@ -61,9 +61,10 @@
             <th>Kills</th>
             <th>Deaths</th>
             <th>Assists</th>
-            <th>Wards Placed</th>
-            <th>Game Time</th>
-            <th>Damage to Champs</th>
+            <th>CS/MIN</th>
+            <th>Damage/Min</th>
+            <th>KP</th>
+            <th>Vision Score</th>
         </tr>
         @{
             const int minTeamCount = 5;
@@ -98,30 +99,49 @@
                         @*Rank*@
                         @player.TierDivision
                     </td>
-                    <td>
-                        @*Kills*@
-                        TBD
-                    </td>
-                    <td>
-                        @*Deaths*@
-                        TBD
-                    </td>
-                    <td>
-                        @*Assists*@
-                        TBD
-                    </td>
-                    <td>
-                        @*Wards Placed*@
-                        TBD
-                    </td>
-                    <td>
-                        @*Game Time*@
-                        TBD
-                    </td>
-                    <td>
-                        @*Damage to Champs*@
-                        TBD
-                    </td>
+                    @{
+                        if (player.PlayerStats == null)
+                        {
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        }
+                        else
+                        {
+                            <td>
+                                @*Kills*@
+                                @player.PlayerStats.Kills
+                            </td>
+                            <td>
+                                @*Deaths*@
+                                @player.PlayerStats.Deaths
+                            </td>
+                            <td>
+                                @*Assists*@
+                                @player.PlayerStats.Assists
+                            </td>
+                            <td>
+                                @*CS/Min*@
+                                @player.PlayerStats.CSperMin
+                            </td>
+                            <td>
+                                @*Damage/Min*@
+                                @player.PlayerStats.DamagePerMin
+                            </td>
+                            <td>
+                                @*KP*@
+                                @player.PlayerStats.Kp %
+                            </td>
+                            <td>
+                                @*Vision Score*@
+                                @player.PlayerStats.VisionScore
+                            </td>
+                        }
+                    }
                 </tr>
             }
         }

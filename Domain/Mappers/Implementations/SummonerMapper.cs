@@ -56,7 +56,7 @@ namespace Domain.Mappers.Implementations
             return views.Select(Map);
         }
 
-        public DetailedSummonerInfoView MapDetailed(SummonerInfoEntity entity)
+        public DetailedSummonerInfoView MapDetailed(SummonerInfoEntity entity, PlayerStatsView stats = null)
         {
             return new DetailedSummonerInfoView
             {
@@ -66,13 +66,23 @@ namespace Domain.Mappers.Implementations
                 TierDivision = _tierDivisionMapper.Map(entity.Tier_DivisionId),
                 CurrentLp = entity.CurrentLp,
                 OpGgUrl = entity.OpGGUrlLink,
-                IsValid = entity.IsValidPlayer
+                IsValid = entity.IsValidPlayer,
+                PlayerStats = stats
             };
         }
 
-        public IEnumerable<DetailedSummonerInfoView> MapDetailed(IEnumerable<SummonerInfoEntity> entities)
+        public IEnumerable<DetailedSummonerInfoView> MapDetailed(IEnumerable<SummonerInfoEntity> entities, IEnumerable<PlayerStatsView> stats)
         {
-            return entities.Select(MapDetailed);
+            stats = stats.ToList();
+            var list = new List<DetailedSummonerInfoView>();
+            foreach (var entity in entities)
+            {
+                var playerStats = stats.FirstOrDefault(x => x.SummonerId == entity.Id);
+                var view = MapDetailed(entity, playerStats);
+                list.Add(view);
+            }
+
+            return list;
         }
 
         public SummonerInfoEntity MapDetailed(DetailedSummonerInfoView view)
