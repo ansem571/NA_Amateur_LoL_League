@@ -18,6 +18,7 @@ namespace Domain.Mappers.Implementations
                 Kills = entity.Kills,
                 Deaths = entity.Deaths,
                 Assists = entity.Assists,
+                Kda = Math.Round((entity.Kills + entity.Assists)/(float)entity.Deaths, 2),
                 CSperMin = Math.Round(entity.CS/(float)entity.GameTime, 2),
                 DamagePerMin = Math.Round(entity.Damage/entity.GameTime, 2),
                 Kp = Math.Round((entity.Kills/(float)entity.TotalTeamKills) * 100, 1),

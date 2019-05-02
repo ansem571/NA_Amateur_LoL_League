@@ -61,6 +61,7 @@
             <th>Kills</th>
             <th>Deaths</th>
             <th>Assists</th>
+            <th>KDA</th>
             <th>CS/MIN</th>
             <th>Damage/Min</th>
             <th>KP</th>
@@ -76,73 +77,78 @@
             {
                 var player = Model.RosterView.Players.ToList()[i];
                 var index = i + 1;
-                <tr>
+        <tr>
+            <td>
+                @if (index > minTeamCount)
+                {
+                    <div>Sub@(index - minTeamCount)</div>
+                }
+                else
+                {
+                    <div>@((SummonerRoleEnum)index)</div>
+                }
+            </td>
+            @if (player.SummonerName == Model.RosterView.Captain)
+            {
+                <td>@player.SummonerName &#x2605;</td>
+            }
+            else
+            {
+                <td>@player.SummonerName</td>
+            }
+            <td>
+                @*Rank*@
+                @player.TierDivision
+            </td>
+            @{
+                if (player.PlayerStats == null)
+                {
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                }
+                else
+                {
                     <td>
-                        @if (index > minTeamCount)
-                        {
-                            <div>Sub@(index - minTeamCount)</div>
-                        }
-                        else
-                        {
-                            <div>@((SummonerRoleEnum)index)</div>
-                        }
+                        @*Kills*@
+                        @player.PlayerStats.Kills
                     </td>
-                    @if (player.SummonerName == Model.RosterView.Captain)
-                    {
-                        <td>@player.SummonerName &#x2605;</td>
-                    }
-                    else
-                    {
-                        <td>@player.SummonerName</td>
-                    }
                     <td>
-                        @*Rank*@
-                        @player.TierDivision
+                        @*Deaths*@
+                        @player.PlayerStats.Deaths
                     </td>
-                    @{
-                        if (player.PlayerStats == null)
-                        {
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                        }
-                        else
-                        {
-                            <td>
-                                @*Kills*@
-                                @player.PlayerStats.Kills
-                            </td>
-                            <td>
-                                @*Deaths*@
-                                @player.PlayerStats.Deaths
-                            </td>
-                            <td>
-                                @*Assists*@
-                                @player.PlayerStats.Assists
-                            </td>
-                            <td>
-                                @*CS/Min*@
-                                @player.PlayerStats.CSperMin
-                            </td>
-                            <td>
-                                @*Damage/Min*@
-                                @player.PlayerStats.DamagePerMin
-                            </td>
-                            <td>
-                                @*KP*@
-                                @player.PlayerStats.Kp %
-                            </td>
-                            <td>
-                                @*Vision Score*@
-                                @player.PlayerStats.VisionScore
-                            </td>
-                        }
-                    }
-                </tr>
+                    <td>
+                        @*Assists*@
+                        @player.PlayerStats.Assists
+                    </td>
+                    <td>
+                        @*KDA*@
+                        @player.PlayerStats.Kda
+                    </td>
+                    <td>
+                        @*CS/Min*@
+                        @player.PlayerStats.CSperMin
+                    </td>
+                    <td>
+                        @*Damage/Min*@
+                        @player.PlayerStats.DamagePerMin
+                    </td>
+                    <td>
+                        @*KP*@
+                        @player.PlayerStats.Kp %
+                    </td>
+                    <td>
+                        @*Vision Score*@
+                        @player.PlayerStats.VisionScore
+                    </td>
+                }
+            }
+        </tr>
             }
         }
     </table>

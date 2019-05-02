@@ -10,6 +10,7 @@ namespace Domain.Views
         public int Kills { get; set; }
         public int Deaths { get; set; }
         public int Assists { get; set; }
+        public double Kda { get; set; }
         public double CSperMin { get; set; }
         public double DamagePerMin { get; set; }
         public double Kp { get; set; }
