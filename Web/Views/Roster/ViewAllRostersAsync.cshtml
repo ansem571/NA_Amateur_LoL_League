@@ -78,15 +78,23 @@
                     <tr>
                         <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
                         @{
-                            foreach (var player in team.Players)
+                            for (var i = 0; i < teamCount; i++)
                             {
-                                if (player.SummonerName == team.Captain)
+                                var player = team.Players.ElementAtOrDefault(i);
+                                if (player == null)
                                 {
-                                    <td>@player.SummonerName &#x2605;</td>
+                                    <td></td>
                                 }
                                 else
                                 {
-                                    <td>@player.SummonerName</td>
+                                    if (player.SummonerName == team.Captain)
+                                    {
+                                        <td>@player.SummonerName &#x2605;</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@player.SummonerName</td>
+                                    }
                                 }
                             }
                         }
