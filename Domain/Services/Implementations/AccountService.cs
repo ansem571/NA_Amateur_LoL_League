@@ -411,7 +411,11 @@ namespace Domain.Services.Implementations
 
                 foreach (var requestEntity in requestedList)
                 {
-                    var requestedSummoner = summoners[requestEntity.SummonerRequestedId];
+                    summoners.TryGetValue(requestEntity.SummonerRequestedId, out var requestedSummoner);
+                    if (requestedSummoner == null)
+                    {
+                        continue;
+                    }
                     if (!usedSummoners.Contains(requestedSummoner.Id))
                     {
                         usedSummoners.Add(requestedSummoner.Id);
