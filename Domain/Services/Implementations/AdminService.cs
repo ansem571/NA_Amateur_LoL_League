@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
+using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
@@ -19,12 +20,13 @@ namespace Domain.Services.Implementations
         private readonly ITeamRosterRepository _teamRosterRepository;
         private readonly ITeamCaptainRepository _teamCaptainRepository;
         private readonly IRosterService _rosterService;
+        private readonly ITierDivisionMapper _tierDivisionMapper;
 
         private const int MinTeamCountRequirement = 5;
 
         public AdminService(ILogger logger, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
-            ITeamCaptainRepository teamCaptainRepository, IRosterService rosterService)
+            ITeamCaptainRepository teamCaptainRepository, IRosterService rosterService, ITierDivisionMapper tierDivisionMapper)
         {
             _logger = logger ?? 
                       throw new ArgumentNullException(nameof(logger));
@@ -40,6 +42,8 @@ namespace Domain.Services.Implementations
                                      throw new ArgumentNullException(nameof(teamCaptainRepository));
             _rosterService = rosterService ?? 
                              throw new ArgumentNullException(nameof(rosterService));
+            _tierDivisionMapper = tierDivisionMapper ??
+                                  throw new ArgumentNullException(nameof(tierDivisionMapper));
         }
 
         public async Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync()
@@ -195,6 +199,40 @@ namespace Domain.Services.Implementations
             };
 
             return await _teamCaptainRepository.CreateCaptainAsync(entity);
+        }
+
+        public async Task<bool> UpdateRosterTierScoreAsync()
+        {
+            var rosters = await _rosterService.GetAllRosters();
+
+            foreach (var roster in rosters)
+            {
+                var currentScore = 0;
+                foreach (var player in roster.Players)
+                {
+                    var divisionId = _tierDivisionMapper.Map(player.TierDivision);
+                    var divisionScore = int.Parse((await _lookupRepository.GetLookupEntity(divisionId)).Value);
+                    currentScore += (divisionScore + player.CurrentLp);
+                }
+
+                currentScore /= roster.Players.Count();
+                var rosterEntity = await _teamRosterRepository.GetByTeamIdAsync(roster.RosterId);
+                rosterEntity.TeamTierScore = currentScore;
+                try
+                {
+                    var rosterUpdate = await _teamRosterRepository.UpdateAsync(rosterEntity);
+                    if (!rosterUpdate)
+                    {
+                        throw new Exception($"Error updating team score for: {roster.TeamName}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "");
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
