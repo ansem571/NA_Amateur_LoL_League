@@ -11,7 +11,7 @@ namespace Domain.Views
         public string Captain { get; set; }
         public string TeamName { get; set; }
         public int TeamTierScore { get; set; }
-        public string DivisionName { get; set; }
+        public DivisionView Division { get; set; }
         public int Wins { get; set; }
         public int Loses { get; set; }
         public IEnumerable<DetailedSummonerInfoView> Players { get; set; } = new List<DetailedSummonerInfoView>();

@@ -56,22 +56,27 @@ namespace Domain.Services.Implementations
         {
             var view = new SeasonInfoView();
 
+            var rostersTask = GetAllRosters();
             var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
 
             var seasonInfo = await seasonInfoTask;
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
             try
             {
-                var rostersTask = GetAllRosters();
                 var rosters = (await rostersTask).ToList();
 
                 foreach (var rosterView in rosters)
                 {
-                    rosterView.DivisionName = divisions.First(x =>
-                        x.LowerLimit <= rosterView.TeamTierScore && x.UpperLimit >= rosterView.TeamTierScore).Name;
+                    var division = divisions.First(x =>
+                        x.LowerLimit <= rosterView.TeamTierScore && x.UpperLimit >= rosterView.TeamTierScore);
+                    rosterView.Division = new DivisionView
+                    {
+                        DivisionName = division.Name,
+                        DivisionMinScore = division.LowerLimit
+                    };
                 }
-
-                view.Rosters = rosters;
+                
+                view.Rosters = rosters.OrderByDescending(x => x.Division.DivisionMinScore);
             }
             catch (Exception)
             {
@@ -143,7 +148,7 @@ namespace Domain.Services.Implementations
             var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
             var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);
             var captainTask = _teamCaptainRepository.GetCaptainByRosterId(rosterId);
-            var playersSummonerIds = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).Select(x=>x.SummonerId).ToList();
+            var playersSummonerIds = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).Select(x => x.SummonerId).ToList();
             var summoners = (await _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummonerIds)).ToList();
             var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummonerIds);
             var mappedStats = _playerStatsMapper.Map(playerStats).ToList();
@@ -154,6 +159,8 @@ namespace Domain.Services.Implementations
             var captain = await captainTask;
             var roster = await rosterTask;
 
+            var division = divisions.First(x =>
+                x.LowerLimit <= roster.TeamTierScore && x.UpperLimit >= roster.TeamTierScore);
             var rosterView = new RosterView
             {
                 RosterId = roster.Id,
@@ -163,12 +170,15 @@ namespace Domain.Services.Implementations
                 Loses = roster.Loses ?? 0,
                 Players = summonerViews,
                 TeamTierScore = roster.TeamTierScore.GetValueOrDefault(),
-                DivisionName = divisions.First(x =>
-                    x.LowerLimit <= roster.TeamTierScore && x.UpperLimit >= roster.TeamTierScore).Name
+                Division = new DivisionView
+                {
+                    DivisionName = division.Name,
+                    DivisionMinScore = division.LowerLimit
+                }
             };
 
             var directory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
-            var path = Directory.GetFiles(directory).FirstOrDefault(x=>x.Contains(rosterId.ToString()));
+            var path = Directory.GetFiles(directory).FirstOrDefault(x => x.Contains(rosterId.ToString()));
 
             if (File.Exists(path))
             {

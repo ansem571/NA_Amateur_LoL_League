@@ -9,6 +9,7 @@ namespace Domain.Services.Interfaces
     {
         Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync();
         Task<IEnumerable<RosterView>> GetAllRosters();
+        Task<bool> UpdateRosterTierScoreAsync();
 
         Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerNames);
         Task<bool> RemovePlayerFromRosterAsync(Guid summonerId, Guid rosterId);

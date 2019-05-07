@@ -25,7 +25,7 @@ namespace Web.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return View(model: StatusMessage);
         }
 
         [HttpGet]
@@ -65,7 +65,7 @@ namespace Web.Controllers
             {
                 _logger.LogError(e, "error on creating team, da fuck Ryan");
             }
-            
+
             StatusMessage = "Error creating team";
             return RedirectToAction("CreateTeamAsync");
         }
@@ -105,9 +105,30 @@ namespace Web.Controllers
             {
                 _logger.LogError(e, "error on assigning captain, da fuck Ryan");
             }
-            
+
             StatusMessage = "Error assigning captain";
             return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> UpdateTeamTierScoresAsync()
+        {
+            try
+            {
+                var result = await _adminService.UpdateRosterTierScoreAsync();
+                if (!result)
+                {
+                    throw new Exception("Failed to update roster tier scores");
+                }
+
+                StatusMessage = "Updated Official Rosters tier scores";
+                return RedirectToAction("Index");
+            }
+            catch (Exception e)
+            {
+                StatusMessage = e.Message;
+                _logger.LogError(e, StatusMessage);
+                return RedirectToAction("Index");
+            }
         }
     }
 }

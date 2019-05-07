@@ -39,7 +39,7 @@
     }
     else
     {
-        var divisions = Model.Rosters.GroupBy(x => x.DivisionName).ToDictionary(x => x.Key, x => x.ToList());
+        var divisions = Model.Rosters.GroupBy(x => x.Division.DivisionName).ToDictionary(x => x.Key, x => x.ToList());
         foreach (var division in divisions)
         {
             <div class="row">
