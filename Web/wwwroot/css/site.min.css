@@ -66,3 +66,23 @@ table, th, td {
     text-align: center;
     margin: 15px;
 }
+
+.line-break-horizontal:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid black;
+    z-index: -1;
+}
+
+.line-break-vertical:after {
+    content: "";
+    position: absolute;
+    bottom: 10%;
+    top: 10%;
+    left: 50%;
+    border-left: 1px solid black;
+    z-index: -1;
+}

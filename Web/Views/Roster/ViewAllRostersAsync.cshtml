@@ -29,9 +29,9 @@
         </div>
     </div>
 </div>
-    <div>
-        &#x2605; means they are the captain
-    </div>
+<div>
+    &#x2605; means they are the captain
+</div>
 @{
     if (!Model.Rosters.ToList().Any())
     {
@@ -75,35 +75,67 @@
                     </tr>
                     @foreach (var team in division.Value)
                     {
-                    <tr>
-                        <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
-                        @{
-                            for (var i = 0; i < teamCount; i++)
-                            {
-                                var player = team.Players.ElementAtOrDefault(i);
-                                if (player == null)
+                        <tr>
+                            <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
+                            @{
+                                for (var i = 0; i < teamCount; i++)
                                 {
-                                    <td></td>
-                                }
-                                else
-                                {
-                                    if (player.SummonerName == team.Captain)
+                                    var player = team.Players.ElementAtOrDefault(i);
+                                    if (player == null)
                                     {
-                                        <td>@player.SummonerName &#x2605;</td>
+                                        <td></td>
                                     }
                                     else
                                     {
-                                        <td>@player.SummonerName</td>
+                                        <td>
+                                            @if (player.SummonerName == team.Captain)
+                                            {
+                                                <div> @player.SummonerName &#x2605;</div>
+                                            }
+                                            else
+                                            {
+                                                <div>@player.SummonerName</div>
+                                            }
+
+                                            <button onclick="showDetailedInfo('@team.TeamName', '@i')">+</button>
+                                            <div class="line-break-horizontal" id="{{'showDetailedInfo'@team.TeamName@i}}" style="display: none">
+                                                <div class="line-break-vertical">@player.IsValid</div>
+                                                @foreach (var alt in player.AlternateAccounts)
+                                                {
+                                                    <div class="line-break-vertical">@alt.AlternateName</div>
+                                                }
+                                            </div>
+
+                                        </td>
                                     }
                                 }
                             }
-                        }
-                        <td>@team.Wins</td>
-                        <td>@team.Loses</td>
-                    </tr>
-                }
+                            <td>@team.Wins</td>
+                            <td>@team.Loses</td>
+                        </tr>
+                    }
                 </table>
             </div>
         }
     }
 }
+
+<script>
+    function showDetailedInfo() {
+        if (arguments.length < 2)
+            return;
+
+        var teamName = arguments[0];
+        var index = arguments[1];
+        alert(teamName);
+        alert(index);
+        var x = document.getElementById("{{'showDetailedInfo'" + teamName +  index + "}}");
+        alert(x);
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        }
+        else {
+            x.style.display = "none";
+        }
+    }
+</script>

@@ -8,7 +8,7 @@
 @{
     if (Model.IsCaptain)
     {
-        <button onclick="myFunction()">Rename team?</button>
+        <button onclick="renameTeam()">Rename team?</button>
 
         <form asp-controller="Roster" asp-action="UpdateTeamNameAsync" method="post" id="updateRoster" style="display: none">
             <input type="text" name="newTeamName" />
@@ -77,78 +77,78 @@
             {
                 var player = Model.RosterView.Players.ToList()[i];
                 var index = i + 1;
-        <tr>
-            <td>
-                @if (index > minTeamCount)
-                {
-                    <div>Sub@(index - minTeamCount)</div>
-                }
-                else
-                {
-                    <div>@((SummonerRoleEnum)index)</div>
-                }
-            </td>
-            @if (player.SummonerName == Model.RosterView.Captain)
-            {
-                <td>@player.SummonerName &#x2605;</td>
-            }
-            else
-            {
-                <td>@player.SummonerName</td>
-            }
-            <td>
-                @*Rank*@
-                @player.TierDivision
-            </td>
-            @{
-                if (player.PlayerStats == null)
-                {
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                }
-                else
-                {
+                <tr>
                     <td>
-                        @*Kills*@
-                        @player.PlayerStats.Kills
+                        @if (index > minTeamCount)
+                        {
+                            <div>Sub@(index - minTeamCount)</div>
+                        }
+                        else
+                        {
+                            <div>@((SummonerRoleEnum)index)</div>
+                        }
                     </td>
+                    @if (player.SummonerName == Model.RosterView.Captain)
+                    {
+                        <td>@player.SummonerName &#x2605;</td>
+                    }
+                    else
+                    {
+                        <td>@player.SummonerName</td>
+                    }
                     <td>
-                        @*Deaths*@
-                        @player.PlayerStats.Deaths
+                        @*Rank*@
+                        @player.TierDivision
                     </td>
-                    <td>
-                        @*Assists*@
-                        @player.PlayerStats.Assists
-                    </td>
-                    <td>
-                        @*KDA*@
-                        @player.PlayerStats.Kda
-                    </td>
-                    <td>
-                        @*CS/Min*@
-                        @player.PlayerStats.CSperMin
-                    </td>
-                    <td>
-                        @*Damage/Min*@
-                        @player.PlayerStats.DamagePerMin
-                    </td>
-                    <td>
-                        @*KP*@
-                        @player.PlayerStats.Kp %
-                    </td>
-                    <td>
-                        @*Vision Score*@
-                        @player.PlayerStats.VisionScore
-                    </td>
-                }
-            }
-        </tr>
+                    @{
+                        if (player.PlayerStats == null)
+                        {
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        }
+                        else
+                        {
+                            <td>
+                                @*Kills*@
+                                @player.PlayerStats.Kills
+                            </td>
+                            <td>
+                                @*Deaths*@
+                                @player.PlayerStats.Deaths
+                            </td>
+                            <td>
+                                @*Assists*@
+                                @player.PlayerStats.Assists
+                            </td>
+                            <td>
+                                @*KDA*@
+                                @player.PlayerStats.Kda
+                            </td>
+                            <td>
+                                @*CS/Min*@
+                                @player.PlayerStats.CSperMin
+                            </td>
+                            <td>
+                                @*Damage/Min*@
+                                @player.PlayerStats.DamagePerMin
+                            </td>
+                            <td>
+                                @*KP*@
+                                @player.PlayerStats.Kp %
+                            </td>
+                            <td>
+                                @*Vision Score*@
+                                @player.PlayerStats.VisionScore
+                            </td>
+                        }
+                    }
+                </tr>
             }
         }
     </table>
@@ -159,7 +159,7 @@
 </div>
 
 <script>
-    function myFunction() {
+    function renameTeam() {
         var x = document.getElementById("updateRoster");
         if (x.style.display === "none") {
             x.style.display = "block";
