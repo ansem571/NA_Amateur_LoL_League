@@ -7,6 +7,7 @@ namespace Domain.Repositories.Interfaces
 {
     public interface IAlternateAccountRepository
     {
+        Task<IEnumerable<AlternateAccountEntity>> ReadAllAsync();
         Task<IEnumerable<AlternateAccountEntity>> ReadAllForSummonerAsync(Guid summonerId);
         Task<bool> CreateAsync(IEnumerable<AlternateAccountEntity> entities);
         Task<bool> UpdateAsync(IEnumerable<AlternateAccountEntity> entities);

@@ -12,10 +12,15 @@ namespace Domain.Mappers.Implementations
     {
         private readonly ISummonerRoleMapper _summonerRoleMapper;
         private readonly ITierDivisionMapper _tierDivisionMapper;
-        public SummonerMapper(ISummonerRoleMapper summonerRoleMapper, ITierDivisionMapper tierDivisionMapper)
+        private readonly IAlternateAccountMapper _alternateAccountMapper;
+        public SummonerMapper(ISummonerRoleMapper summonerRoleMapper, ITierDivisionMapper tierDivisionMapper, IAlternateAccountMapper alternateAccountMapper)
         {
-            _summonerRoleMapper = summonerRoleMapper ?? throw new ArgumentNullException(nameof(summonerRoleMapper));
-            _tierDivisionMapper = tierDivisionMapper ?? throw new ArgumentNullException(nameof(tierDivisionMapper));
+            _summonerRoleMapper = summonerRoleMapper ?? 
+                                  throw new ArgumentNullException(nameof(summonerRoleMapper));
+            _tierDivisionMapper = tierDivisionMapper ?? 
+                                  throw new ArgumentNullException(nameof(tierDivisionMapper));
+            _alternateAccountMapper = alternateAccountMapper ??
+                                      throw new ArgumentNullException(nameof(alternateAccountMapper));
         }
 
         public SummonerInfoView Map(SummonerInfoEntity entity)
@@ -56,11 +61,12 @@ namespace Domain.Mappers.Implementations
             return views.Select(Map);
         }
 
-        public DetailedSummonerInfoView MapDetailed(SummonerInfoEntity entity, PlayerStatsView stats = null)
+        public DetailedSummonerInfoView MapDetailed(SummonerInfoEntity entity, IEnumerable<AlternateAccountEntity> alternates, PlayerStatsView stats = null)
         {
             return new DetailedSummonerInfoView
             {
                 SummonerName = entity.SummonerName,
+                AlternateAccounts = alternates != null ? _alternateAccountMapper.Map(alternates).ToList() : new List<AlternateAccountView>(),
                 Role = _summonerRoleMapper.Map(entity.RoleId),
                 OffRole = entity.OffRoleId.HasValue ? _summonerRoleMapper.Map(entity.OffRoleId.Value) : SummonerRoleEnum.None,
                 TierDivision = _tierDivisionMapper.Map(entity.Tier_DivisionId),
@@ -71,14 +77,16 @@ namespace Domain.Mappers.Implementations
             };
         }
 
-        public IEnumerable<DetailedSummonerInfoView> MapDetailed(IEnumerable<SummonerInfoEntity> entities, IEnumerable<PlayerStatsView> stats)
+        public IEnumerable<DetailedSummonerInfoView> MapDetailed(IEnumerable<SummonerInfoEntity> entities, IEnumerable<AlternateAccountEntity> alternateAccountEntities, IEnumerable<PlayerStatsView> stats)
         {
             stats = stats.ToList();
+            alternateAccountEntities = alternateAccountEntities.ToList();
             var list = new List<DetailedSummonerInfoView>();
             foreach (var entity in entities)
             {
                 var playerStats = stats.FirstOrDefault(x => x.SummonerId == entity.Id);
-                var view = MapDetailed(entity, playerStats);
+                var alternates = alternateAccountEntities.Where(x => x.SummonerId == entity.Id);
+                var view = MapDetailed(entity, alternates, playerStats);
                 list.Add(view);
             }
 

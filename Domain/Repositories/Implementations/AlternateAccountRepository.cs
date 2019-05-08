@@ -17,6 +17,11 @@ namespace Domain.Repositories.Implementations
             _table = table ?? throw new ArgumentNullException(nameof(table));
         }
 
+        public async Task<IEnumerable<AlternateAccountEntity>> ReadAllAsync()
+        {
+            return await _table.ReadAllAsync();
+        }
+
         public async Task<IEnumerable<AlternateAccountEntity>> ReadAllForSummonerAsync(Guid summonerId)
         {
             return await _table.ReadManyAsync("SummonerId = @summonerId", new {summonerId});

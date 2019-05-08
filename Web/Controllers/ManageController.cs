@@ -125,12 +125,11 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendVerificationEmail(IndexViewModel model)
+        public async Task<IActionResult> SendVerificationEmail()
         {
             if (!ModelState.IsValid)
             {
-                StatusMessage = "Failed to send Verification email. Please check your email.";
+                StatusMessage = "Failed to send Verification email. Contact Ansem571 on discord.";
                 return RedirectToAction(nameof(Index));
             }
 
