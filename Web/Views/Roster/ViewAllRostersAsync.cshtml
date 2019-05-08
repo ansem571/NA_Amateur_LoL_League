@@ -96,16 +96,16 @@
                                             {
                                                 <div>@player.SummonerName</div>
                                             }
-
-                                            <button onclick="showDetailedInfo('@team.TeamName', '@i')">+</button>
-                                            <div class="line-break-horizontal" id="{{'showDetailedInfo'@team.TeamName@i}}" style="display: none">
-                                                <div class="line-break-vertical">@player.IsValid</div>
-                                                @foreach (var alt in player.AlternateAccounts)
-                                                {
-                                                    <div class="line-break-vertical">@alt.AlternateName</div>
-                                                }
-                                            </div>
-
+                                            @if (player.AlternateAccounts.Any())
+                                            {
+                                                <button id="{{'showDetailedInfoButton'@team.TeamName@i}}" onclick="showDetailedInfo('@team.TeamName', '@i')">+</button>
+                                                <div id="{{'showDetailedInfo'@team.TeamName@i}}" style="display: none">
+                                                    @foreach (var alt in player.AlternateAccounts)
+                                                    {
+                                                        <div>@alt.AlternateName</div>
+                                                    }
+                                                </div>
+                                            }
                                         </td>
                                     }
                                 }
@@ -124,18 +124,17 @@
     function showDetailedInfo() {
         if (arguments.length < 2)
             return;
-
         var teamName = arguments[0];
-        var index = arguments[1];
-        alert(teamName);
-        alert(index);
-        var x = document.getElementById("{{'showDetailedInfo'" + teamName +  index + "}}");
-        alert(x);
+        var index = arguments[1];     
+        var x = document.getElementById("{{'showDetailedInfo'" + teamName + index + "}}");
+        var y = document.getElementById("{{'showDetailedInfoButton'" + teamName + index + "}}");
         if (x.style.display === "none") {
             x.style.display = "block";
+            y.innerHTML = "-";
         }
         else {
             x.style.display = "none";
+            y.innerHTML = "+";
         }
     }
 </script>

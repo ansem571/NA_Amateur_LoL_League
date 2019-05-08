@@ -12,8 +12,8 @@ namespace Domain.Mappers.Interfaces
         SummonerInfoEntity Map(SummonerInfoView view);
         IEnumerable<SummonerInfoEntity> Map(IEnumerable<SummonerInfoView> views);
 
-        DetailedSummonerInfoView MapDetailed(SummonerInfoEntity entity, PlayerStatsView stats = null);
-        IEnumerable<DetailedSummonerInfoView> MapDetailed(IEnumerable<SummonerInfoEntity> entities, IEnumerable<PlayerStatsView> stats);
+        DetailedSummonerInfoView MapDetailed(SummonerInfoEntity entity, IEnumerable<AlternateAccountEntity> alternates, PlayerStatsView stats = null);
+        IEnumerable<DetailedSummonerInfoView> MapDetailed(IEnumerable<SummonerInfoEntity> entities, IEnumerable<AlternateAccountEntity> alternateAccountEntities, IEnumerable<PlayerStatsView> stats);
 
         SummonerInfoEntity MapDetailed(DetailedSummonerInfoView view);
         IEnumerable<SummonerInfoEntity> MapDetailed(IEnumerable<DetailedSummonerInfoView> views);

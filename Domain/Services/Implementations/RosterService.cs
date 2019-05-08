@@ -24,11 +24,13 @@ namespace Domain.Services.Implementations
         private readonly IDivisionRepository _divisionRepository;
         private readonly IPlayerStatsRepository _playerStatsRepository;
         private readonly IPlayerStatsMapper _playerStatsMapper;
+        private readonly IAlternateAccountRepository _alternateAccountRepository;
 
         public RosterService(ILogger logger, ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, ISeasonInfoRepository seasonInfoRepository,
-            IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper)
+            IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper,
+            IAlternateAccountRepository alternateAccountRepository)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -50,6 +52,8 @@ namespace Domain.Services.Implementations
                                      throw new ArgumentNullException(nameof(playerStatsRepository));
             _playerStatsMapper = playerStatsMapper ??
                                  throw new ArgumentNullException(nameof(playerStatsMapper));
+            _alternateAccountRepository = alternateAccountRepository ??
+                                          throw new ArgumentNullException(nameof(alternateAccountRepository));
         }
 
         public async Task<SeasonInfoView> GetSeasonInfoView()
@@ -100,6 +104,7 @@ namespace Domain.Services.Implementations
         {
             var rosters = await _teamRosterRepository.GetAllTeamsAsync();
             var captains = (await _teamCaptainRepository.GetAllTeamCaptainsAsync()).ToList();
+            var alternateAccounts = (await _alternateAccountRepository.ReadAllAsync()).ToList();
             var list = new List<RosterView>();
             foreach (var roster in rosters)
             {
@@ -109,7 +114,8 @@ namespace Domain.Services.Implementations
                 var summoners =
                     (await _summonerInfoRepository.GetAllForSummonerIdsAsync(players.Select(x => x.SummonerId))).ToList();
 
-                var summonerViews = _summonerMapper.MapDetailed(summoners, new List<PlayerStatsView>());
+                var alts = alternateAccounts.Where(x => summoners.Select(y => y.Id).ToList().Contains(x.SummonerId));
+                var summonerViews = _summonerMapper.MapDetailed(summoners, alts, new List<PlayerStatsView>());
                 var rosterView = new RosterView
                 {
                     RosterId = roster.Id,
@@ -146,13 +152,17 @@ namespace Domain.Services.Implementations
         public async Task<RosterView> GetRosterAsync(Guid rosterId)
         {
             var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+
+            var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
             var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);
             var captainTask = _teamCaptainRepository.GetCaptainByRosterId(rosterId);
             var playersSummonerIds = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).Select(x => x.SummonerId).ToList();
             var summoners = (await _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummonerIds)).ToList();
             var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummonerIds);
             var mappedStats = _playerStatsMapper.Map(playerStats).ToList();
-            var summonerViews = _summonerMapper.MapDetailed(summoners, mappedStats).ToList();
+
+            var alternateAccounts = (await alternateAccountsTask).ToList();
+            var summonerViews = _summonerMapper.MapDetailed(summoners, alternateAccounts, mappedStats).ToList();
 
             var seasonInfo = await seasonInfoTask;
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();

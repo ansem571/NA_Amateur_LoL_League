@@ -67,7 +67,7 @@ table, th, td {
     margin: 15px;
 }
 
-.line-break-horizontal:before {
+.line-break-horizontal {
     content: "";
     position: absolute;
     bottom: 0;
@@ -77,7 +77,7 @@ table, th, td {
     z-index: -1;
 }
 
-.line-break-vertical:after {
+.line-break-vertical {
     content: "";
     position: absolute;
     bottom: 10%;
