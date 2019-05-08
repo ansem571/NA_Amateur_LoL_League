@@ -26,6 +26,7 @@ namespace Domain.Services.Implementations
         private readonly IRequestedSummonerRepository _requestedSummonerRepository;
         private readonly ITeamPlayerRepository _teamPlayerRepository;
         private readonly ITeamRosterRepository _teamRosterRepository;
+        private readonly ISeasonInfoRepository _seasonInfoRepository;
         private const int AltenateAccountsCount = 3;
         private const int RequestingSummonerCount = 6;
         private const int TeamRosterMaxCount = 7;
@@ -33,7 +34,7 @@ namespace Domain.Services.Implementations
         public AccountService(ILogger logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
             ISummonerInfoRepository summonerInfoRepository, IAlternateAccountRepository alternateAccountRepository,
             IRequestedSummonerRepository requestedSummonerRepository, ITeamPlayerRepository teamPlayerRepository, 
-            ITeamRosterRepository teamRosterRepository)
+            ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository)
         {
             _logger = logger ?? 
                       throw new ArgumentNullException(nameof(logger));
@@ -51,16 +52,21 @@ namespace Domain.Services.Implementations
                                     throw new ArgumentNullException(nameof(teamPlayerRepository));
             _teamRosterRepository = teamRosterRepository ??
                                     throw new ArgumentNullException(nameof(teamRosterRepository));
+            _seasonInfoRepository = seasonInfoRepository ??
+                                    throw new ArgumentNullException(nameof(seasonInfoRepository));
         }
 
         public async Task<bool> CreateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
         {
             try
             {
+                var date = DateTime.Now;
+                var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(date);
+
                 var newEntity = _summonerMapper.Map(view);
                 newEntity.Id = Guid.NewGuid();
                 newEntity.UserId = user.Id;
-                newEntity.IsValidPlayer = true;
+                newEntity.IsValidPlayer = seasonInfo.ClosedRegistrationDate > date;
 
                 var result = await _summonerInfoRepository.InsertAsync(newEntity);
 
