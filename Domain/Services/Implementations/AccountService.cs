@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.UserData;
@@ -369,6 +370,19 @@ namespace Domain.Services.Implementations
             }
 
             return fpSummonerView;
+        }
+
+        public async Task<SeasonInfoViewPartial> GetSeasonInfoAsync()
+        {
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Now);
+
+            var partialSeasonView = new SeasonInfoViewPartial
+            {
+                ClosedRegistrationDate = seasonInfo.ClosedRegistrationDate,
+                SeasonStartDate = seasonInfo.SeasonStartDate,
+                SeasonName = seasonInfo.SeasonName
+            };
+            return partialSeasonView;
         }
 
         public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()

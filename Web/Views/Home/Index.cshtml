@@ -1,11 +1,11 @@
-﻿@model Web.Models.ManageViewModels.IndexViewModel
+﻿@model Web.Models.Home.HomeViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 <br />
-<img src="images/casualealtitle.png" alt="" class="center-block"/>
+<img src="images/casualealtitle.png" alt="" class="center-block" />
 <br />
-@if (Model.IsEmailConfirmed)
+@if (Model.IndexViewModel.IsEmailConfirmed)
 {
     <p class="center-block" style="width: 50%">
         Now that you have registered, please read our <a href="https://docs.google.com/document/d/1vNQLBbPZJyJdSX7Hl1bR-ciu6NZ-sxxMAkrtbe168wE/edit?usp=sharing">rules</a>
@@ -13,7 +13,7 @@
     </p>
     <br />
 }
-else if (!Model.IsEmailConfirmed && !string.IsNullOrEmpty(Model.Username))
+else if (!Model.IndexViewModel.IsEmailConfirmed && !string.IsNullOrEmpty(Model.IndexViewModel.Username))
 {
     <div>
         <p>
@@ -25,26 +25,51 @@ else if (!Model.IsEmailConfirmed && !string.IsNullOrEmpty(Model.Username))
     </div>
     <br />
 }
-        <div class="container">
-            <div class="row center-text">
-                <div class="col-sm-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <p>Thank you for your patience we have now officially gone beyond Beta.</p>
-                            <p>If you wish to join the discord server please navigate to the Contacts section of the website to see our social media links and support email.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <ul>
-                            <li><a href="https://discord.gg/ZXDdyAh"><img src="images/icons8-discord-new-logo-48.png">Join our Discord</a></li>
-                            <li><a href="https://www.twitch.tv/casualeal"><img src="images/icons8-twitch-48.png">Watch us live</a></li>
-                            </ul>
-                        </div>
-                    </div>
+<div class="container">
+    <div class="row center-text">
+        <div class="col-sm-8">
+            <div class="card">
+                <div class="card-body">
+                    <p>Thank you for your patience we have now officially gone beyond Beta.</p>
+                    <p>
+                        If you wish to join the discord server please navigate to the Contacts section of the website to see our social media links and support email.
+                    </p>
                 </div>
             </div>
         </div>
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <ul>
+                        <li><a href="https://discord.gg/ZXDdyAh"><img src="images/icons8-discord-new-logo-48.png">Join our Discord</a></li>
+                        <li><a href="https://www.twitch.tv/casualeal"><img src="images/icons8-twitch-48.png">Watch us live</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="row center-text">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    @Model.SeasonInfo.SeasonName
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    Season Starts: @Model.SeasonInfo.SeasonStartDate
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    Registration Closes: @Model.SeasonInfo.ClosedRegistrationDate
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

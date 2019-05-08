@@ -16,5 +16,7 @@ namespace Domain.Services.Interfaces
 
         Task<List<RequestedPlayersView>> GetRequestedPlayersAsync();
         Task<FpSummonerView> GetFpSummonerView();
+
+        Task<SeasonInfoViewPartial> GetSeasonInfoAsync();
     }
 }
