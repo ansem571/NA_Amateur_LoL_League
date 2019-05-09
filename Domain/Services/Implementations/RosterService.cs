@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using DAL.Entities.LeagueInfo;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
@@ -79,7 +81,7 @@ namespace Domain.Services.Implementations
                         DivisionMinScore = division.LowerLimit
                     };
                 }
-                
+
                 view.Rosters = rosters.OrderByDescending(x => x.Division.DivisionMinScore);
             }
             catch (Exception)
@@ -102,20 +104,36 @@ namespace Domain.Services.Implementations
         /// <returns></returns>
         public async Task<IEnumerable<RosterView>> GetAllRosters()
         {
-            var rosters = await _teamRosterRepository.GetAllTeamsAsync();
-            var captains = (await _teamCaptainRepository.GetAllTeamCaptainsAsync()).ToList();
-            var alternateAccounts = (await _alternateAccountRepository.ReadAllAsync()).ToList();
             var list = new List<RosterView>();
+
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            var captainsTask = _teamCaptainRepository.GetAllTeamCaptainsAsync();
+            var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
+            var allPlayersTask = _teamPlayerRepository.ReadAllAsync();
+
+            var rosters = await rostersTask;
+            var captains = (await captainsTask).ToList();
+            var alternateAccounts = (await alternateAccountsTask).ToList();
+            var allPlayers = (await allPlayersTask).ToList();
             foreach (var roster in rosters)
             {
-                var players = await _teamPlayerRepository.ReadAllForRosterAsync(roster.Id);
+                var players = allPlayers.Where(x => x.TeamRosterId == roster.Id).ToList();
                 var captain = captains.FirstOrDefault(x => x.TeamRosterId == roster.Id);
 
                 var summoners =
                     (await _summonerInfoRepository.GetAllForSummonerIdsAsync(players.Select(x => x.SummonerId))).ToList();
 
                 var alts = alternateAccounts.Where(x => summoners.Select(y => y.Id).ToList().Contains(x.SummonerId));
-                var summonerViews = _summonerMapper.MapDetailed(summoners, alts, new List<PlayerStatsView>());
+                var summonerViews = _summonerMapper.MapDetailed(summoners, alts, new List<PlayerStatsView>()).ToList();
+                foreach (var teamPlayerEntity in players)
+                {
+                    var player = summoners.First(x => x.Id == teamPlayerEntity.SummonerId);
+
+                    var isSub = teamPlayerEntity.IsSub ?? false;
+                    var summonerView = summonerViews.First(x => x.SummonerName == player.SummonerName);
+                    summonerView.IsSub = isSub;
+                }
+
                 var rosterView = new RosterView
                 {
                     RosterId = roster.Id,
@@ -156,18 +174,29 @@ namespace Domain.Services.Implementations
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
             var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);
             var captainTask = _teamCaptainRepository.GetCaptainByRosterId(rosterId);
-            var playersSummonerIds = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).Select(x => x.SummonerId).ToList();
-            var summoners = (await _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummonerIds)).ToList();
-            var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummonerIds);
+            var playersSummoner = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).ToList();
+            var summonersTask = _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummoner.Select(x => x.SummonerId));
+            var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummoner.Select(x => x.SummonerId));
+
             var mappedStats = _playerStatsMapper.Map(playerStats).ToList();
 
             var alternateAccounts = (await alternateAccountsTask).ToList();
+            var summoners = (await summonersTask).ToList();
+
             var summonerViews = _summonerMapper.MapDetailed(summoners, alternateAccounts, mappedStats).ToList();
 
             var seasonInfo = await seasonInfoTask;
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
             var captain = await captainTask;
             var roster = await rosterTask;
+            foreach (var teamPlayerEntity in playersSummoner)
+            {
+                var player = summoners.First(x => x.Id == teamPlayerEntity.SummonerId);
+
+                var isSub = teamPlayerEntity.IsSub ?? false;
+                var summonerView = summonerViews.First(x => x.SummonerName == player.SummonerName);
+                summonerView.IsSub = isSub;
+            }
 
             var division = divisions.First(x =>
                 x.LowerLimit <= roster.TeamTierScore && x.UpperLimit >= roster.TeamTierScore);
@@ -237,6 +266,24 @@ namespace Domain.Services.Implementations
             roster.TeamName = newTeamName;
             var updateResult = await _teamRosterRepository.UpdateAsync(roster);
             return updateResult;
+        }
+
+        public async Task<bool> SetPlayerAsSubAsync(string summonerName, Guid rosterId)
+        {
+            var summoner = (await _summonerInfoRepository.GetAllForSummonerNamesAsync(new List<string> {summonerName})).FirstOrDefault();
+            if (summoner == null)
+            {
+                throw new Exception($"{summonerName} was not found");
+            }
+            var player = await _teamPlayerRepository.GetBySummonerIdAsync(summoner.Id);
+            player.IsSub = true;
+
+            var result = await _teamPlayerRepository.UpdateAsync(new List<TeamPlayerEntity>
+            {
+                player
+            });
+
+            return result;
         }
 
         private string GetContentType(string path)

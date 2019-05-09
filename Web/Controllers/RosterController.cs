@@ -153,13 +153,42 @@ namespace Web.Controllers
                 {
                     return RedirectToAction("ViewRosterAsync", new { rosterId });
                 }
+
+                throw new Exception();
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error uploading file");
+                StatusMessage = "Error uploading file";
+                _logger.LogError(e, StatusMessage);
             }
 
-            StatusMessage = "File Not Selected";
+            return RedirectToAction("ViewRosterAsync", new { rosterId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetPlayerAsSubAsync(string summonerName, Guid rosterId)
+        {
+            if (!ModelState.IsValid)
+            {
+                StatusMessage = "Contact Ansem571 about setting player as sub";
+                return RedirectToAction("ViewRosterAsync", new { rosterId });
+            }
+            try
+            {
+                var result = await _rosterService.SetPlayerAsSubAsync(summonerName, rosterId);
+                if (result)
+                {
+                    return RedirectToAction("ViewRosterAsync", new { rosterId });
+                }
+
+                throw new Exception();
+            }
+            catch (Exception e)
+            {
+                StatusMessage = $"Failed to set {summonerName} as sub";
+                _logger.LogError(e, StatusMessage);
+            }
+
             return RedirectToAction("ViewRosterAsync", new { rosterId });
         }
     }

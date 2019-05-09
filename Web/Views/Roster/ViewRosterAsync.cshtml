@@ -17,7 +17,9 @@
         </form>
     }
 }
-@Model.StatusMessage
+<div class="row">
+    @Model.StatusMessage
+</div>
 <div class="row icon-row">
     <div class="col-md-4">
         <div class="card">
@@ -94,7 +96,19 @@
                     }
                     else
                     {
-                        <td>@player.SummonerName</td>
+                        <td>
+                            @player.SummonerName
+                            @{
+                                if (Model.IsCaptain && !string.IsNullOrEmpty(player.SummonerName))
+                                {
+                                    <form asp-controller="Roster" asp-action="SetPlayerAsSubAsync" method="post">
+                                        <input type="hidden" name="summonerName" value="@player.SummonerName" />
+                                        <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+                                        <button type="submit">SetAsSub</button>
+                                    </form>
+                                }
+                            }
+                        </td>
                     }
                     <td>
                         @*Rank*@
