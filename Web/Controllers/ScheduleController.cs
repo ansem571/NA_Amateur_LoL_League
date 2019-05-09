@@ -25,5 +25,24 @@ namespace Web.Controllers
 
             return View(schedules);
         }
+
+        public async Task<IActionResult> CreateScheduleAsync()
+        {
+            try
+            {
+                var result = await _scheduleService.CreateFullScheduleAsync();
+                if (result)
+                {
+                    return RedirectToAction("Index");
+                }
+                throw new Exception("come on man");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "ERROR");
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

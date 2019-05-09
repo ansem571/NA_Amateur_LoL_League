@@ -20,9 +20,11 @@ namespace Domain.Services.Implementations
         private readonly IDivisionRepository _divisionRepository;
         private readonly IScheduleRepository _scheduleRepository;
         private readonly IScheduleMapper _scheduleMapper;
+        private readonly IRosterService _rosterService;
 
         public ScheduleService(ILogger logger, ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository,
-            IDivisionRepository divisionRepository, IScheduleRepository scheduleRepository, IScheduleMapper scheduleMapper)
+            IDivisionRepository divisionRepository, IScheduleRepository scheduleRepository, IScheduleMapper scheduleMapper,
+            IRosterService rosterService)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -36,6 +38,7 @@ namespace Domain.Services.Implementations
                                   throw new ArgumentNullException(nameof(scheduleRepository));
             _scheduleMapper = scheduleMapper ??
                               throw new ArgumentNullException(nameof(scheduleMapper));
+            _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
         }
 
         public async Task<Dictionary<string, List<ScheduleView>>> GetAllSchedules()
@@ -73,7 +76,7 @@ namespace Domain.Services.Implementations
                 }
             }
 
-            views = views.OrderBy(x=>x.Key).ThenBy(x => x.Value.Select(y=>y.WeekOf)).ToDictionary(x=> x.Key, x=> x.Value);
+            views = views.OrderBy(x => x.Key).ThenBy(x => x.Value.Select(y => y.WeekOf)).ToDictionary(x => x.Key, x => x.Value);
 
             return views;
         }
@@ -119,20 +122,94 @@ namespace Domain.Services.Implementations
 
             var mapped = _scheduleMapper.Map(view, seasonInfo.Id, homeTeam.Id, awayTeam.Id);
 
-            return await _scheduleRepository.UpdateAsync(new List<ScheduleEntity> {mapped});
+            return await _scheduleRepository.UpdateAsync(new List<ScheduleEntity> { mapped });
         }
 
         //TODO
         public async Task<bool> CreateFullScheduleAsync()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Now);
-            var divisionsTask = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            try
+            {
+                var seasonInfo = await _rosterService.GetSeasonInfoView();
+                var divisions = seasonInfo.Rosters.GroupBy(x => x.Division.DivisionName)
+                    .ToDictionary(x => x.Key, x => x.ToList());
+                var scheduleEntities = new List<ScheduleEntity>();
+                foreach (var division in divisions)
+                {
+                    var teamNames = division.Value.Select(x => x.TeamName).ToList();
+                    var views = GenerateRoundRobin(teamNames);
+                    foreach (var view in views)
+                    {
+                        var homeRosterId = division.Value.First(x => x.TeamName == view.HomeTeam).RosterId;
+                        var awayRosterId = division.Value.First(x => x.TeamName == view.AwayTeam).RosterId;
+                        var mapped = _scheduleMapper.Map(view, new Guid(), homeRosterId, awayRosterId);
+                        scheduleEntities.Add(mapped);
+                    }
+                }
 
-            var divisions = (await divisionsTask).ToList();
-            var rosters = (await rostersTask).ToDictionary(x => x.Id, x => x);
+                return await _scheduleRepository.InsertAsync(scheduleEntities);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error creating schedule");
+                return false;
+            }
+        }
 
-            throw new NotImplementedException();
+
+        private IEnumerable<ScheduleView> GenerateRoundRobin(List<string> teamNames)
+        {
+            var views = new List<ScheduleView>();
+            if (teamNames.Count % 2 != 0)
+            {
+                teamNames.Add("BYE");
+            }
+
+            var teamSize = teamNames.Count;
+
+            var weeks = Math.Min(teamSize - 1, 6);
+            var halfSize = teamSize / 2;
+            var teams = new List<string>();
+            teams.AddRange(teamNames);
+            teams.RemoveAt(0);
+
+            teamSize--;
+
+            var startDate = new DateTime(2019, 5, 20);
+            for (var week = 0; week < weeks; week++)
+            {
+                var date = startDate.AddDays(7 * week);
+                var teamIndex = week % teamSize;
+                var firstTeam = teams[teamIndex];
+                var secondTeam = teamNames[0];
+
+                views.Add(new ScheduleView
+                {
+                    ScheduleId = Guid.NewGuid(),
+                    HomeTeam = firstTeam,
+                    AwayTeam = secondTeam,
+                    HomeTeamScore = 0,
+                    AwayTeamScore = 0,
+                    WeekOf = date
+                });
+
+                for (var index = 1; index < halfSize; index++)
+                {
+                    firstTeam = teams[(week + index) % teamSize];
+                    secondTeam = teams[(week + teamSize - index) % teamSize];
+                    views.Add(new ScheduleView
+                    {
+                        ScheduleId = Guid.NewGuid(),
+                        HomeTeam = firstTeam,
+                        AwayTeam = secondTeam,
+                        HomeTeamScore = 0,
+                        AwayTeamScore = 0,
+                        WeekOf = date
+                    });
+                }
+            }
+
+            return views;
         }
     }
 }

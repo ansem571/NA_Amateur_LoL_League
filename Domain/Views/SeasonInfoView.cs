@@ -12,6 +12,7 @@ namespace Domain.Views
 
     public class SeasonInfoViewPartial
     {
+        public Guid SeasonInfoId { get; set; }
         public string SeasonName { get; set; }
         public DateTime ClosedRegistrationDate { get; set; }
         public DateTime SeasonStartDate { get; set; }
