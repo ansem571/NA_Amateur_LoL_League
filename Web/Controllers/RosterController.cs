@@ -17,13 +17,16 @@ namespace Web.Controllers
         private readonly IRosterService _rosterService;
         private readonly UserManager<UserEntity> _userManager;
         private readonly ILogger _logger;
+        private readonly IScheduleService _scheduleService;
 
-        public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager, ILogger logger)
+        public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager, 
+            ILogger logger, IScheduleService scheduleService)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
         }
         [TempData]
         public string StatusMessage { get; set; }
@@ -102,12 +105,17 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> ViewRosterAsync(Guid rosterId)
         {
-            var roster = await _rosterService.GetRosterAsync(rosterId);
+            var rosterTask = _rosterService.GetRosterAsync(rosterId);
+            var userTask = _userManager.GetUserAsync(User);
+            var scheudleTask = _scheduleService.GetTeamSchedule(rosterId);
+
+            var roster = await rosterTask;
+            var user = await userTask;
             var viewModel = new RosterViewModel
             {
-                RosterView = roster
+                RosterView = roster,
+                ScheduleLineup = await scheudleTask
             };
-            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return View(viewModel);

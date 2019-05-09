@@ -16,6 +16,7 @@ namespace Domain.Views
         public int Loses { get; set; }
         public IEnumerable<DetailedSummonerInfoView> Players { get; set; } = new List<DetailedSummonerInfoView>();
         public string FileSource { get; set; }
+        public IEnumerable<ScheduleView> Schedule { get; set; }
 
         public void Cleanup()
         {

@@ -12,5 +12,6 @@ namespace DAL.Entities.LeagueInfo
         public int? TeamTierScore { get; set; }
         public int? Wins { get; set; }
         public int? Loses { get; set; }
+        public int? Points { get; set; }
     }
 }

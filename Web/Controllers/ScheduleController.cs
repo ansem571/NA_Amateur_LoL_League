@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Domain.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+namespace Web.Controllers
+{
+    public class ScheduleController : Controller
+    {
+        private readonly ILogger _logger;
+        private readonly IScheduleService _scheduleService;
+
+        public ScheduleController(ILogger logger, IScheduleService scheduleService)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var schedules = await _scheduleService.GetAllSchedules();
+
+            return View(schedules);
+        }
+    }
+}

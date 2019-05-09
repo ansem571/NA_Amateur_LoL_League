@@ -168,8 +168,54 @@
     </table>
 </div>
 
+
 <div class="row">
-    Schedule tbd
+    <div class="card center-block">
+        <div class="card-body">
+            Team Schedule (Times are based in EST)
+        </div>
+    </div>
+    <table class="table table-bordered">
+        <tr>
+            <th>HomeTeam</th>
+            <th>AwayTeam</th>
+            <th>HomeTeamScore</th>
+            <th>AwayTeamScore</th>
+            <th>Week Of</th>
+            <th>Start Time</th>
+            <th>Casters</th>
+        </tr>
+        @foreach (var week in Model.ScheduleLineup)
+        {
+            <tr>
+                <td>@week.HomeTeam</td>
+                <td>@week.AwayTeam</td>
+                <td>@week.HomeTeamScore</td>
+                <td>@week.AwayTeamScore</td>
+                <td>@Convert.ToDateTime(week.WeekOf.ToString("MM/dd/yyyy"))</td>
+                @{
+                    if (week.PlayTime == null)
+                    {
+                        <td>TBD</td>
+                    }
+                    else
+                    {
+                        <td>@Convert.ToDateTime(week.PlayTime.Value.ToString("MM/dd/yyyy hh:mm"))</td>
+                    }
+                }
+                @{
+                    if (string.IsNullOrEmpty(week.CasterName))
+                    {
+                        <td>TBD</td>
+                    }
+                    else
+                    {
+                        <td>@week.CasterName</td>
+                    }
+                }
+            </tr>
+        }
+    </table>
 </div>
 
 <script>
