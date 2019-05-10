@@ -19,7 +19,7 @@ namespace Web.Controllers
         private readonly ILogger _logger;
         private readonly IScheduleService _scheduleService;
 
-        public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager, 
+        public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
             ILogger logger, IScheduleService scheduleService)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
@@ -80,13 +80,15 @@ namespace Web.Controllers
                         break;
                     }
                 case "ESub":
-                {
-                    break;
-                }
+                    {
+                        model.SummonerInfos = model.SummonerInfos.OrderBy(x => x.IsEsubOnly).ToList();
+                        break;
+                    }
                 case "ESub_desc":
-                {
-                    break;
-                }
+                    {
+                        model.SummonerInfos = model.SummonerInfos.OrderByDescending(x => x.IsEsubOnly).ToList();
+                        break;
+                    }
                 default:
                     model.SummonerInfos = model.SummonerInfos.OrderBy(x => x.SummonerName).ToList();
                     break;

@@ -343,7 +343,8 @@ namespace Domain.Services.Implementations
                             OffRole = mapped.OffRole,
                             TierDivision = mapped.TierDivision,
                             OpGgUrl = summoner.OpGGUrlLink,
-                            TeamName = team.Value.TeamName
+                            TeamName = team.Value.TeamName,
+                            IsEsubOnly = mapped.IsSubOnly
                         });
                     }
                     else
@@ -365,7 +366,8 @@ namespace Domain.Services.Implementations
                     OffRole = mapped.OffRole,
                     TierDivision = mapped.TierDivision,
                     OpGgUrl = mapped.OpGgUrl,
-                    TeamName = "Unassigned"
+                    TeamName = "Unassigned",
+                    IsEsubOnly = mapped.IsSubOnly
                 });
             }
 
