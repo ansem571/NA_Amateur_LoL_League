@@ -146,8 +146,9 @@ namespace Domain.Services.Implementations
                         scheduleEntities.Add(mapped);
                     }
                 }
-
-                return await _scheduleRepository.InsertAsync(scheduleEntities);
+                //TODO: Toggle on when ready
+                //return await _scheduleRepository.InsertAsync(scheduleEntities);
+                return true;
             }
             catch (Exception e)
             {

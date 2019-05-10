@@ -20,6 +20,7 @@ namespace Domain.Views
         public string OpGgUrl { get; set; }
         [Required]
         public bool IsValid { get; set; }
+        public bool IsSubOnly { get; set; }
 
         public List<AlternateAccountView> AlternateAccounts { get; set; } = new List<AlternateAccountView>();
 

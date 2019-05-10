@@ -13,6 +13,7 @@
         <th>@Html.ActionLink(string.Concat("Rank ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new {sortOrder = ViewBag.TierDivision })</th>
         <th>op.gg link</th>
         <th>@Html.ActionLink(string.Concat("Team Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new {sortOrder = ViewBag.TeamName })</th>
+        <th>@Html.ActionLink(string.Concat("E-Sub only ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.ESub })</th>
     </tr>
     @foreach (var item in Model.SummonerInfos)
     {
@@ -32,6 +33,7 @@
                 <td>@Html.ActionLink(item.TeamName, "ViewRosterAsync", "Roster", new {rosterId = item.RosterId})</td>
             }
         }
+        <td>@item.IsEsubOnly</td>
     </tr>
     }
 </table>

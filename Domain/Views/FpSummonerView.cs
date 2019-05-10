@@ -19,5 +19,6 @@ namespace Domain.Views
         public string OpGgUrl { get; set; }
         public string TeamName { get; set; }
         public Guid RosterId { get; set; }
+        public bool IsEsubOnly { get; set; }
     }
 }

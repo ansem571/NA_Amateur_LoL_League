@@ -38,6 +38,7 @@ namespace Web.Controllers
             ViewBag.Role = sortOrder == "Role" ? "role_desc" : "Role";
             ViewBag.TierDivision = sortOrder == "TierDivision" ? "tierDivision_desc" : "TierDivision";
             ViewBag.TeamName = sortOrder == "TeamName" ? "teamName_desc" : "TeamName";
+            ViewBag.ESub = sortOrder == "ESub" ? "ESub_desc" : "ESub";
 
             var model = await _accountService.GetFpSummonerView();
 
@@ -78,6 +79,14 @@ namespace Web.Controllers
                         model.SummonerInfos = model.SummonerInfos.OrderBy(x => x.TeamName).ToList();
                         break;
                     }
+                case "ESub":
+                {
+                    break;
+                }
+                case "ESub_desc":
+                {
+                    break;
+                }
                 default:
                     model.SummonerInfos = model.SummonerInfos.OrderBy(x => x.SummonerName).ToList();
                     break;

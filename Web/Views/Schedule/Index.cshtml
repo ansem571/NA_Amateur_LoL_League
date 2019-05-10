@@ -1,4 +1,11 @@
-﻿@model Dictionary<string, List<Domain.Views.ScheduleView>>
+﻿@using DAL.Entities.UserData
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<UserEntity> SignInManager
+@inject UserManager<UserEntity> UserManager
+@inject RoleManager<UserRoleEntity> UserRoleManager
+
+@model Dictionary<string, List<Domain.Views.ScheduleView>>
 @{
     ViewData["Title"] = "All schedules";
 }
@@ -13,9 +20,18 @@
                 This will be filled after all teams are finalized, please wait until AFTER 5/12/2019
             </div>
         </div>
-        <div>
-            @Html.ActionLink("Create Schedules", "CreateScheduleAsync")
-        </div>
+
+        if (SignInManager.IsSignedIn(User))
+        {
+            var user = await UserManager.GetUserAsync(User);
+            if (await UserManager.IsInRoleAsync(user, "Admin"))
+            {
+                <button class="bigRedButton center-block">
+                    @Html.ActionLink("Create Schedules", "CreateScheduleAsync")
+                </button>
+            }
+        }
+
     }
     else
     {

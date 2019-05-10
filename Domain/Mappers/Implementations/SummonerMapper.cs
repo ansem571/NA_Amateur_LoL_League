@@ -33,7 +33,8 @@ namespace Domain.Mappers.Implementations
                 TierDivision = _tierDivisionMapper.Map(entity.Tier_DivisionId),
                 CurrentLp = entity.CurrentLp,
                 OpGgUrl = entity.OpGGUrlLink,
-                IsValid = entity.IsValidPlayer
+                IsValid = entity.IsValidPlayer,
+                IsSubOnly = entity.IsSubOnly ?? false
             };
         }
 
@@ -52,7 +53,8 @@ namespace Domain.Mappers.Implementations
                 Tier_DivisionId = _tierDivisionMapper.Map(view.TierDivision),
                 OpGGUrlLink = view.OpGgUrl,
                 IsValidPlayer = view.IsValid,
-                CurrentLp = view.CurrentLp
+                CurrentLp = view.CurrentLp,
+                IsSubOnly = view.IsSubOnly
             };
         }
 
@@ -73,7 +75,8 @@ namespace Domain.Mappers.Implementations
                 CurrentLp = entity.CurrentLp,
                 OpGgUrl = entity.OpGGUrlLink,
                 IsValid = entity.IsValidPlayer,
-                PlayerStats = stats
+                PlayerStats = stats,
+                IsSubOnly = entity.IsSubOnly ?? false
             };
         }
 
@@ -103,7 +106,8 @@ namespace Domain.Mappers.Implementations
                 Tier_DivisionId = _tierDivisionMapper.Map(view.TierDivision),
                 OpGGUrlLink = view.OpGgUrl,
                 IsValidPlayer = view.IsValid,
-                CurrentLp = view.CurrentLp
+                CurrentLp = view.CurrentLp,
+                IsSubOnly = view.IsSubOnly
             };
         }
 

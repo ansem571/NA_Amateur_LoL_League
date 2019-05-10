@@ -5,7 +5,17 @@
     font-size: 16px !important;
 }
 
-.navbar{
+.bigRedButton {
+    background-color: rgb(240, 50, 75);
+    width: 25% !important;
+    font-size: 30px !important;
+}
+
+    .bigRedButton a {
+        color: white !important;
+    }
+
+.navbar {
     background: #1c2951;
     color: #f0f0f0;
 }
