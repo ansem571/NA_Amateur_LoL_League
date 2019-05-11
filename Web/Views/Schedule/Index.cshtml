@@ -53,7 +53,7 @@
                         <th>Start Time</th>
                         <th>Casters</th>
                     </tr>
-                    @foreach (var week in divisionSchedule.Value)
+                    @foreach (var week in divisionSchedule.Value.OrderBy(x=>x.WeekOf))
                     {
                         <tr>
                             <td>@week.HomeTeam</td>

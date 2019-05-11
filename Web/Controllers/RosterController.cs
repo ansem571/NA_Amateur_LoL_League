@@ -118,14 +118,14 @@ namespace Web.Controllers
         {
             var rosterTask = _rosterService.GetRosterAsync(rosterId);
             var userTask = _userManager.GetUserAsync(User);
-            var scheudleTask = _scheduleService.GetTeamSchedule(rosterId);
+            var scheduleTask = _scheduleService.GetTeamSchedule(rosterId);
 
             var roster = await rosterTask;
             var user = await userTask;
             var viewModel = new RosterViewModel
             {
                 RosterView = roster,
-                ScheduleLineup = await scheudleTask
+                ScheduleLineup = await scheduleTask
             };
             if (user == null)
             {
