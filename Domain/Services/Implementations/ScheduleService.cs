@@ -91,7 +91,7 @@ namespace Domain.Services.Implementations
             var schedules = (await schedulesTask).ToList();
             foreach (var schedule in schedules)
             {
-                if (schedule.HomeRosterTeamId != rosterId || schedule.AwayRosterTeamId != rosterId)
+                if (schedule.HomeRosterTeamId != rosterId && schedule.AwayRosterTeamId != rosterId)
                 {
                     continue;
                 }
