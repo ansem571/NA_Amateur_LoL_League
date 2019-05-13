@@ -9,6 +9,11 @@
 @{
     ViewData["Title"] = "All schedules";
 }
+@{
+    var isSignedIn = SignInManager.IsSignedIn(User);
+    var user = await UserManager.GetUserAsync(User);
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+}
 
 <h2>@ViewData["Title"]</h2>
 
@@ -21,9 +26,8 @@
             </div>
         </div>
 
-        if (SignInManager.IsSignedIn(User))
+        if (isSignedIn)
         {
-            var user = await UserManager.GetUserAsync(User);
             if (await UserManager.IsInRoleAsync(user, "Admin"))
             {
                 <button class="bigRedButton center-block">
@@ -53,7 +57,7 @@
                         <th>Start Time</th>
                         <th>Casters</th>
                     </tr>
-                    @foreach (var week in divisionSchedule.Value)
+                    @foreach (var week in divisionSchedule.Value.OrderBy(x=>x.WeekOf))
                     {
                         <tr>
                             <td>@week.HomeTeam</td>
@@ -64,7 +68,21 @@
                             @{
                                 if (week.PlayTime == null)
                                 {
-                                    <td>TBD</td>
+                                    <td>
+                                        TBD
+                                        @if (isSignedIn)
+                                        {
+                                            if (isAdmin)
+                                            {
+                                                <button id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule(@week.ScheduleId)">+</button>
+                                                <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showPlayTime'@week.ScheduleId}}" style="display: none">
+                                                    <input type="datetime" name="playTime" />
+                                                    <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                                    <button class="center-block">Submit play time</button>
+                                                </form>
+                                            }
+                                        }
+                                    </td>
                                 }
                                 else
                                 {
@@ -74,7 +92,21 @@
                             @{
                                 if (string.IsNullOrEmpty(week.CasterName))
                                 {
-                                    <td>TBD</td>
+                                    <td>
+                                        TBD
+                                        @if (isSignedIn)
+                                        {
+                                            if (isAdmin)
+                                            {
+                                                <button id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster(@week.ScheduleId)">+</button>
+                                                <form asp-controller="Schedule" asp-action="AssignCastersAsync" method="post" id="{{'showCaster'@week.ScheduleId}}" style="display: none">
+                                                    <input type="text" name="names" />
+                                                    <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                                    <button class="center-block">Submit casters</button>
+                                                </form>
+                                            }
+                                        }
+                                    </td>
                                 }
                                 else
                                 {
@@ -89,3 +121,36 @@
     }
 }
 
+<script>
+    function showSchedule() {
+        if (arguments.length < 1)
+            return;
+        var scheduleId = arguments[0];
+        var x = document.getElementById("{{'showSchedule'" + scheduleId + "}}");
+        var y = document.getElementById("{{'showScheduleButton'" + scheduleId + "}}");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            y.innerHTML = "-";
+        }
+        else {
+            x.style.display = "none";
+            y.innerHTML = "+";
+        }
+    }
+
+    function showCaster() {
+        if (arguments.length < 1)
+            return;
+        var scheduleId = arguments[0];
+        var x = document.getElementById("{{'showCaster'" + scheduleId + "}}");
+        var y = document.getElementById("{{'showCasterButton'" + scheduleId + "}}");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            y.innerHTML = "-";
+        }
+        else {
+            x.style.display = "none";
+            y.innerHTML = "+";
+        }
+    }
+</script>

@@ -44,5 +44,16 @@ namespace Web.Controllers
 
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> AssignPlayTimeAsync(Guid scheduleId, DateTime playTime)
+        {
+            return null;
+        }
+
+        public async Task<IActionResult> AssignCastersAsync(Guid scheduleId, string names)
+        {
+            var splitNames = names.Split(",");
+            return null;
+        }
     }
 }
