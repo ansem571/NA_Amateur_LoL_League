@@ -74,9 +74,9 @@
                                         {
                                             if (isAdmin)
                                             {
-                                                <button id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule(@week.ScheduleId)">+</button>
-                                                <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showPlayTime'@week.ScheduleId}}" style="display: none">
-                                                    <input type="datetime" name="playTime" />
+                                                <button id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule('@week.ScheduleId')">+</button>
+                                                <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showSchedule'@week.ScheduleId}}" style="display: none">
+                                                    <input type="datetime-local" name="playTime" />
                                                     <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
                                                     <button class="center-block">Submit play time</button>
                                                 </form>
@@ -98,7 +98,7 @@
                                         {
                                             if (isAdmin)
                                             {
-                                                <button id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster(@week.ScheduleId)">+</button>
+                                                <button id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster('@week.ScheduleId')">+</button>
                                                 <form asp-controller="Schedule" asp-action="AssignCastersAsync" method="post" id="{{'showCaster'@week.ScheduleId}}" style="display: none">
                                                     <input type="text" name="names" />
                                                     <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
@@ -122,10 +122,7 @@
 }
 
 <script>
-    function showSchedule() {
-        if (arguments.length < 1)
-            return;
-        var scheduleId = arguments[0];
+    function showSchedule(scheduleId) {
         var x = document.getElementById("{{'showSchedule'" + scheduleId + "}}");
         var y = document.getElementById("{{'showScheduleButton'" + scheduleId + "}}");
         if (x.style.display === "none") {
@@ -138,10 +135,7 @@
         }
     }
 
-    function showCaster() {
-        if (arguments.length < 1)
-            return;
-        var scheduleId = arguments[0];
+    function showCaster(scheduleId) {
         var x = document.getElementById("{{'showCaster'" + scheduleId + "}}");
         var y = document.getElementById("{{'showCasterButton'" + scheduleId + "}}");
         if (x.style.display === "none") {
