@@ -61,7 +61,7 @@ namespace Web.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
             var blacklisted = await _blacklistRepository.GetByUserIdAsync(user.Id);
-            if (blacklisted.IsBanned)
+            if (blacklisted != null && blacklisted.IsBanned)
             {
                 await _signInManager.SignOutAsync();
                 _logger.LogInformation($"User {user.Email} was signed in, but blacklisted");

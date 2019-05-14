@@ -40,7 +40,7 @@ namespace Web.Controllers
             if (user != null)
             {
                 var blacklisted = await _blacklistRepository.GetByUserIdAsync(user.Id);
-                if (blacklisted.IsBanned)
+                if (blacklisted != null && blacklisted.IsBanned)
                 {
                     await _signInManager.SignOutAsync();
                     return RedirectToAction("InvalidUser", "Manage");
