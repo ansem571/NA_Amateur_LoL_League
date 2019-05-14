@@ -110,17 +110,28 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> UpdateScheduleAsync(ScheduleView view)
         {
-            var seasonTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Now);
-            var homeTeamTask = _teamRosterRepository.GetByTeamNameAsync(view.HomeTeam);
-            var awayTeamTask = _teamRosterRepository.GetByTeamNameAsync(view.AwayTeam);
+            var scheduleInfo = await _scheduleRepository.GetScheduleAsync(view.ScheduleId);
+            if (view.CasterName != null)
+            {
+                scheduleInfo.CasterName = view.CasterName;
+            }
 
-            var seasonInfo = await seasonTask;
-            var homeTeam = await homeTeamTask;
-            var awayTeam = await awayTeamTask;
+            if (view.PlayTime != null)
+            {
+                scheduleInfo.MatchScheduledTime = view.PlayTime;
+            }
 
-            var mapped = _scheduleMapper.Map(view, seasonInfo.Id, homeTeam.Id, awayTeam.Id);
+            if (view.HomeTeamScore != -1)
+            {
+                scheduleInfo.HomeTeamWins = view.HomeTeamScore;
+            }
 
-            return await _scheduleRepository.UpdateAsync(new List<ScheduleEntity> { mapped });
+            if (view.AwayTeamScore != -1)
+            {
+                scheduleInfo.AwayTeamWins = view.AwayTeamScore;
+            }
+
+            return await _scheduleRepository.UpdateAsync(new List<ScheduleEntity> { scheduleInfo });
         }
 
         //TODO
