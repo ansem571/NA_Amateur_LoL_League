@@ -68,7 +68,7 @@ namespace Web.Controllers
                 _logger.LogError(e, $"Error setting playtime for {scheduleId}.");
             }
 
-            return await Index();
+            return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> AssignCastersAsync(Guid scheduleId, string names)
@@ -93,7 +93,7 @@ namespace Web.Controllers
                 _logger.LogError(e, $"Error setting playtime for {scheduleId}.");
             }
 
-            return await Index();
+            return RedirectToAction("Index");
         }
     }
 }
