@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
+using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,15 @@ namespace Web.Controllers
     {
         private readonly UserManager<UserEntity> _userManager;
         private readonly IAccountService _accountService;
+        private readonly IBlacklistRepository _blacklistRepository;
+        private readonly SignInManager<UserEntity> _signInManager;
 
-        public HomeController(UserManager<UserEntity> userManager, IAccountService accountService)
+        public HomeController(UserManager<UserEntity> userManager, IAccountService accountService, IBlacklistRepository blacklistRepository, SignInManager<UserEntity> signInManager)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+            _blacklistRepository = blacklistRepository ?? throw new ArgumentNullException(nameof(blacklistRepository));
         }
 
         [TempData]
@@ -34,6 +39,12 @@ namespace Web.Controllers
             var user = await userTask;
             if (user != null)
             {
+                var blacklisted = await _blacklistRepository.GetByUserIdAsync(user.Id);
+                if (blacklisted != null && blacklisted.IsBanned)
+                {
+                    await _signInManager.SignOutAsync();
+                    return RedirectToAction("InvalidUser", "Manage");
+                }
                 model = new IndexViewModel
                 {
                     Username = user.UserName,

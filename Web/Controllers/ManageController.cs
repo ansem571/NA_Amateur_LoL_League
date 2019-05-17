@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
+using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -26,16 +27,13 @@ namespace Web.Controllers
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
         private readonly IAccountService _accountService;
+        private readonly IBlacklistRepository _blacklistRepository;
 
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
-        public ManageController(
-          UserManager<UserEntity> userManager,
-          SignInManager<UserEntity> signInManager,
-          IEmailService emailSender,
-          ILogger logger,
-          UrlEncoder urlEncoder, 
-          IAccountService accountService)
+        public ManageController(UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager,
+          IEmailService emailSender, ILogger logger, UrlEncoder urlEncoder, 
+          IAccountService accountService, IBlacklistRepository blacklistRepository)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
@@ -43,10 +41,16 @@ namespace Web.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _urlEncoder = urlEncoder ?? throw new ArgumentNullException(nameof(urlEncoder));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
+            _blacklistRepository = blacklistRepository ?? throw new ArgumentNullException(nameof(blacklistRepository));
         }
 
         [TempData]
         public string StatusMessage { get; set; }
+
+        public async Task<IActionResult> InvalidUser()
+        {
+            return View("InvalidUser");
+        }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -55,6 +59,13 @@ namespace Web.Controllers
             if (user == null)
             {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+            var blacklisted = await _blacklistRepository.GetByUserIdAsync(user.Id);
+            if (blacklisted != null && blacklisted.IsBanned)
+            {
+                await _signInManager.SignOutAsync();
+                _logger.LogInformation($"User {user.Email} was signed in, but blacklisted");
+                return await InvalidUser();
             }
 
             var accountInfo = new IndexViewModel

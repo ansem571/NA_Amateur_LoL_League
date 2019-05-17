@@ -71,6 +71,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<DivisionEntity>, DivisionStore>();
             services.TryAddSingleton<ITableStorageRepository<PlayerStatsEntity>, PlayerStatsStore>();
             services.TryAddSingleton<ITableStorageRepository<ScheduleEntity>, ScheduleStore>();
+            services.TryAddSingleton<ITableStorageRepository<BlacklistEntity>, BlacklistStore>();
             return services;
         }
 
@@ -100,6 +101,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IDivisionRepository, DivisionRepository>();
             services.TryAddSingleton<IPlayerStatsRepository, PlayerStatsRepository>();
             services.TryAddSingleton<IScheduleRepository, ScheduleRepository>();
+            services.TryAddSingleton<IBlacklistRepository, BlacklistRepository>();
             return services;
         }
 

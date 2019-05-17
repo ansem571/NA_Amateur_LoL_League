@@ -105,8 +105,6 @@ namespace Domain.Services.Implementations
                 }
             }
 
-            views = views.OrderBy(x => x.WeekOf.Date).ToList();
-
             return views;
         }
 
@@ -151,15 +149,14 @@ namespace Domain.Services.Implementations
                     var views = GenerateRoundRobin(teamNames);
                     foreach (var view in views)
                     {
-                        var homeRosterId = division.Value.First(x => x.TeamName == view.HomeTeam).RosterId;
-                        var awayRosterId = division.Value.First(x => x.TeamName == view.AwayTeam).RosterId;
-                        var mapped = _scheduleMapper.Map(view, new Guid(), homeRosterId, awayRosterId);
+                        var homeRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.HomeTeam)?.RosterId;
+                        var awayRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.AwayTeam)?.RosterId;
+                        var mapped = _scheduleMapper.Map(view, new Guid("D646B913-17B4-411D-8C43-CB18BF85E319"), homeRosterId ?? Guid.Empty, awayRosterId ?? Guid.Empty);
                         scheduleEntities.Add(mapped);
                     }
                 }
                 //TODO: Toggle on when ready
-                //return await _scheduleRepository.InsertAsync(scheduleEntities);
-                return true;
+                return await _scheduleRepository.InsertAsync(scheduleEntities);
             }
             catch (Exception e)
             {

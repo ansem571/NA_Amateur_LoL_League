@@ -67,7 +67,8 @@ namespace Domain.Services.Implementations
                 var newEntity = _summonerMapper.Map(view);
                 newEntity.Id = Guid.NewGuid();
                 newEntity.UserId = user.Id;
-                newEntity.IsValidPlayer = seasonInfo.ClosedRegistrationDate > date;
+                newEntity.IsValidPlayer = true;
+            
 
                 var result = await _summonerInfoRepository.InsertAsync(newEntity);
 
