@@ -1,4 +1,5 @@
-﻿@using DAL.Entities.UserData
+﻿@using System.Globalization
+@using DAL.Entities.UserData
 @using Microsoft.AspNetCore.Identity
 
 @inject SignInManager<UserEntity> SignInManager
@@ -86,7 +87,7 @@
                                 }
                                 else
                                 {
-                                    <td>@Convert.ToDateTime(week.PlayTime.Value.ToString("MM/dd/yyyy hh:mm"))</td>
+                                    <td>@Convert.ToDateTime(week.PlayTime.Value.ToString("MM/dd/yyyy hh:mm tt", CultureInfo.InvariantCulture))</td>
                                 }
                             }
                             @{
