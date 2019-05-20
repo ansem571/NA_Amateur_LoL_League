@@ -185,7 +185,7 @@
             <th>Start Time</th>
             <th>Casters</th>
         </tr>
-        @foreach (var week in Model.ScheduleLineup.OrderBy(x=>x.WeekOf))
+        @foreach (var week in Model.ScheduleLineup.OrderBy(x => x.WeekOf).ThenBy(y => y.PlayTime))
         {
             <tr>
                 <td>@week.HomeTeam</td>
