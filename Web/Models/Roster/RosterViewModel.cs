@@ -20,6 +20,10 @@ namespace Web.Models.Roster
             var urls = RosterView.Players.Select(x => x.OpGgUrl).ToList();
             foreach (var url in urls)
             {
+                if (url == null)
+                {
+                    continue;
+                }
                 var urlSecure = url.Replace("http:", "https:");
                 var urlName = urlSecure.Replace("https://na.op.gg/summoner/userName=", "");
                 str += $"{urlName},";
