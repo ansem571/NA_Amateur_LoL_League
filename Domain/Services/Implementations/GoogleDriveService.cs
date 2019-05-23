@@ -69,10 +69,24 @@ namespace Domain.Services.Implementations
 
             var path = @"C:\Users\MRMacDonnell\Desktop\Documents\Pics\log1.JPG";
 
+            var fileMetadata = new Google.Apis.Drive.v3.Data.File()
+            {
+                Name = "TestFolder",
+                MimeType = "application/vnd.google-apps.folder"
+            };
+            var folderRequest = service.Files.Create(fileMetadata);
+            folderRequest.Fields = "id";
+            var folder = folderRequest.Execute();
+            Console.WriteLine("Folder ID: " + folder.Id);
+
             var fileMetaData = new Google.Apis.Drive.v3.Data.File()
             {
                 Name = "NotRandom",
-                MimeType = MimeTypes.GetMimeType(path)
+                MimeType = MimeTypes.GetMimeType(path),
+                Parents = new List<string>
+                {
+                    folder.Id
+                }
             };
             FilesResource.CreateMediaUpload request;
             using (var stream = new FileStream(path, FileMode.Open))
@@ -81,11 +95,11 @@ namespace Domain.Services.Implementations
                     fileMetaData, stream, "image/jpeg");
                 request.Fields = "id";
                 var r = request.UploadAsync().Result;
-                _logger.LogInformation($"Exception: {r.Exception}");
+                Console.WriteLine($"Exception: {r.Exception}");
             }
 
             var fileResponse = request.ResponseBody;
-            _logger.LogInformation("File ID: " + fileResponse.Id);
+            Console.WriteLine("File ID: " + fileResponse.Id);
 
 
             Console.ReadLine();
