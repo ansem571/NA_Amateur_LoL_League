@@ -23,6 +23,7 @@
   <ItemGroup>
     <Folder Include="Scripts\" />
     <Folder Include="wwwroot\logos\" />
+    <Folder Include="wwwroot\Auth\" />
   </ItemGroup>
 
   <ItemGroup>
