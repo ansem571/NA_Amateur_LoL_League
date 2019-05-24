@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Services.Interfaces;
+using Domain.Views;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,16 +19,19 @@ namespace Web.Controllers
         private readonly UserManager<UserEntity> _userManager;
         private readonly ILogger _logger;
         private readonly IScheduleService _scheduleService;
+        private readonly IGoogleDriveService _googleDriveService;
 
         public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
-            ILogger logger, IScheduleService scheduleService)
+            ILogger logger, IScheduleService scheduleService, IGoogleDriveService googleDriveService)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
+            _googleDriveService = googleDriveService ?? throw new ArgumentNullException(nameof(googleDriveService));
         }
+
         [TempData]
         public string StatusMessage { get; set; }
 
@@ -209,6 +213,45 @@ namespace Web.Controllers
             }
 
             return RedirectToAction("ViewRosterAsync", new { rosterId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SendMatchDataAsync(int weekNumber, string hometeam, string awayteam)
+        {
+            var view = new MatchSubmissionView();
+            view.Week = $"Week {weekNumber}";
+            view.HomeTeamName = hometeam;
+            view.AwayTeamName = awayteam;
+            return View(view);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendMatchDataAsync(MatchSubmissionView view)
+        {
+            try
+            {
+                if (!ModelState.IsValid || !view.GameInfos.Any())
+                {
+                    throw new Exception("View was not setup right");
+                }
+
+                var result = await _googleDriveService.SendFileData(view);
+
+                if (!result)
+                {
+                    throw new Exception($"Failed to send match data for: {view.FileName}");
+                }
+
+                StatusMessage = "Successfully submitted match data. Stats will be reflected soon.";
+            }
+            catch (Exception e)
+            {
+                StatusMessage = e.Message;
+                _logger.LogError(e, StatusMessage);
+                return View(view);
+            }
+
+            return RedirectToAction("ViewAllRostersAsync");
         }
     }
 }

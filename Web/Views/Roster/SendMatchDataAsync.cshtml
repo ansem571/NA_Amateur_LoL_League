@@ -1,0 +1,214 @@
+﻿@using Domain.Views
+@model Domain.Views.MatchSubmissionView
+
+@{
+    ViewData["Title"] = "SendMatchDataAsync";
+}
+
+<h2>@Model.Week: @Model.FileName results</h2>
+
+
+<div asp-validation-summary="All" class="text-danger">
+    <form method="post">
+        <input type="hidden" name="HomeTeamName" value="@Model.HomeTeamName" />
+        <input type="hidden" name="AwayTeamName" value="@Model.AwayTeamName" />
+        <input type="hidden" name="Week" value="@Model.Week" />
+        @{
+            if (Model.GameInfos == null)
+            {
+                Model.GameInfos = new List<GameInfo>();
+            }
+
+            var count = Model.Week.ToLowerInvariant().Contains("week") ? 2 : 5;
+
+            for (var i = 0; i < count; i++)
+            {
+                <h3>Game @(i + 1)</h3>
+                <div class="row">
+                    @{
+                        var gameInfo = new GameInfo
+                        {
+                            BlueTeam = new TeamInfo(),
+                            RedTeam = new TeamInfo()
+                        };
+
+                        Model.GameInfos.Add(gameInfo);
+                    }
+                    <div class="row">
+                        <div class="card col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].TeamWithSideSelection"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].TeamWithSideSelection" />
+                            </div>
+                        </div>
+                        <div class="card col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].ProdraftSpectateLink"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].ProdraftSpectateLink" />
+                            </div>
+                        </div>
+                        <div class="card col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].MatchHistoryLink"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].MatchHistoryLink" />
+                            </div>
+                        </div>
+                        <div class="card col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueSideWinner"></label>
+                                <input type="checkbox" asp-for="@Model.GameInfos[i].BlueSideWinner" />
+
+                                @* Team details For Blue team*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h4> Blue Team </h4>
+                        <div class="card col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop"/>
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionTop"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionTop"/>
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle"/>
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionJungle"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionJungle"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerMid"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerMid" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionMid"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionMid" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerAdc"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerAdc" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionAdc"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionAdc" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerSup"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerSup" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionSup"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionSup" />
+                            </div>
+                        </div>
+                    </div>
+                    @* Team details For Red team*@
+                    <div class="row">
+                        <h4> Red Team </h4>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.PlayerTop"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerTop" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.ChampionTop"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionTop" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.PlayerJungle"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerJungle" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.ChampionJungle"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionJungle" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.PlayerMid"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerMid" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.ChampionMid"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionMid" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.PlayerAdc"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerAdc" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.ChampionAdc"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionAdc" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.PlayerSup"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerSup" />
+                            </div>
+                        </div>
+                        <div class="card  col-md-3">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].RedTeam.ChampionSup"></label>
+                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionSup" />
+                            </div>
+                        </div>
+                    </div>
+                    @if (i <= 2)
+                    {
+                        <label asp-for="@Model.GameInfos[i].GamePlayed"></label>
+                        <input type="checkbox" asp-for="@Model.GameInfos[i].GamePlayed" />
+                    }
+                </div>
+            }
+
+        }
+        <div class="row">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+</div>
+

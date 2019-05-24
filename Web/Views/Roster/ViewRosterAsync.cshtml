@@ -193,36 +193,58 @@
             <th>Week Of</th>
             <th>Start Time</th>
             <th>Casters</th>
+            @{
+                if (Model.IsCaptain)
+                {
+                    <th>Captains Only</th>
+                }
+            }
         </tr>
-        @foreach (var week in Model.ScheduleLineup.OrderBy(x => x.WeekOf).ThenBy(y => y.PlayTime))
-        {
-            <tr>
-                <td>@week.HomeTeam</td>
-                <td>@week.AwayTeam</td>
-                <td>@week.HomeTeamScore</td>
-                <td>@week.AwayTeamScore</td>
-                <td>@Convert.ToDateTime(week.WeekOf.ToString("MM/dd/yyyy"))</td>
-                @{
-                    if (week.PlayTime == null)
-                    {
-                        <td>TBD</td>
+        @{
+            var weekNumber = 0;
+            foreach (var week in Model.ScheduleLineup.OrderBy(x => x.WeekOf).ThenBy(y => y.PlayTime))
+            {
+                weekNumber++;
+                <tr>
+                    <td>@week.HomeTeam</td>
+                    <td>@week.AwayTeam</td>
+                    <td>@week.HomeTeamScore</td>
+                    <td>@week.AwayTeamScore</td>
+                    <td>@Convert.ToDateTime(week.WeekOf.ToString("MM/dd/yyyy"))</td>
+                    @{
+                        if (week.PlayTime == null)
+                        {
+                            <td>TBD</td>
+                        }
+                        else
+                        {
+                            <td>@Convert.ToDateTime(week.PlayTime.Value.ToString("MM/dd/yyyy hh:mm tt"))</td>
+                        }
                     }
-                    else
-                    {
-                        <td>@Convert.ToDateTime(week.PlayTime.Value.ToString("MM/dd/yyyy hh:mm tt"))</td>
+                    @{
+                        if (string.IsNullOrEmpty(week.CasterName))
+                        {
+                            <td>TBD</td>
+                        }
+                        else
+                        {
+                            <td>@week.CasterName</td>
+                        }
                     }
-                }
-                @{
-                    if (string.IsNullOrEmpty(week.CasterName))
-                    {
-                        <td>TBD</td>
+                    @{
+                        if (Model.IsCaptain)
+                        {
+                            <td>
+                                <button
+                                    onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam}) + "'");"
+                                    class="btn">
+                                    Send Match Detail Data
+                                </button>
+                            </td>
+                        }
                     }
-                    else
-                    {
-                        <td>@week.CasterName</td>
-                    }
-                }
-            </tr>
+                </tr>
+            }
         }
     </table>
 </div>

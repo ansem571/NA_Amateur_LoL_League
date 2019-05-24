@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
 using System.Text.Encodings.Web;
@@ -24,11 +25,18 @@ namespace Domain.Services.Implementations
             _phoneMapper = phoneMapper ?? throw new ArgumentNullException(nameof(phoneMapper));
         }
 
-        public async Task SendEmailAsync(string to, string messageBody, string subject)
+        public async Task SendEmailAsync(string to, string messageBody, string subject, IEnumerable<Attachment> attachments = null)
         {
             const string fromEmail = "casualesportsamateurleague@gmail.com";
 
             var message = new MailMessage(fromEmail, to, subject, messageBody);
+            if (attachments != null)
+            {
+                foreach (var attachment in attachments)
+                {
+                    message.Attachments.Add(attachment);
+                }
+            }
             var client = new SmtpClient("smtp.gmail.com", 587)
             {
                 EnableSsl = true,

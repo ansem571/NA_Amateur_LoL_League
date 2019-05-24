@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CsvHelper;
+using DAL.Entities.Logging;
+using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Domain.Views;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+using Google.Apis.Upload;
 using Google.Apis.Util.Store;
 using Microsoft.Extensions.Logging;
 
@@ -16,95 +23,223 @@ namespace Domain.Services.Implementations
     public class GoogleDriveService : IGoogleDriveService
     {
         private readonly ILogger _logger;
-        static string[] DriveScopes =
+        private readonly IGoogleDriveFolderRepository _googleDriveFolderRepository;
+        private readonly IEmailService _emailService;
+
+        private readonly string[] _driveScopes =
             { DriveService.Scope.Drive, DriveService.Scope.DriveMetadata };
-        static string MyApplicationName =
-            "Casual Esports Amateur League";
-        public GoogleDriveService(ILogger logger)
+
+        private const string MyApplicationName = "Casual Esports Amateur League";
+        private UserCredential _credential;
+        private DriveService _driveService;
+        private readonly string _wwwRootDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        private readonly List<string> _folderNames = new List<string>
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            "Week1", "Week2", "Week3", "Week4", "Week5", "Semi-Finals", "Finals"
+        };
+
+        public GoogleDriveService(ILogger logger, IGoogleDriveFolderRepository googleDriveFolderRepository, IEmailService emailService)
+        {
+            _logger = logger ??
+                        throw new ArgumentNullException(nameof(logger));
+            _googleDriveFolderRepository = googleDriveFolderRepository ??
+                        throw new ArgumentNullException(nameof(googleDriveFolderRepository));
+
+            _emailService = emailService ??
+                            throw new ArgumentNullException(nameof(emailService));
         }
 
-        public async Task<bool> SendFileData()
+        public void SetupCredentials()
         {
-            UserCredential credential;
-            using (var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+            if (_credential != null)
             {
-                var credPath = "token.json";
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                return;
+            }
+            var directory = Path.Combine(_wwwRootDirectory, "Auth");
+            var credentialsPath = Path.Combine(directory, "credentials.json");
+            using (var stream = new FileStream(credentialsPath, FileMode.Open, FileAccess.Read))
+            {
+                var tokenPath = Path.Combine(directory, "token.json");
+                _credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
-                    DriveScopes,
+                    _driveScopes,
                     "casualesportsamateurleague@gmail.com",
                     CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
-                _logger.LogInformation($"Credential file saved to: {credPath}");
+                    new FileDataStore(tokenPath, true)).Result;
+                _logger.LogInformation($"Credential file saved to: {tokenPath}");
             }
 
-            var service = new DriveService(new BaseClientService.Initializer()
+            _driveService = new DriveService(new BaseClientService.Initializer
             {
-                HttpClientInitializer = credential,
+                HttpClientInitializer = _credential,
                 ApplicationName = MyApplicationName
             });
+        }
 
-            var listRequest = service.Files.List();
-            listRequest.PageSize = 10;
-            listRequest.Fields = "nextPageToken, files(id, name)";
-
-            IList<Google.Apis.Drive.v3.Data.File> files = listRequest.Execute().Files;
-
-            _logger.LogInformation("Files");
-
-            if (files != null && files.Count > 0)
+        public async Task<bool> CreateFolders()
+        {
+            var folders = await _googleDriveFolderRepository.GetAllFoldersAsync();
+            var tempFolderNames = new List<string>(_folderNames);
+            foreach (var folder in folders)
             {
-                foreach (var file in files)
+                if (_folderNames.Contains(folder.FolderName))
                 {
-                    _logger.LogInformation("{0} ({1})", file.Name, file.Id);
+                    tempFolderNames.Remove(folder.FolderName);
                 }
             }
-            else
-            {
-                _logger.LogInformation("No files found in your Google Drive.");
-            }
-            //C:\Users\MRMacDonnell\Desktop\Documents\Pics\log1.JPG
 
-            var path = @"C:\Users\MRMacDonnell\Desktop\Documents\Pics\log1.JPG";
-
-            var fileMetadata = new Google.Apis.Drive.v3.Data.File()
+            //Any remaining folders
+            var newFolders = new List<GoogleDriveFolderEntity>();
+            foreach (var week in tempFolderNames)
             {
-                Name = "TestFolder",
-                MimeType = "application/vnd.google-apps.folder"
-            };
-            var folderRequest = service.Files.Create(fileMetadata);
-            folderRequest.Fields = "id";
-            var folder = folderRequest.Execute();
-            Console.WriteLine("Folder ID: " + folder.Id);
-
-            var fileMetaData = new Google.Apis.Drive.v3.Data.File()
-            {
-                Name = "NotRandom",
-                MimeType = MimeTypes.GetMimeType(path),
-                Parents = new List<string>
+                var fileMetadata = new Google.Apis.Drive.v3.Data.File()
                 {
-                    folder.Id
-                }
-            };
-            FilesResource.CreateMediaUpload request;
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                request = service.Files.Create(
-                    fileMetaData, stream, "image/jpeg");
-                request.Fields = "id";
-                var r = request.UploadAsync().Result;
-                Console.WriteLine($"Exception: {r.Exception}");
+                    Name = week,
+                    MimeType = "application/vnd.google-apps.folder"
+                };
+
+                var folderRequest = _driveService.Files.Create(fileMetadata);
+                folderRequest.Fields = "id";
+                var folder = folderRequest.Execute();
+
+                newFolders.Add(new GoogleDriveFolderEntity
+                {
+                    Id = Guid.NewGuid(),
+                    FolderName = week,
+                    FolderId = folder.Id
+                });
             }
 
-            var fileResponse = request.ResponseBody;
-            Console.WriteLine("File ID: " + fileResponse.Id);
+            return await _googleDriveFolderRepository.InsertAsync(newFolders);
+        }
 
+        public async Task<bool> SendFileData(MatchSubmissionView view)
+        {
+            CreateCsvDataFile(view);
 
-            Console.ReadLine();
+            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}.csv");
+
+            await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", "Match result for subject", view.FileName, new List<Attachment>
+            {
+                new Attachment(csvFile)
+            });
 
             return true;
+        }
+
+        private void CreateCsvDataFile(MatchSubmissionView view)
+        {
+            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}.csv");
+            if (File.Exists(csvFile))
+            {
+                File.Delete(csvFile);
+            }
+
+            using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))
+            {
+                using (var csvWriter = new CsvWriter(writer))
+                {
+                    csvWriter.WriteField(view.Week);
+                    csvWriter.WriteField("");
+                    WriteHeader(csvWriter, view.Week.ToLowerInvariant().Contains("week") ? 2 : view.GameInfos.Count(x => x.GamePlayed));
+
+                    csvWriter.NextRecord();
+
+                    foreach (var gameInfo in view.GameInfos)
+                    {
+                        for (var i = 0; i < 5; i++) //players
+                        {
+                            if (i == 0)
+                            {
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField(gameInfo.TeamWithSideSelection);
+                                csvWriter.WriteField(gameInfo.BlueSideWinner ? "Blue" : "Red");
+                                csvWriter.WriteField(gameInfo.ProdraftSpectateLink);
+                                csvWriter.WriteField(gameInfo.MatchHistoryLink);
+
+                                csvWriter.WriteField(gameInfo.BlueTeam.PlayerTop);
+                                csvWriter.WriteField(gameInfo.BlueTeam.ChampionTop);
+                                csvWriter.WriteField(gameInfo.RedTeam.PlayerTop);
+                                csvWriter.WriteField(gameInfo.RedTeam.ChampionTop);
+                            }
+                            else if (i == 1)
+                            {
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+
+                                csvWriter.WriteField(gameInfo.BlueTeam.PlayerJungle);
+                                csvWriter.WriteField(gameInfo.BlueTeam.ChampionJungle);
+                                csvWriter.WriteField(gameInfo.RedTeam.PlayerJungle);
+                                csvWriter.WriteField(gameInfo.RedTeam.ChampionJungle);
+                            }
+
+                            else if (i == 2)
+                            {
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+
+                                csvWriter.WriteField(gameInfo.BlueTeam.PlayerMid);
+                                csvWriter.WriteField(gameInfo.BlueTeam.ChampionMid);
+                                csvWriter.WriteField(gameInfo.RedTeam.PlayerMid);
+                                csvWriter.WriteField(gameInfo.RedTeam.ChampionMid);
+                            }
+
+                            else if (i == 3)
+                            {
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+
+                                csvWriter.WriteField(gameInfo.BlueTeam.PlayerAdc);
+                                csvWriter.WriteField(gameInfo.BlueTeam.ChampionAdc);
+                                csvWriter.WriteField(gameInfo.RedTeam.PlayerAdc);
+                                csvWriter.WriteField(gameInfo.RedTeam.ChampionAdc);
+                            }
+
+                            else if (i == 4)
+                            {
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+                                csvWriter.WriteField("");
+
+                                csvWriter.WriteField(gameInfo.BlueTeam.PlayerSup);
+                                csvWriter.WriteField(gameInfo.BlueTeam.ChampionSup);
+                                csvWriter.WriteField(gameInfo.RedTeam.PlayerSup);
+                                csvWriter.WriteField(gameInfo.RedTeam.ChampionSup);
+                            }
+                            csvWriter.NextRecord();
+                        }
+                        csvWriter.NextRecord();
+                    }
+                }
+            }
+        }
+
+        private static void WriteHeader(IWriterRow csvWriter, int games)
+        {
+            for (var i = 1; i <= games; i++)
+            {
+                csvWriter.WriteField($"Game {i}");
+                var selected = i % 2 == 0 ? "Home" : "Away";
+                csvWriter.WriteField($"{selected} Side Selection");
+                csvWriter.WriteField("Winner");
+                csvWriter.WriteField("ProDraft Spectate Link");
+                csvWriter.WriteField("Match History Link");
+                csvWriter.WriteField("Blue Player");
+                csvWriter.WriteField("Blue Champion");
+                csvWriter.WriteField("Red Player");
+                csvWriter.WriteField("Red Champion");
+            }
         }
     }
 }
