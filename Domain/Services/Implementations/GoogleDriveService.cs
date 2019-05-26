@@ -129,9 +129,24 @@ namespace Domain.Services.Implementations
 
         private void CreateCsvDataFile(MatchSubmissionView view)
         {
-            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}.csv");
-            if (File.Exists(csvFile))
+            var matchCsvsDir = Path.Combine(_wwwRootDirectory, "MatchCsvs");
+            if (!Directory.Exists(matchCsvsDir))
             {
+                Directory.CreateDirectory(matchCsvsDir);
+            }
+
+            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}.csv");
+            try
+            {
+                if (File.Exists(csvFile))
+                {
+                    File.Delete(csvFile);
+                }
+            }
+            catch (Exception e)
+            {
+                var newGuid = Guid.NewGuid();
+                File.Copy(csvFile, csvFile.Replace(".csv", $"{newGuid}.csv"));
                 File.Delete(csvFile);
             }
 
@@ -139,14 +154,14 @@ namespace Domain.Services.Implementations
             {
                 using (var csvWriter = new CsvWriter(writer))
                 {
-                    csvWriter.WriteField(view.Week);
-                    csvWriter.WriteField("");
-                    WriteHeader(csvWriter, view.Week.ToLowerInvariant().Contains("week") ? 2 : view.GameInfos.Count(x => x.GamePlayed));
+                    //csvWriter.WriteField("");
 
-                    csvWriter.NextRecord();
-
+                    var gameNum = 0;
                     foreach (var gameInfo in view.GameInfos)
                     {
+                        gameNum++;
+                        WriteHeader(csvWriter, gameNum);
+                        csvWriter.NextRecord();
                         for (var i = 0; i < 5; i++) //players
                         {
                             if (i == 0)
@@ -222,24 +237,24 @@ namespace Domain.Services.Implementations
                         csvWriter.NextRecord();
                     }
                 }
+                writer.Close();
             }
         }
 
-        private static void WriteHeader(IWriterRow csvWriter, int games)
+        private static void WriteHeader(IWriterRow csvWriter, int gameNum)
         {
-            for (var i = 1; i <= games; i++)
-            {
-                csvWriter.WriteField($"Game {i}");
-                var selected = i % 2 == 0 ? "Home" : "Away";
-                csvWriter.WriteField($"{selected} Side Selection");
-                csvWriter.WriteField("Winner");
-                csvWriter.WriteField("ProDraft Spectate Link");
-                csvWriter.WriteField("Match History Link");
-                csvWriter.WriteField("Blue Player");
-                csvWriter.WriteField("Blue Champion");
-                csvWriter.WriteField("Red Player");
-                csvWriter.WriteField("Red Champion");
-            }
+
+            csvWriter.WriteField($"Game {gameNum}");
+            var selected = gameNum % 2 == 0 ? "Home" : "Away";
+            csvWriter.WriteField($"{selected} Side Selection");
+            csvWriter.WriteField("Winner");
+            csvWriter.WriteField("ProDraft Spectate Link");
+            csvWriter.WriteField("Match History Link");
+            csvWriter.WriteField("Blue Player");
+            csvWriter.WriteField("Blue Champion");
+            csvWriter.WriteField("Red Player");
+            csvWriter.WriteField("Red Champion");
+
         }
     }
 }

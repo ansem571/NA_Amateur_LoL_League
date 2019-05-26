@@ -230,7 +230,8 @@ namespace Web.Controllers
         {
             try
             {
-                if (!ModelState.IsValid || !view.GameInfos.Any())
+                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed).ToList();
+                if (!view.GameInfos.Any() || view.GameInfos.Count < 2)
                 {
                     throw new Exception("View was not setup right");
                 }
@@ -248,10 +249,10 @@ namespace Web.Controllers
             {
                 StatusMessage = e.Message;
                 _logger.LogError(e, StatusMessage);
-                return View(view);
             }
 
-            return RedirectToAction("ViewAllRostersAsync");
+            view.StatusMessage = StatusMessage;
+            return View(view);
         }
     }
 }
