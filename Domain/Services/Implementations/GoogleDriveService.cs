@@ -135,20 +135,7 @@ namespace Domain.Services.Implementations
                 Directory.CreateDirectory(matchCsvsDir);
             }
 
-            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}.csv");
-            try
-            {
-                if (File.Exists(csvFile))
-                {
-                    File.Delete(csvFile);
-                }
-            }
-            catch (Exception e)
-            {
-                var newGuid = Guid.NewGuid();
-                File.Copy(csvFile, csvFile.Replace(".csv", $"{newGuid}.csv"));
-                File.Delete(csvFile);
-            }
+            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}{Guid.NewGuid()}.csv");
 
             using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))
             {
