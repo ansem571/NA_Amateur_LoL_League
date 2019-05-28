@@ -232,7 +232,7 @@ namespace Domain.Services.Implementations
         {
 
             csvWriter.WriteField($"Game {gameNum}");
-            var selected = gameNum % 2 == 0 ? "Home" : "Away";
+            var selected = gameNum % 2 == 1 ? "Home" : "Away";
             csvWriter.WriteField($"{selected} Side Selection");
             csvWriter.WriteField("Winner");
             csvWriter.WriteField("ProDraft Spectate Link");
