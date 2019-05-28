@@ -115,19 +115,17 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> SendFileData(MatchSubmissionView view)
         {
-            CreateCsvDataFile(view);
-
-            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}.csv");
+            var csvDataFile = CreateCsvDataFile(view);        
 
             await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", "Match result for subject", view.FileName, new List<Attachment>
             {
-                new Attachment(csvFile)
+                new Attachment(csvDataFile)
             });
 
             return true;
         }
 
-        private void CreateCsvDataFile(MatchSubmissionView view)
+        private string CreateCsvDataFile(MatchSubmissionView view)
         {
             var matchCsvsDir = Path.Combine(_wwwRootDirectory, "MatchCsvs");
             if (!Directory.Exists(matchCsvsDir))
@@ -135,7 +133,7 @@ namespace Domain.Services.Implementations
                 Directory.CreateDirectory(matchCsvsDir);
             }
 
-            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}{Guid.NewGuid()}.csv");
+            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}-{Guid.NewGuid()}.csv");
 
             using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))
             {
@@ -226,6 +224,8 @@ namespace Domain.Services.Implementations
                 }
                 writer.Close();
             }
+
+            return csvFile;
         }
 
         private static void WriteHeader(IWriterRow csvWriter, int gameNum)
