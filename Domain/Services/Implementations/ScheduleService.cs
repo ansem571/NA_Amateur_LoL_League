@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
+using Domain.Helpers;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
@@ -57,22 +58,40 @@ namespace Domain.Services.Implementations
                 rosters.TryGetValue(schedule.HomeRosterTeamId, out var homeTeam);
                 rosters.TryGetValue(schedule.AwayRosterTeamId, out var awayTeam);
 
-                if (homeTeam != null && awayTeam != null)
+                var homeTeamName = homeTeam?.TeamName ?? "BYE";
+                var awayTeamName = awayTeam?.TeamName ?? "BYE";
+                if (homeTeamName == "BYE" || awayTeamName == "BYE")
                 {
-                    var division = divisions.First(x =>
+                    continue;
+                }
+
+                string division;
+                if (homeTeam != null)
+                {
+                    division = divisions.First(x =>
                         x.LowerLimit <= homeTeam.TeamTierScore && x.UpperLimit >= homeTeam.TeamTierScore).Name;
-                    views.TryGetValue(division, out var view);
-                    if (view == null)
+                }
+                else if (awayTeam != null)
+                {
+                    division = divisions.First(x =>
+                        x.LowerLimit <= awayTeam.TeamTierScore && x.UpperLimit >= awayTeam.TeamTierScore).Name;
+                }
+                else
+                {
+                    continue;
+                }
+
+                views.TryGetValue(division, out var view);
+                if (view == null)
+                {
+                    views.Add(division, new List<ScheduleView>
                     {
-                        views.Add(division, new List<ScheduleView>
-                        {
-                            _scheduleMapper.Map(schedule, homeTeam.TeamName, awayTeam.TeamName)
-                        });
-                    }
-                    else
-                    {
-                        view.Add(_scheduleMapper.Map(schedule, homeTeam.TeamName, awayTeam.TeamName));
-                    }
+                        _scheduleMapper.Map(schedule, homeTeamName, awayTeamName)
+                    });
+                }
+                else
+                {
+                    view.Add(_scheduleMapper.Map(schedule, homeTeamName, awayTeamName));
                 }
             }
 
@@ -151,11 +170,19 @@ namespace Domain.Services.Implementations
                     {
                         var homeRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.HomeTeam)?.RosterId;
                         var awayRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.AwayTeam)?.RosterId;
-                        var mapped = _scheduleMapper.Map(view, new Guid("D646B913-17B4-411D-8C43-CB18BF85E319"), homeRosterId ?? Guid.Empty, awayRosterId ?? Guid.Empty);
+                        var swap = TrueRandom.TrueRandomGenerator();
+
+                        if (!swap)
+                        {
+                            var temp = homeRosterId;
+                            homeRosterId = awayRosterId;
+                            awayRosterId = temp;
+                        }
+
+                        var mapped = _scheduleMapper.Map(view, seasonInfo.SeasonInfo.SeasonInfoId, homeRosterId ?? Guid.Empty, awayRosterId ?? Guid.Empty);
                         scheduleEntities.Add(mapped);
                     }
                 }
-                //TODO: Toggle on when ready
                 return await _scheduleRepository.InsertAsync(scheduleEntities);
             }
             catch (Exception e)
@@ -165,6 +192,62 @@ namespace Domain.Services.Implementations
             }
         }
 
+        public async Task<Dictionary<string, IEnumerable<RosterView>>> SetupStandings()
+        {
+            var standings = new Dictionary<string, IEnumerable<RosterView>>();
+            var schedulesTask = _scheduleRepository.GetAllUpdatedMatchesAsync();
+            var rostersTask = _rosterService.GetSeasonInfoView();
+
+            var rostersGrouped = (await rostersTask).Rosters.GroupBy(x => x.Division.DivisionName)
+                .ToDictionary(x => x.Key, x => x.ToList());
+            var schedules = (await schedulesTask).ToList();
+
+            foreach (var division in rostersGrouped)
+            {
+                var teamsInDivision = division.Value.OrderByDescending(x => x.Points).ThenByDescending(x => x.Wins).ToList();
+                var tempList = new List<RosterView>(teamsInDivision);
+
+                foreach (var team in tempList)
+                {
+                    var sameScoreTeam = teamsInDivision.FirstOrDefault(x =>
+                        x.RosterId != team.RosterId && x.Wins == team.Wins && x.Points == team.Points);
+                    if (sameScoreTeam != null)
+                    {
+                        var schedule = schedules.FirstOrDefault(
+                            x => (x.HomeRosterTeamId == team.RosterId && x.AwayRosterTeamId == sameScoreTeam.RosterId) ||
+                            (x.AwayRosterTeamId == team.RosterId && x.HomeRosterTeamId == sameScoreTeam.RosterId));
+                        if (schedule != null)
+                        {
+                            var teamPoints = schedule.HomeRosterTeamId == team.RosterId
+                                ? schedule.HomeTeamWins
+                                : schedule.AwayTeamWins;
+
+                            var otherTeamPoints = schedule.HomeRosterTeamId == sameScoreTeam.RosterId
+                                ? schedule.HomeTeamWins
+                                : schedule.AwayTeamWins;
+
+                            var team1Position = teamsInDivision.IndexOf(team);
+                            var team2Position = teamsInDivision.IndexOf(sameScoreTeam);
+
+                            if (teamPoints > otherTeamPoints && team1Position < team2Position)
+                            {
+                                teamsInDivision.RemoveAt(team2Position);
+                                teamsInDivision.Insert(team1Position, sameScoreTeam);
+                            }
+                            else if (teamPoints < otherTeamPoints && team1Position > team2Position)
+                            {
+                                teamsInDivision.RemoveAt(team1Position);
+                                teamsInDivision.Insert(team2Position, team);
+                            }
+                        }
+                    }
+                }
+
+                standings.Add(division.Key, teamsInDivision);
+            }
+
+            return standings;
+        }
 
         private IEnumerable<ScheduleView> GenerateRoundRobin(List<string> teamNames)
         {

@@ -91,6 +91,7 @@ namespace Domain.Services.Implementations
 
             view.SeasonInfo = new SeasonInfoViewPartial
             {
+                SeasonInfoId = seasonInfo.Id,
                 ClosedRegistrationDate = seasonInfo.ClosedRegistrationDate,
                 SeasonName = seasonInfo.SeasonName,
                 SeasonStartDate = seasonInfo.SeasonStartDate
@@ -141,6 +142,7 @@ namespace Domain.Services.Implementations
                     TeamName = roster.TeamName,
                     Wins = roster.Wins ?? 0,
                     Loses = roster.Loses ?? 0,
+                    Points = roster.Points ?? 0,
                     Players = summonerViews,
                     TeamTierScore = roster.TeamTierScore.GetValueOrDefault()
                 };
@@ -283,6 +285,24 @@ namespace Domain.Services.Implementations
                 player
             });
 
+            return result;
+        }
+
+        public async Task<bool> AddToTeamScoreAsync(string teamName, int wins, int loses)
+        {
+            var roster = await _teamRosterRepository.GetByTeamNameAsync(teamName);
+            roster.Wins += wins;
+            roster.Loses += loses;
+
+            if (wins == 2 && loses == 0)
+            {
+                roster.Points += 3;
+            }
+            else if(wins == 1 && loses == 1)
+            {
+                roster.Points += 1;
+            }
+            var result = await _teamRosterRepository.UpdateAsync(roster);
             return result;
         }
 

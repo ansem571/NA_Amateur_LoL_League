@@ -13,11 +13,13 @@ namespace Web.Controllers
     {
         private readonly ILogger _logger;
         private readonly IScheduleService _scheduleService;
+        private readonly IRosterService _rosterService;
 
-        public ScheduleController(ILogger logger, IScheduleService scheduleService)
+        public ScheduleController(ILogger logger, IScheduleService scheduleService, IRosterService rosterService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
+            _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
         }
 
         public async Task<IActionResult> Index()
@@ -41,6 +43,33 @@ namespace Web.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "ERROR");
+            }
+
+            return RedirectToAction("Index");
+        }       
+        
+        public async Task<IActionResult> UpdateMatchScores(Guid scheduleId, string homeTeam, int homeScore, string awayTeam, int awayScore)
+        {
+            try
+            {
+                var view = new ScheduleView
+                {
+                    ScheduleId = scheduleId,
+                    HomeTeamScore = homeScore,
+                    AwayTeamScore = awayScore
+                };
+                var homeRosterResultTask = _rosterService.AddToTeamScoreAsync(homeTeam, homeScore, awayScore);
+                var awayRosterResultTask = _rosterService.AddToTeamScoreAsync(awayTeam, awayScore, homeScore);
+                var scheduleResultTask = _scheduleService.UpdateScheduleAsync(view);
+                var result = await homeRosterResultTask && await awayRosterResultTask && await scheduleResultTask;
+                if (!result)
+                {
+                    throw new Exception();
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Error setting match scores for {scheduleId}.");
             }
 
             return RedirectToAction("Index");

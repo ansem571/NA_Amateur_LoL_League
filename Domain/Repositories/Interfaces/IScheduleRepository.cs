@@ -10,6 +10,7 @@ namespace Domain.Repositories.Interfaces
     {
         Task<ScheduleEntity> GetScheduleAsync(Guid id);
         Task<IEnumerable<ScheduleEntity>> GetAllAsync();
+        Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync();
         Task<bool> InsertAsync(IEnumerable<ScheduleEntity> entities);
         Task<bool> UpdateAsync(IEnumerable<ScheduleEntity> entities);
     }

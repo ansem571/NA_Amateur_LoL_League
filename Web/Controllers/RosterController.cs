@@ -216,7 +216,7 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SendMatchDataAsync(int weekNumber, string hometeam, string awayteam)
+        public IActionResult SendMatchDataAsync(int weekNumber, string hometeam, string awayteam)
         {
             var view = new MatchSubmissionView();
             view.Week = $"Week {weekNumber}";
@@ -253,6 +253,22 @@ namespace Web.Controllers
 
             view.StatusMessage = StatusMessage;
             return View(view);
+        }
+
+        public async Task<IActionResult> StandingsAsync()
+        {
+            try
+            {
+                var standingsSortedRoster = await _scheduleService.SetupStandings();
+
+                return View(standingsSortedRoster);
+            }
+            catch (Exception e)
+            {
+                StatusMessage = e.Message;
+                _logger.LogError(e, e.Message);
+                return RedirectToAction("ViewAllRostersAsync");
+            }
         }
     }
 }

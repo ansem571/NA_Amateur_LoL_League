@@ -57,6 +57,10 @@
                         <th>Week Of</th>
                         <th>Start Time</th>
                         <th>Casters</th>
+                        @if (isAdmin)
+                        {
+                            <th>Admin stuff</th>
+                        }
                     </tr>
                     @foreach (var week in divisionSchedule.Value.OrderBy(x => x.WeekOf).ThenBy(y => y.PlayTime))
                     {
@@ -114,6 +118,22 @@
                                     <td>@week.CasterName</td>
                                 }
                             }
+                            @if (isAdmin)
+                            {
+                                <td>
+                                    <button id ="{{'showUpdateMatchScoreButton'@week.ScheduleId}}" onclick="updateMatchScore('@week.ScheduleId')">+</button>
+                                    <form asp-controller="Schedule" asp-action="UpdateMatchScores" method="post" id="{{'showUpdateMatchScore'@week.ScheduleId}}" style="display: none">
+                                        <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                        <input type="hidden" name="homeTeam" value="@week.HomeTeam" />
+                                        <input type="hidden" name="awayTeam" value="@week.AwayTeam" />
+                                        <label>HomeScore</label>
+                                        <input type="text" name="homeScore" />
+                                        <label>AwayScore</label>
+                                        <input type="text" name="awayScore" />
+                                        <button class="center-block">Submit scores</button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 </table>
@@ -139,6 +159,19 @@
     function showCaster(scheduleId) {
         var x = document.getElementById("{{'showCaster'" + scheduleId + "}}");
         var y = document.getElementById("{{'showCasterButton'" + scheduleId + "}}");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            y.innerHTML = "-";
+        }
+        else {
+            x.style.display = "none";
+            y.innerHTML = "+";
+        }
+    }
+
+    function updateMatchScore(scheduleId) {
+        var x = document.getElementById("{{'showUpdateMatchScore'" + scheduleId + "}}");
+        var y = document.getElementById("{{'showUpdateMatchScoreButton'" + scheduleId + "}}");
         if (x.style.display === "none") {
             x.style.display = "block";
             y.innerHTML = "-";

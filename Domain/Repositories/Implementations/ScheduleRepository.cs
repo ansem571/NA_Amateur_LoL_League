@@ -29,6 +29,12 @@ namespace Domain.Repositories.Implementations
             return await _table.ReadAllAsync();
         }
 
+        public async Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync()
+        {
+            return await _table.ReadManyAsync(
+                "(HomeTeamWins is not null AND HomeTeamWins > 0) or (AwayTeamWins is not null AND AwayTeamWins > 0)");
+        }
+
         public async Task<bool> InsertAsync(IEnumerable<ScheduleEntity> entities)
         {
             entities = entities.ToList();

@@ -14,5 +14,6 @@ namespace Domain.Services.Interfaces
         Task<(bool result, string message)> SaveFileAsync(IFormFile file, Guid rosterId);
         Task<bool> UpdateTeamNameAsync(string newTeamName, Guid rosterId);
         Task<bool> SetPlayerAsSubAsync(string summonerName, Guid rosterId);
+        Task<bool> AddToTeamScoreAsync(string teamName, int wins, int loses);
     }
 }

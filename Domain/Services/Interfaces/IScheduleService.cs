@@ -12,5 +12,6 @@ namespace Domain.Services.Interfaces
         Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId);
         Task<bool> UpdateScheduleAsync(ScheduleView view);
         Task<bool> CreateFullScheduleAsync();
+        Task<Dictionary<string, IEnumerable<RosterView>>> SetupStandings();
     }
 }

@@ -1,0 +1,40 @@
+﻿@model Dictionary<string, IEnumerable<Domain.Views.RosterView>>
+@{
+    ViewBag.Title = "Standings";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@{
+    if (!Model.ToList().Any())
+    {
+        <div class="row">No official rosters yet. Check back later.</div>
+    }
+    else
+    {
+        foreach (var division in Model)
+        {
+            <div class="row">
+                <label>@division.Key</label>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Team Name</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                    </tr>
+                    @foreach (var team in division.Value)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
+                            <td>@team.Wins</td>
+                            <td>@team.Loses</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    }
+}
+
+<script>
+</script>
