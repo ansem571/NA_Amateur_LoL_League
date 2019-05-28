@@ -204,7 +204,7 @@ namespace Domain.Services.Implementations
 
             foreach (var division in rostersGrouped)
             {
-                var teamsInDivision = division.Value.OrderByDescending(x => x.Points).ThenByDescending(x => x.Wins).ToList();
+                var teamsInDivision = division.Value.OrderByDescending(x => x.Points).ThenByDescending(x => x.Wins).ThenBy(x=>x.Loses).ToList();
                 var tempList = new List<RosterView>(teamsInDivision);
 
                 foreach (var team in tempList)
