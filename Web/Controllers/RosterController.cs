@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
+using Domain.Helpers;
 using Domain.Services.Interfaces;
 using Domain.Views;
 using Microsoft.AspNetCore.Http;
@@ -231,9 +232,30 @@ namespace Web.Controllers
             try
             {
                 view.GameInfos = view.GameInfos.Where(x => x.GamePlayed).ToList();
-                if (!view.GameInfos.Any() || view.GameInfos.Count < 2)
+                var isNullCheck = false;
+                foreach (var gameInfo in view.GameInfos)
                 {
-                    throw new Exception("View was not setup right");
+                    isNullCheck = Properties<GameInfo>.HasEmptyProperties(gameInfo);
+                    if (isNullCheck)
+                    {
+                        break;
+                    }
+
+                    isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.BlueTeam);
+                    if (isNullCheck)
+                    {
+                        break;
+                    }
+
+                    isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.RedTeam);
+                    if (isNullCheck)
+                    {
+                        break;
+                    }
+                }
+                if (!view.GameInfos.Any() || view.GameInfos.Count < 2 || isNullCheck)
+                {
+                    throw new Exception("Form was not setup right");
                 }
 
                 var result = await _googleDriveService.SendFileData(view);

@@ -73,6 +73,7 @@ namespace Domain.Views
         /// <summary>
         /// Will only be used for games 3,4,5 of series
         /// </summary>
+        [Required]
         public bool GamePlayed { get; set; } = true;
     }
 }
