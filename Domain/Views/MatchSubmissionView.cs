@@ -75,5 +75,8 @@ namespace Domain.Views
         /// </summary>
         [Required]
         public bool GamePlayed { get; set; } = true;
+
+        public bool BlueTeamForfeit { get; set; } = false;
+        public bool RedTeamForfeit { get; set; } = false;
     }
 }

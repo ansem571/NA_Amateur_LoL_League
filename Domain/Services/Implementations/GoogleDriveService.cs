@@ -153,6 +153,16 @@ namespace Domain.Services.Implementations
                             {
                                 csvWriter.WriteField("");
                                 csvWriter.WriteField(gameInfo.TeamWithSideSelection);
+                                if (gameInfo.BlueTeamForfeit)
+                                {
+                                    csvWriter.WriteField("Red by Blue team forfeit");
+                                    break;
+                                }
+                                if(gameInfo.RedTeamForfeit)
+                                {
+                                    csvWriter.WriteField("Blue by Red team forfeit");
+                                    break;
+                                }
                                 csvWriter.WriteField(gameInfo.BlueSideWinner ? "Blue" : "Red");
                                 csvWriter.WriteField(gameInfo.ProdraftSpectateLink);
                                 csvWriter.WriteField(gameInfo.MatchHistoryLink);

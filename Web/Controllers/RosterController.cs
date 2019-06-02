@@ -231,25 +231,40 @@ namespace Web.Controllers
         {
             try
             {
-                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed).ToList();
+                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed || x.RedTeamForfeit || x.BlueTeamForfeit).ToList();
                 var isNullCheck = false;
                 foreach (var gameInfo in view.GameInfos)
                 {
                     isNullCheck = Properties<GameInfo>.HasEmptyProperties(gameInfo);
                     if (isNullCheck)
                     {
+                        if (gameInfo.BlueTeamForfeit || gameInfo.RedTeamForfeit)
+                        {
+                            isNullCheck = false;
+                            continue;
+                        }
                         break;
                     }
 
                     isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.BlueTeam);
                     if (isNullCheck)
                     {
+                        if (gameInfo.BlueTeamForfeit || gameInfo.RedTeamForfeit)
+                        {
+                            isNullCheck = false;
+                            continue;
+                        }
                         break;
                     }
 
                     isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.RedTeam);
                     if (isNullCheck)
                     {
+                        if (gameInfo.BlueTeamForfeit || gameInfo.RedTeamForfeit)
+                        {
+                            isNullCheck = false;
+                            continue;
+                        }
                         break;
                     }
                 }
