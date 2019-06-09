@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Views;
+using Microsoft.AspNetCore.Http;
 
 namespace Domain.Services.Interfaces
 {
@@ -14,5 +15,7 @@ namespace Domain.Services.Interfaces
         Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerNames);
         Task<bool> RemovePlayerFromRosterAsync(Guid summonerId, Guid rosterId);
         Task<bool> AssignTeamCaptain(TeamCaptainView view);
+
+        Task<bool> UploadPlayerStatsAsync(IEnumerable<IFormFile> files);
     }
 }

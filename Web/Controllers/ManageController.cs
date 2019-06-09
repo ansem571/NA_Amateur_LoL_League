@@ -47,7 +47,7 @@ namespace Web.Controllers
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task<IActionResult> InvalidUser()
+        public IActionResult InvalidUser()
         {
             return View("InvalidUser");
         }
@@ -65,7 +65,7 @@ namespace Web.Controllers
             {
                 await _signInManager.SignOutAsync();
                 _logger.LogInformation($"User {user.Email} was signed in, but blacklisted");
-                return await InvalidUser();
+                return InvalidUser();
             }
 
             var accountInfo = new IndexViewModel
