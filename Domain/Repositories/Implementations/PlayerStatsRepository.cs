@@ -31,6 +31,11 @@ namespace Domain.Repositories.Implementations
             return entities;
         }
 
+        public async Task<IEnumerable<PlayerStatsEntity>> GetAllStatsAsync()
+        {
+            return await _table.ReadAllAsync();
+        }
+
         public async Task<bool> InsertAsync(IEnumerable<PlayerStatsEntity> stats)
         {
             stats = stats.ToList();

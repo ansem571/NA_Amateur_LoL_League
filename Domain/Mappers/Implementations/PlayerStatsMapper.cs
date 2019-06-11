@@ -19,9 +19,9 @@ namespace Domain.Mappers.Implementations
                 Deaths = entity.Deaths,
                 Assists = entity.Assists,
                 Kda = Math.Round((entity.Kills + entity.Assists)/(float)entity.Deaths, 2),
-                CSperMin = Math.Round(entity.CS/(float)entity.GameTime, 2),
-                DamagePerMin = Math.Round(entity.Damage/entity.GameTime, 2),
-                Kp = Math.Round((entity.Kills/(float)entity.TotalTeamKills) * 100, 1),
+                CSperMin = Math.Round(entity.CS/(float)entity.GameTime.TotalMinutes, 2),
+                DamagePerMin = Math.Round(entity.Gold/(float)entity.GameTime.TotalMinutes, 2),
+                Kp = Math.Round(((entity.Kills + entity.Assists) / (float)entity.TotalTeamKills) * 100, 1),
                 VisionScore = entity.VisionScore
             };
         }

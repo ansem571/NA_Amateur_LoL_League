@@ -1,0 +1,15 @@
+﻿@model string
+@using Web.Views.Manage
+@{
+    ViewData["Title"] = "Player Stats";
+}
+
+<div class="row">
+    @Model
+</div>
+<div class="row">
+    <form asp-controller="Admin" asp-action="UploadStatsAsync" method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple=""/>
+        <button type="submit">Upload Stats</button>
+    </form>
+</div>

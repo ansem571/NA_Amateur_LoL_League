@@ -10,6 +10,7 @@ namespace Domain.Repositories.Interfaces
     {
         Task<PlayerStatsEntity> GetStatsForSummonerAsync(Guid summonerId);
         Task<IEnumerable<PlayerStatsEntity>> GetStatsForSummonersAsync(IEnumerable<Guid> summonerIds);
+        Task<IEnumerable<PlayerStatsEntity>> GetAllStatsAsync();
         Task<bool> InsertAsync(IEnumerable<PlayerStatsEntity> stats);
         Task<bool> UpdateAsync(IEnumerable<PlayerStatsEntity> stats);
         Task<bool> DeleteAsync(IEnumerable<PlayerStatsEntity> stats);

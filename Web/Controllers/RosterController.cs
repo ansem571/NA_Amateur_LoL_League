@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
+using Domain.Helpers;
 using Domain.Services.Interfaces;
 using Domain.Views;
 using Microsoft.AspNetCore.Http;
@@ -230,10 +231,46 @@ namespace Web.Controllers
         {
             try
             {
-                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed).ToList();
-                if (!view.GameInfos.Any() || view.GameInfos.Count < 2)
+                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed || x.AwayTeamForfeit || x.HomeTeamForfeit).ToList();
+                var isNullCheck = false;
+                foreach (var gameInfo in view.GameInfos)
                 {
-                    throw new Exception("View was not setup right");
+                    isNullCheck = Properties<GameInfo>.HasEmptyProperties(gameInfo);
+                    if (isNullCheck)
+                    {
+                        if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
+                        {
+                            isNullCheck = false;
+                            continue;
+                        }
+                        break;
+                    }
+
+                    isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.BlueTeam);
+                    if (isNullCheck)
+                    {
+                        if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
+                        {
+                            isNullCheck = false;
+                            continue;
+                        }
+                        break;
+                    }
+
+                    isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.RedTeam);
+                    if (isNullCheck)
+                    {
+                        if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
+                        {
+                            isNullCheck = false;
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                if (!view.GameInfos.Any() || view.GameInfos.Count < 2 || isNullCheck)
+                {
+                    throw new Exception("Form was not setup right");
                 }
 
                 var result = await _googleDriveService.SendFileData(view);
