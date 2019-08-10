@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Domain.Views;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,7 @@ namespace Web.Controllers
     {
         private readonly UserManager<UserEntity> _userManager;
         private readonly SignInManager<UserEntity> _signInManager;
+        private readonly IAccountService _accountService;
         private readonly IEmailService _emailSender;
         private readonly ILogger _logger;
 
@@ -28,16 +30,39 @@ namespace Web.Controllers
             UserManager<UserEntity> userManager,
             SignInManager<UserEntity> signInManager,
             IEmailService emailSender,
-            ILogger logger)
+            ILogger logger, IAccountService accountService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
         }
 
         [TempData]
         public string ErrorMessage { get; set; }
+
+        [HttpGet]
+        public async Task<IActionResult> SuccessfulPayment()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            await _accountService.UpdateSummonerValidAsync(user);
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CancelPayment()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RegisterForSeason()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var summoner = await _accountService.GetSummonerViewAsync(user);
+            return View(summoner);
+        }
 
         [HttpGet]
         [AllowAnonymous]

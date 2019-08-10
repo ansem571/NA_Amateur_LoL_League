@@ -5,61 +5,64 @@
 }
 
 <h2>@ViewData["Title"]</h2>
-<table class="table table-bordered">
-    <tr>
-        @{
-            var minTeamCount = 5;
-            var maxTeamSize = Model.Max(x => x.Summoners.Count);
-            var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
-
-            for (var i = 0; i < teamCount; i++)
-            {
-                var index = i + 1;
-                <th>
-                    <div>
-
-                        @if (index > minTeamCount)
-                        {
-                            <div>Sub@(index - minTeamCount)</div>
-                        }
-                        else
-                        {
-                            <div>@((SummonerRoleEnum)index)</div>
-                        }
-                    </div>
-                </th>
-            }
-        }
-        <th>Looking For</th>
-    </tr>
-    @foreach (var group in Model)
-    {
+@if (@Model.Any())
+{
+    <table class="table table-bordered">
         <tr>
             @{
-                var unused = new List<SummonerRoleEnum>
+                var minTeamCount = 5;
+                var maxTeamSize = Model.Max(x => x.Summoners.Count);
+                var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+                for (var i = 0; i < teamCount; i++)
                 {
-                    SummonerRoleEnum.Top, SummonerRoleEnum.Jungle, SummonerRoleEnum.Mid, SummonerRoleEnum.Adc, SummonerRoleEnum.Sup
-                };
-                for (var index = 0; index < group.Summoners.Count; index++)
-                {
-                    var player = group.Summoners[index];
-                    if (string.IsNullOrEmpty(player.SummonerName))
-                    {
-                        <td>Unfilled</td>
-                    }
-                    if (!string.IsNullOrEmpty(player.SummonerName))
-                    {
-                        <td>
-                            <div>@player.SummonerName - @player.Rank</div>
-                            @if (index > 4)
+                    var index = i + 1;
+                    <th>
+                        <div>
+
+                            @if (index > minTeamCount)
                             {
-                                <div> - @player.RoleForTeam</div>
+                                <div>Sub@(index - minTeamCount)</div>
                             }
-                        </td>
-                    }
+                            else
+                            {
+                                <div>@((SummonerRoleEnum) index)</div>
+                            }
+                        </div>
+                    </th>
                 }
-                <td>@group.LookingForString</td>
             }
+            <th>Looking For</th>
         </tr>
-    }
-</table>
+        @foreach (var group in Model)
+        {
+            <tr>
+                @{
+                    var unused = new List<SummonerRoleEnum>
+                    {
+                        SummonerRoleEnum.Top, SummonerRoleEnum.Jungle, SummonerRoleEnum.Mid, SummonerRoleEnum.Adc, SummonerRoleEnum.Sup
+                    };
+                    for (var index = 0; index < group.Summoners.Count; index++)
+                    {
+                        var player = group.Summoners[index];
+                        if (string.IsNullOrEmpty(player.SummonerName))
+                        {
+                            <td>Unfilled</td>
+                        }
+                        if (!string.IsNullOrEmpty(player.SummonerName))
+                        {
+                            <td>
+                                <div>@player.SummonerName - @player.Rank</div>
+                                @if (index > 4)
+                                {
+                                    <div> - @player.RoleForTeam</div>
+                                }
+                            </td>
+                        }
+                    }
+                    <td>@group.LookingForString</td>
+                }
+            </tr>
+        }
+    </table>
+}

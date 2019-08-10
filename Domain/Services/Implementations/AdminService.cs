@@ -27,12 +27,14 @@ namespace Domain.Services.Implementations
         private readonly IRosterService _rosterService;
         private readonly ITierDivisionMapper _tierDivisionMapper;
         private readonly IPlayerStatsRepository _playerStatsRepository;
+        private readonly ISeasonInfoRepository _seasonInfoRepository;
 
         private const int MinTeamCountRequirement = 5;
 
         public AdminService(ILogger logger, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
-            ITeamCaptainRepository teamCaptainRepository, IRosterService rosterService, ITierDivisionMapper tierDivisionMapper, IPlayerStatsRepository playerStatsRepository)
+            ITeamCaptainRepository teamCaptainRepository, IRosterService rosterService, ITierDivisionMapper tierDivisionMapper, IPlayerStatsRepository playerStatsRepository,
+            ISeasonInfoRepository seasonInfoRepository)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -52,12 +54,15 @@ namespace Domain.Services.Implementations
                                   throw new ArgumentNullException(nameof(tierDivisionMapper));
             _playerStatsRepository = playerStatsRepository ??
                                      throw new ArgumentNullException(nameof(playerStatsRepository));
+            _seasonInfoRepository = seasonInfoRepository ??
+                                    throw new ArgumentNullException(nameof(playerStatsRepository));
         }
 
         public async Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync()
         {
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
             var summonersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
             var summoners = (await summonersTask).ToList();
             var rosters = await rostersTask;
@@ -100,6 +105,8 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerIds)
         {
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+
             summonerIds = summonerIds.ToList();
             var result = false;
             try
@@ -128,7 +135,8 @@ namespace Domain.Services.Implementations
                     throw new Exception("Cannot make a team with less than 5 players");
                 }
 
-                var teamTierScore = 0;
+
+                var teamTierScores = new List<int>();
                 var teamPlayers = new List<TeamPlayerEntity>();
                 foreach (var summoner in summoners)
                 {
@@ -137,15 +145,16 @@ namespace Domain.Services.Implementations
                         SummonerId = summoner.Id
                     });
                     var tierScore = int.Parse((await _lookupRepository.GetLookupEntity(summoner.Tier_DivisionId)).Value);
-                    teamTierScore += tierScore + summoner.CurrentLp;
+                    teamTierScores.Add(tierScore + summoner.CurrentLp);
                 }
 
-                var teamsCount = (await _teamRosterRepository.GetAllTeamsAsync()).Count();
+                var teamsCount = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).Count();
+                var teamTierScore = teamTierScores.OrderByDescending(x => x).Take(MinTeamCountRequirement).Sum();
                 var team = new TeamRosterEntity
                 {
                     Id = Guid.NewGuid(),
                     TeamName = $"Team{teamsCount}",
-                    TeamTierScore = teamTierScore / summoners.Count
+                    TeamTierScore = teamTierScore / MinTeamCountRequirement
                 };
 
                 var createTeamResult = await _teamRosterRepository.CreateAsync(team);
@@ -212,7 +221,8 @@ namespace Domain.Services.Implementations
         public async Task<bool> UploadPlayerStatsAsync(IEnumerable<IFormFile> files)
         {
             var newStats = new List<PartialPlayerInfo>();
-            var playerStatsTask = _playerStatsRepository.GetAllStatsAsync();
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var playerStatsTask = _playerStatsRepository.GetAllStatsAsync(seasonInfo.Id);
             var registeredPlayersTask = _summonerInfoRepository.GetAllSummonersAsync();
             foreach (var file in files)
             {
@@ -240,7 +250,7 @@ namespace Domain.Services.Implementations
                         {
                             foreach (var stat in matchStats)
                             {
-                                var strDuration = (string) sheet.Rows[1][4];
+                                var strDuration = (string)sheet.Rows[1][4];
                                 var duration = TimeSpan.Parse(strDuration);
                                 stat.Duration = duration;
                             }
@@ -259,7 +269,7 @@ namespace Domain.Services.Implementations
                             for (var row = 1; row < sheet.Rows.Count; row++)
                             {
                                 var player = matchStats[row - 1];
-                                player.Name = (string) sheet.Rows[row][4];
+                                player.Name = (string)sheet.Rows[row][4];
                                 player.Assists = Convert.ToInt32((double)sheet.Rows[row][7]);
                                 player.Deaths = Convert.ToInt32((double)sheet.Rows[row][9]);
                                 player.Gold = Convert.ToInt32((double)sheet.Rows[row][16]);
@@ -275,7 +285,7 @@ namespace Domain.Services.Implementations
                                 player.CS = Convert.ToInt32((double)sheet.Rows[row][22]);
                                 player.VisionScore = Convert.ToInt32((double)sheet.Rows[row][23]);
                             }
-                            for(var j = 0; j < matchStats.Count; j++)
+                            for (var j = 0; j < matchStats.Count; j++)
                             {
                                 var player = matchStats[j];
                                 if (j < 5)
@@ -308,8 +318,8 @@ namespace Domain.Services.Implementations
                     newList.Add(newStat);
                 }
             }
-            var registeredPlayers = (await registeredPlayersTask).OrderBy(x=>x.SummonerName).ToDictionary(x=>x.SummonerName.ToLowerInvariant(), x=>x);
-            var playerStats = (await playerStatsTask).ToDictionary(x=>x.SummonerId, x=>x);
+            var registeredPlayers = (await registeredPlayersTask).OrderBy(x => x.SummonerName).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
+            var playerStats = (await playerStatsTask).ToDictionary(x => x.SummonerId, x => x);
 
             var updateList = new List<PlayerStatsEntity>();
             var insertList = new List<PlayerStatsEntity>();
@@ -325,18 +335,16 @@ namespace Domain.Services.Implementations
                     }
                     else
                     {
-                        var newStat = new PlayerStatsEntity(playersStat, registeredPlayer.Id);
+                        var newStat = new PlayerStatsEntity(playersStat, registeredPlayer.Id, seasonInfo.Id);
                         insertList.Add(newStat);
                     }
                 }
             }
-             
+
             var insertResult = _playerStatsRepository.InsertAsync(insertList);
             var updateResult = _playerStatsRepository.UpdateAsync(updateList);
             return await insertResult && await updateResult;
         }
-
-
 
         public async Task<bool> UpdateRosterTierScoreAsync()
         {
@@ -344,14 +352,14 @@ namespace Domain.Services.Implementations
 
             foreach (var roster in rosters)
             {
-                var currentScore = 0;
+                var teamTierScores = new List<int>();
                 foreach (var player in roster.Players)
                 {
                     var divisionId = _tierDivisionMapper.Map(player.TierDivision);
                     var divisionScore = int.Parse((await _lookupRepository.GetLookupEntity(divisionId)).Value);
-                    currentScore += (divisionScore + player.CurrentLp);
+                    teamTierScores.Add(divisionScore + player.CurrentLp);
                 }
-
+                var currentScore = teamTierScores.OrderByDescending(x => x).Take(MinTeamCountRequirement).Sum() / MinTeamCountRequirement;
                 currentScore /= roster.Players.Count();
                 var rosterEntity = await _teamRosterRepository.GetByTeamIdAsync(roster.RosterId);
                 rosterEntity.TeamTierScore = currentScore;

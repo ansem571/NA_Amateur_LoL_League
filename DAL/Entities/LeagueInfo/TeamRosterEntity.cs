@@ -13,5 +13,6 @@ namespace DAL.Entities.LeagueInfo
         public int? Wins { get; set; }
         public int? Loses { get; set; }
         public int? Points { get; set; }
+        public Guid? SeasonInfoId { get; set; }
     }
 }

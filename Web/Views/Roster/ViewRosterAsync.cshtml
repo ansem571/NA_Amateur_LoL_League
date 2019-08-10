@@ -82,8 +82,7 @@
             const int minTeamCount = 5;
             var maxTeamSize = Model.RosterView.Players.Count();
             var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
-
-            //TODO: put stats for players here
+            
             for (var i = 0; i < teamCount; i++)
             {
                 var player = Model.RosterView.Players.ToList()[i];

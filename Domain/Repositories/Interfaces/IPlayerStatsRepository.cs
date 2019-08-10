@@ -8,9 +8,9 @@ namespace Domain.Repositories.Interfaces
 {
     public interface IPlayerStatsRepository
     {
-        Task<PlayerStatsEntity> GetStatsForSummonerAsync(Guid summonerId);
-        Task<IEnumerable<PlayerStatsEntity>> GetStatsForSummonersAsync(IEnumerable<Guid> summonerIds);
-        Task<IEnumerable<PlayerStatsEntity>> GetAllStatsAsync();
+        Task<PlayerStatsEntity> GetStatsForSummonerAsync(Guid summonerId, Guid? seasonInfoId);
+        Task<IEnumerable<PlayerStatsEntity>> GetStatsForSummonersAsync(IEnumerable<Guid> summonerIds, Guid? seasonInfoId);
+        Task<IEnumerable<PlayerStatsEntity>> GetAllStatsAsync(Guid? seasonInfoId);
         Task<bool> InsertAsync(IEnumerable<PlayerStatsEntity> stats);
         Task<bool> UpdateAsync(IEnumerable<PlayerStatsEntity> stats);
         Task<bool> DeleteAsync(IEnumerable<PlayerStatsEntity> stats);

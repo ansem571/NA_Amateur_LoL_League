@@ -15,5 +15,6 @@ namespace Domain.Views
         public double DamagePerMin { get; set; }
         public double Kp { get; set; }
         public int VisionScore { get; set; }
+        public Guid? SeasonInfoId { get; set; }
     }
 }

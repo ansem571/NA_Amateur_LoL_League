@@ -47,8 +47,8 @@ namespace Domain.Services.Implementations
             var views = new Dictionary<string, List<ScheduleView>>();
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Now);
             var divisionsTask = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
-            var schedulesTask = _scheduleRepository.GetAllAsync();
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
             var rosters = (await rostersTask).ToDictionary(x => x.Id, x => x);
             var divisions = (await divisionsTask).ToList();
@@ -103,8 +103,9 @@ namespace Domain.Services.Implementations
         public async Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId)
         {
             var views = new List<ScheduleView>();
-            var schedulesTask = _scheduleRepository.GetAllAsync();
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
             var rosters = (await rostersTask).ToDictionary(x => x.Id, x => x);
             var schedules = (await schedulesTask).ToList();

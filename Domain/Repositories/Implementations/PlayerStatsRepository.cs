@@ -18,22 +18,22 @@ namespace Domain.Repositories.Implementations
             _table = table ?? throw new ArgumentNullException(nameof(table));
         }
 
-        public async Task<PlayerStatsEntity> GetStatsForSummonerAsync(Guid summonerId)
+        public async Task<PlayerStatsEntity> GetStatsForSummonerAsync(Guid summonerId, Guid? seasonInfoId)
         {
-            var entity = (await _table.ReadManyAsync("SummonerId = @summonerId", new { summonerId }, top: 1))
+            var entity = (await _table.ReadManyAsync("SummonerId = @summonerId AND SeasonInfoId = @seasonInfoId", new { summonerId, seasonInfoId }, top: 1))
                 .FirstOrDefault();
             return entity;
         }
 
-        public async Task<IEnumerable<PlayerStatsEntity>> GetStatsForSummonersAsync(IEnumerable<Guid> summonerIds)
+        public async Task<IEnumerable<PlayerStatsEntity>> GetStatsForSummonersAsync(IEnumerable<Guid> summonerIds, Guid? seasonInfoId)
         {
-            var entities = await _table.ReadManyAsync("SummonerId in @summonerIds", new { summonerIds });
+            var entities = await _table.ReadManyAsync("SummonerId in @summonerIds AND SeasonInfoId = @seasonInfoId", new { summonerIds, seasonInfoId });
             return entities;
         }
 
-        public async Task<IEnumerable<PlayerStatsEntity>> GetAllStatsAsync()
+        public async Task<IEnumerable<PlayerStatsEntity>> GetAllStatsAsync(Guid? seasonInfoId)
         {
-            return await _table.ReadAllAsync();
+            return await _table.ReadManyAsync("SeasonInfoId = @seasonInfoId", new { seasonInfoId });
         }
 
         public async Task<bool> InsertAsync(IEnumerable<PlayerStatsEntity> stats)

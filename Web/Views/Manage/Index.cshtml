@@ -26,7 +26,7 @@
                 }
                 else
                 {
-                    <input asp-for="ProfileInfo.Email" class="form-control"/>
+                    <input asp-for="ProfileInfo.Email" class="form-control" />
                     <button asp-action="SendVerificationEmail" class="btn btn-link">Send verification email</button>
                 }
                 <span asp-validation-for="ProfileInfo.Email" class="text-danger"></span>
@@ -38,7 +38,7 @@
             </div>
             <button type="submit" class="btn btn-default">Save</button>
         </form>
-              
+
     </div>
 </div>
 @if (Model.ProfileInfo.IsEmailConfirmed)
@@ -53,6 +53,11 @@
         <br />
     </div>
     <div class="row">
+        @if (Model.ProfileInfo.Username == "Ansem571")
+        {
+            @Html.Partial("~/Views/Account/RegisterForSeason.cshtml", Model.SummonerInfo)
+        }
+
         @Html.Partial("~/Views/Summoner/_RequestSummonerPartial.cshtml", Model.SummonerInfo)
     </div>
 }

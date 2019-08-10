@@ -24,9 +24,9 @@ namespace Domain.Repositories.Implementations
             return await _table.ReadOneAsync(id);
         }
 
-        public async Task<IEnumerable<ScheduleEntity>> GetAllAsync()
+        public async Task<IEnumerable<ScheduleEntity>> GetAllAsync(Guid? seasonInfoId)
         {
-            return await _table.ReadAllAsync();
+            return await _table.ReadManyAsync("SeasonInfoId = @seasonInfoId", new { seasonInfoId });
         }
 
         public async Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync()

@@ -106,8 +106,8 @@ namespace Domain.Services.Implementations
         public async Task<IEnumerable<RosterView>> GetAllRosters()
         {
             var list = new List<RosterView>();
-
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var captainsTask = _teamCaptainRepository.GetAllTeamCaptainsAsync();
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
             var allPlayersTask = _teamPlayerRepository.ReadAllAsync();
@@ -171,14 +171,14 @@ namespace Domain.Services.Implementations
         /// <returns></returns>
         public async Task<RosterView> GetRosterAsync(Guid rosterId)
         {
-            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
 
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
             var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);
             var captainTask = _teamCaptainRepository.GetCaptainByRosterId(rosterId);
             var playersSummoner = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).ToList();
             var summonersTask = _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummoner.Select(x => x.SummonerId));
-            var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummoner.Select(x => x.SummonerId));
+            var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummoner.Select(x => x.SummonerId), seasonInfo.Id);
 
             var mappedStats = _playerStatsMapper.Map(playerStats).ToList();
 
@@ -187,7 +187,6 @@ namespace Domain.Services.Implementations
 
             var summonerViews = _summonerMapper.MapDetailed(summoners, alternateAccounts, mappedStats).ToList();
 
-            var seasonInfo = await seasonInfoTask;
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
             var captain = await captainTask;
             var roster = await rosterTask;

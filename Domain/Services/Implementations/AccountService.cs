@@ -133,6 +133,15 @@ namespace Domain.Services.Implementations
             }
         }
 
+        public async Task<bool> UpdateSummonerValidAsync(UserEntity user)
+        {
+            var account = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
+
+            account.IsValidPlayer = true;
+
+            return await _summonerInfoRepository.UpdateAsync(account);
+        }
+
         public async Task<bool> UpdateAlternateAccountsAsync(Guid summonerId, IEnumerable<AlternateAccountView> viewList)
         {
             var newList = viewList.ToList();
@@ -321,8 +330,9 @@ namespace Domain.Services.Implementations
 
         public async Task<FpSummonerView> GetFpSummonerView()
         {
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
-            var teams = (await _teamRosterRepository.GetAllTeamsAsync()).ToDictionary(x => x.Id, x => x);
+            var teams = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).ToDictionary(x => x.Id, x => x);
 
             var usedSummoners = new Dictionary<Guid, SummonerInfoEntity>();
             var fpSummonerView = new FpSummonerView();

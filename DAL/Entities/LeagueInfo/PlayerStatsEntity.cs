@@ -21,10 +21,11 @@ namespace DAL.Entities.LeagueInfo
         public int VisionScore { get; set; }
         public TimeSpan GameTime { get; set; }
         public int Games { get; set; }
+        public Guid? SeasonInfoId { get; set; }
 
         public PlayerStatsEntity() { }
 
-        public PlayerStatsEntity(PartialPlayerInfo newStats, Guid summonerId)
+        public PlayerStatsEntity(PartialPlayerInfo newStats, Guid summonerId, Guid seasonInfoId)
         {
             Id = Guid.NewGuid();
             SummonerId = summonerId;
@@ -37,6 +38,7 @@ namespace DAL.Entities.LeagueInfo
             GameTime = newStats.Duration;
             TotalTeamKills = newStats.TotalTeamKills;
             Games = newStats.Games;
+            SeasonInfoId = seasonInfoId;
         }
 
         public void UpdateValues(PartialPlayerInfo newStats)

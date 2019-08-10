@@ -19,17 +19,20 @@ namespace Domain.Services.Implementations
         private readonly IDivisionRepository _divisionRepository;
         private readonly IPlayoffSeedRepository _playoffSeedRepository;
 
-        public PlayoffService(IPlayoffSeedRepository playoffSeedRepository)
+        public PlayoffService(IPlayoffSeedRepository playoffSeedRepository, ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository, IDivisionRepository divisionRepository)
         {
             _playoffSeedRepository =
                 playoffSeedRepository ?? throw new ArgumentNullException(nameof(playoffSeedRepository));
+            _teamRosterRepository = teamRosterRepository;
+            _seasonInfoRepository = seasonInfoRepository;
+            _divisionRepository = divisionRepository;
         }
 
         public async Task<IEnumerable<PlayoffSeedView>> GetPlayoffSchedule()
         {
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
 
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var divisions = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
 
 
@@ -39,7 +42,7 @@ namespace Domain.Services.Implementations
         public async Task<IEnumerable<PlayoffSeedView>> GetView()
         {
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync();
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var divisions = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
             throw new NotImplementedException();
         }
