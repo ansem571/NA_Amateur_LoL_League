@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
 using DAL.Entities.Logging;
+using Domain.Helpers;
 using Domain.Mappers.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -27,14 +28,14 @@ namespace Domain.Services.Implementations
                 var messageLogEntity = new MessageLogEntity
                 {
                     Id = Guid.NewGuid(),
-                    Timestamp = DateTime.Now,
+                    Timestamp = TimeZoneExtensions.GetCurrentTime(),
                     TypeId = _logLevelMapper.Map(logLevel),
                     Message = $"{formatter(state, exception)}",
                     Exception = exception?.ToString(),
                     InnerException = exception?.InnerException?.ToString(),
                     StackTrace = exception?.StackTrace,
                     Source = exception?.Source,
-                    CreatedOn = DateTime.Now,
+                    CreatedOn = TimeZoneExtensions.GetCurrentTime(),
                     CreatedBy = _createdBy
                 };
 

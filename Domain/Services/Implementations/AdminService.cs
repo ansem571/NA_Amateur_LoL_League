@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DAL.Contracts;
 using DAL.Entities.LeagueInfo;
+using Domain.Helpers;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
@@ -60,7 +61,7 @@ namespace Domain.Services.Implementations
 
         public async Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
             var summonersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
@@ -105,7 +106,7 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerIds)
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
 
             summonerIds = summonerIds.ToList();
             var result = false;
@@ -221,7 +222,7 @@ namespace Domain.Services.Implementations
         public async Task<bool> UploadPlayerStatsAsync(IEnumerable<IFormFile> files)
         {
             var newStats = new List<PartialPlayerInfo>();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
             var playerStatsTask = _playerStatsRepository.GetAllStatsAsync(seasonInfo.Id);
             var registeredPlayersTask = _summonerInfoRepository.GetAllSummonersAsync();
             foreach (var file in files)

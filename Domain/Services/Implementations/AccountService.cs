@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.UserData;
 using Domain.Exceptions;
+using Domain.Helpers;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
@@ -61,14 +62,9 @@ namespace Domain.Services.Implementations
         {
             try
             {
-                var date = DateTime.Now;
-                var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(date);
-
                 var newEntity = _summonerMapper.Map(view);
                 newEntity.Id = Guid.NewGuid();
-                newEntity.UserId = user.Id;
-                newEntity.IsValidPlayer = true;
-            
+                newEntity.UserId = user.Id;         
 
                 var result = await _summonerInfoRepository.InsertAsync(newEntity);
 
@@ -222,7 +218,7 @@ namespace Domain.Services.Implementations
 
         public async Task<SummonerRequestView> GetRequestedSummonersAsync(UserEntity user)
         {
-            var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).ToList();
+            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToList();
             var summonerEntity = summoners.First(x => x.UserId == user.Id);
             summoners.Remove(summonerEntity);
 
@@ -330,7 +326,7 @@ namespace Domain.Services.Implementations
 
         public async Task<FpSummonerView> GetFpSummonerView()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var teams = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).ToDictionary(x => x.Id, x => x);
 
@@ -387,7 +383,7 @@ namespace Domain.Services.Implementations
 
         public async Task<SeasonInfoViewPartial> GetSeasonInfoAsync()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Now);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime());
 
             var partialSeasonView = new SeasonInfoViewPartial
             {
