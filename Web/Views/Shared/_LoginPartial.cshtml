@@ -18,12 +18,11 @@
             <li>
                 <a asp-area="" asp-controller="Summoner" asp-action="Index">My SummonerInfo</a>
             </li>
-            @if (await UserManager.IsInRoleAsync(user, "Admin"))
-            {
-                <li>
-                    <a asp-area="" asp-controller="Account" asp-action="RegisterForSeason">Register For Season</a>
-                </li>
-            }
+
+            <li>
+                <a asp-area="" asp-controller="Account" asp-action="RegisterForSeason">Register For Season</a>
+            </li>
+
             <li>
                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Log out</button>
             </li>
