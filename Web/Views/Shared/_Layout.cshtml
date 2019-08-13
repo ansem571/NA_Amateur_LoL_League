@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Domain.Helpers
+@{
+    var showSeason = TimeZoneExtensions.GetCurrentTime() > new DateTime(2019, 08, 25);
+}
+
 <html>
 <head>
     <meta charset="utf-8" />
@@ -18,9 +22,9 @@
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container wide">
+        <div class="container">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <button type="button" class="navbar-toggle navbar-left" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -33,18 +37,23 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
                     <li><a asp-area="" asp-controller="Roster" asp-action="Index">Summoners</a></li>
-                    <li><a asp-area="" asp-controller="Roster" asp-action="TeamCreationViewAsync">Team Creation</a></li>
+                    @if (showSeason)
+                    {
+                        <li><a asp-area="" asp-controller="Roster" asp-action="TeamCreationViewAsync">Team Creation</a></li>
+                    }
                     <li><a asp-area="" asp-controller="Roster" asp-action="ViewAllRostersAsync">Official Rosters</a></li>
-                    <li><a asp-area="" asp-controller="Schedule" asp-action="Index">Schedule</a></li>
-                    <li><a asp-area="" asp-controller="Roster" asp-action="StandingsAsync">Standings</a></li>
-
+                    @if (!showSeason)
+                    {
+                        <li><a asp-area="" asp-controller="Schedule" asp-action="Index">Schedule</a></li>
+                        <li><a asp-area="" asp-controller="Roster" asp-action="StandingsAsync">Standings</a></li>
+                    }
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>
         </div>
     </nav>
     <div class="container body-content">
-        @RenderBody()     
+        @RenderBody()
         <hr />
         <footer>
             <p>&copy; 2019 - Casual eSports Amateur League LLC</p>

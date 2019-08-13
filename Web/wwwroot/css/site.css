@@ -20,14 +20,12 @@
     color: #f0f0f0;
 }
 
-.wide {
-    width: 1400px !important;
-}
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
+    padding-top: 75px;
 }
 
 /* Carousel */

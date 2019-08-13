@@ -19,12 +19,10 @@ body {
     background: #1c2951;
     color: #f0f0f0;
 }
-.wide {
-    width: 1400px !important;
-}
 .body-content {
     padding-left: 15px;
-    padding-right: 15px
+    padding-right: 15px;
+    padding-top: 75px;
 }
 
 .carousel-caption p {
