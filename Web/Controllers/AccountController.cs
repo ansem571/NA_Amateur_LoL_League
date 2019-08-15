@@ -5,6 +5,7 @@ using DAL.Entities.UserData;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -43,6 +44,7 @@ namespace Web.Controllers
         public string ErrorMessage { get; set; }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> SuccessfulPayment()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -51,12 +53,14 @@ namespace Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult CancelPayment()
         {
             return View();
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterForSeason()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -70,6 +74,12 @@ namespace Web.Controllers
         {
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            var url = HttpContext.Request.GetUri();
+            var urlStr = url.ToString();
+            if (urlStr.Contains("azurewebsites"))
+            {
+                return Redirect("http://www.casualeal.com/Account/Login");
+            }
 
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -92,6 +102,10 @@ namespace Web.Controllers
                     if (result.Succeeded)
                     {
                         _logger.LogInformation($"User {model.Email} was signed in successfully.");
+                        if (!string.IsNullOrEmpty(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
                         return RedirectToAction("Index", "Manage");
                     }
 
@@ -243,6 +257,12 @@ namespace Web.Controllers
         [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
         {
+            var url = HttpContext.Request.GetUri();
+            var urlStr = url.ToString();
+            if (urlStr.Contains("azurewebsites"))
+            {
+                return Redirect("http://www.casualeal.com/Account/Register");
+            }
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
