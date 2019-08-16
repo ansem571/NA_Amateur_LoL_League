@@ -58,6 +58,10 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/Index");
+            }
+            if (user == null)
+            {
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
             var blacklisted = await _blacklistRepository.GetByUserIdAsync(user.Id);
@@ -98,7 +102,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/Index");
             }
 
             var userName = user.UserName;
@@ -147,7 +151,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/SendVerificationEmail");
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -165,7 +169,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/ChangePassword");
             }
 
             var hasPassword = await _userManager.HasPasswordAsync(user);
@@ -190,7 +194,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/ChangePassword");
             }
 
             var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
@@ -213,7 +217,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/SetPassword");
             }
 
             var hasPassword = await _userManager.HasPasswordAsync(user);
@@ -239,7 +243,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/SetPassword");
             }
 
             var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
@@ -261,7 +265,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/ExternalLogins");
             }
 
             var model = new ExternalLoginsViewModel { CurrentLogins = await _userManager.GetLoginsAsync(user) };
@@ -293,7 +297,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/LinkLoginCallback");
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync(user.Id.ToString());
@@ -322,7 +326,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/RemoveLogin");
             }
 
             var result = await _userManager.RemoveLoginAsync(user, model.LoginProvider, model.ProviderKey);
@@ -342,7 +346,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/TwoFactorAuthentication");
             }
 
             var model = new TwoFactorAuthenticationViewModel
@@ -361,7 +365,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/Disable2faWarning");
             }
 
             if (!user.TwoFactorEnabled)
@@ -379,7 +383,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/Disable2fa");
             }
 
             var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
@@ -398,7 +402,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/EnableAuthenticator");
             }
 
             var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
@@ -429,7 +433,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/EnableAuthenticator");
             }
 
             // Strip spaces and hypens
@@ -462,7 +466,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/ResetAuthenticator");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
@@ -478,7 +482,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/GenerateRecoveryCodes");
             }
 
             if (!user.TwoFactorEnabled)

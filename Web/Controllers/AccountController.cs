@@ -68,6 +68,10 @@ namespace Web.Controllers
         public async Task<IActionResult> RegisterForSeason()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/RegisterForSeason");
+            }
             var summoner = await _accountService.GetSummonerViewAsync(user);
             return View(summoner);
         }
@@ -149,7 +153,7 @@ namespace Web.Controllers
 
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWith2fa");
             }
 
             var model = new LoginWith2faViewModel { RememberMe = rememberMe };
@@ -171,7 +175,7 @@ namespace Web.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWith2fa");
             }
 
             var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
@@ -204,7 +208,7 @@ namespace Web.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWithRecoveryCode");
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -225,7 +229,7 @@ namespace Web.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load two-factor authentication user.");
+                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWithRecoveryCode");
             }
 
             var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
@@ -419,7 +423,7 @@ namespace Web.Controllers
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
                 {
-                    throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+                    return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/ConfirmEmail");
                 }
 
                 var result = await _userManager.ConfirmEmailAsync(user, code);

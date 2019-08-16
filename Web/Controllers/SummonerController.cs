@@ -31,7 +31,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/Index");
             }
 
             var model = await _accountService.GetSummonerViewAsync(user);
@@ -52,7 +52,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/Index");
             }
 
             try
@@ -75,7 +75,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/RequestPlayers");
             }
 
             var model = await _accountService.GetRequestedSummonersAsync(user);
@@ -95,7 +95,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/RequestPlayers");
             }
 
             var tempList = new List<RequestedSummoner>();
