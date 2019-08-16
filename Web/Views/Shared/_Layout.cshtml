@@ -37,16 +37,17 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
                     <li><a asp-area="" asp-controller="Roster" asp-action="Index">Summoners</a></li>
-                    @if (showSeason)
+                    @if (!showSeason)
                     {
                         <li><a asp-area="" asp-controller="Roster" asp-action="TeamCreationViewAsync">Team Creation</a></li>
                     }
-                    <li><a asp-area="" asp-controller="Roster" asp-action="ViewAllRostersAsync">Official Rosters</a></li>
-                    @if (!showSeason)
+                    @if (showSeason)
                     {
+                        <li><a asp-area="" asp-controller="Roster" asp-action="ViewAllRostersAsync">Official Rosters</a></li>
                         <li><a asp-area="" asp-controller="Schedule" asp-action="Index">Schedule</a></li>
-                        <li><a asp-area="" asp-controller="Roster" asp-action="StandingsAsync">Standings</a></li>
                     }
+                    <li><a asp-area="" asp-controller="Roster" asp-action="StandingsAsync">Standings</a></li>
+
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>

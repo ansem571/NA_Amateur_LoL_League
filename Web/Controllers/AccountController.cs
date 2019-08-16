@@ -48,6 +48,10 @@ namespace Web.Controllers
         public async Task<IActionResult> SuccessfulPayment()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/SuccessfulPayment");
+            }
             await _accountService.UpdateSummonerValidAsync(user);
             return View();
         }
