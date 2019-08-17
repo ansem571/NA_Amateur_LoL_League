@@ -32,7 +32,7 @@ namespace Web.Controllers
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
         public ManageController(UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager,
-          IEmailService emailSender, ILogger logger, UrlEncoder urlEncoder, 
+          IEmailService emailSender, ILogger logger, UrlEncoder urlEncoder,
           IAccountService accountService, IBlacklistRepository blacklistRepository)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -58,7 +58,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/Index");
+                var returnUrl = "http://www.casualeal.com/Manage/Index";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
             if (user == null)
             {
@@ -102,7 +103,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/Index");
+                var returnUrl = "http://www.casualeal.com/Manage/Index";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var userName = user.UserName;
@@ -151,7 +153,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/SendVerificationEmail");
+                var returnUrl = "http://www.casualeal.com/Manage/SendVerificationEmail";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -169,7 +172,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/ChangePassword");
+                var returnUrl = "http://www.casualeal.com/Manage/ChangePassword";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var hasPassword = await _userManager.HasPasswordAsync(user);
@@ -194,7 +198,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/ChangePassword");
+                var returnUrl = "http://www.casualeal.com/Manage/ChangePassword";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
@@ -217,7 +222,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/SetPassword");
+                var returnUrl = "http://www.casualeal.com/Manage/SetPassword";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var hasPassword = await _userManager.HasPasswordAsync(user);
@@ -243,7 +249,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Manage/SetPassword");
+                var returnUrl = "http://www.casualeal.com/Manage/SetPassword";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);

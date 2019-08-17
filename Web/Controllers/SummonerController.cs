@@ -31,7 +31,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/Index");
+                var returnUrl = "http://www.casualeal.com/Summoner/Index";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var model = await _accountService.GetSummonerViewAsync(user);
@@ -52,7 +53,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/Index");
+                var returnUrl = "http://www.casualeal.com/Summoner/Index";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             try
@@ -75,7 +77,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/RequestPlayers");
+                var returnUrl = "http://www.casualeal.com/Summoner/RequestPlayers";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var model = await _accountService.GetRequestedSummonersAsync(user);
@@ -95,7 +98,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", "Account", routeValues: "http://www.casualeal.com/Summoner/RequestPlayers");
+                var returnUrl = "http://www.casualeal.com/Summoner/RequestPlayers";
+                return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
             var tempList = new List<RequestedSummoner>();

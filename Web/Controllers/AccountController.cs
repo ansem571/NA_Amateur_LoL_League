@@ -48,9 +48,11 @@ namespace Web.Controllers
         public async Task<IActionResult> SuccessfulPayment()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
-                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/SuccessfulPayment");
+                var returnUrl = "http://www.casualeal.com/Account/SuccessfulPayment";
+                return RedirectToAction("Login", routeValues: new { returnUrl });
             }
             await _accountService.UpdateSummonerValidAsync(user);
             return View();
@@ -70,7 +72,8 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/RegisterForSeason");
+                var returnUrl = "http://www.casualeal.com/Account/RegisterForSeason";
+                return RedirectToAction("Login", routeValues: new { returnUrl });
             }
             var summoner = await _accountService.GetSummonerViewAsync(user);
             return View(summoner);
@@ -423,7 +426,8 @@ namespace Web.Controllers
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
                 {
-                    return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/ConfirmEmail");
+                    var returnUrl = $"http://www.casualeal.com/Account/ConfirmEmail?userId={userId}code={code}";
+                    return RedirectToAction("Login", routeValues: new { returnUrl });
                 }
 
                 var result = await _userManager.ConfirmEmailAsync(user, code);
