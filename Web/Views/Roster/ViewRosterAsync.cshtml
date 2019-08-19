@@ -15,6 +15,8 @@
             <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
             <button type="submit">Submit name change</button>
         </form>
+
+        <button onclick="@("window.location.href='" + Url.Action("UpdateRosterLineup", "Roster", new { players = Model.RosterView.Players }) + "'");">Update Roster Lineup</button>
     }
 }
 <div class="row">
@@ -82,7 +84,7 @@
             const int minTeamCount = 5;
             var maxTeamSize = Model.RosterView.Players.Count();
             var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
-            
+
             for (var i = 0; i < teamCount; i++)
             {
                 var player = Model.RosterView.Players.ToList()[i];
@@ -234,9 +236,8 @@
                         if (Model.IsCaptain)
                         {
                             <td>
-                                <button
-                                    onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam}) + "'");"
-                                    class="btn">
+                                <button onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam}) + "'");"
+                                        class="btn">
                                     Send Match Detail Data
                                 </button>
                             </td>
@@ -251,6 +252,14 @@
 <script>
     function renameTeam() {
         var x = document.getElementById("updateRoster");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+    function setRosterLineup() {
+        var x = document.getElementById("updateRosterLineup");
         if (x.style.display === "none") {
             x.style.display = "block";
         } else {

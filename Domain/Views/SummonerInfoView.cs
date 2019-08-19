@@ -22,6 +22,8 @@ namespace Domain.Views
         public bool IsValid { get; set; }
         public bool IsSubOnly { get; set; }
 
+        public SummonerRoleEnum TeamRole { get; set; }
+
         public List<AlternateAccountView> AlternateAccounts { get; set; } = new List<AlternateAccountView>();
 
         public string StatusMessage { get; set; }

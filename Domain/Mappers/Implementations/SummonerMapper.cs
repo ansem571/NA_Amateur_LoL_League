@@ -49,12 +49,13 @@ namespace Domain.Mappers.Implementations
             {
                 SummonerName = view.SummonerName,
                 RoleId = _summonerRoleMapper.Map(view.Role),
-                OffRoleId = view.OffRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.OffRole) : default(Guid),
+                OffRoleId = view.OffRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.OffRole) : default(Guid?),
                 Tier_DivisionId = _tierDivisionMapper.Map(view.TierDivision),
                 OpGGUrlLink = view.OpGgUrl,
                 IsValidPlayer = view.IsValid,
                 CurrentLp = view.CurrentLp,
-                IsSubOnly = view.IsSubOnly
+                IsSubOnly = view.IsSubOnly,
+                TeamRoleId = view.TeamRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.TeamRole) : default(Guid?)
             };
         }
 
@@ -76,7 +77,8 @@ namespace Domain.Mappers.Implementations
                 OpGgUrl = entity.OpGGUrlLink,
                 IsValid = entity.IsValidPlayer,
                 PlayerStats = stats,
-                IsSubOnly = entity.IsSubOnly ?? false
+                IsSubOnly = entity.IsSubOnly ?? false,
+                TeamRole = entity.TeamRoleId == null ? _summonerRoleMapper.Map(entity.RoleId) : _summonerRoleMapper.Map(entity.TeamRoleId.Value)
             };
         }
 

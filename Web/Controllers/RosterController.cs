@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
@@ -306,6 +307,19 @@ namespace Web.Controllers
                 _logger.LogError(e, e.Message);
                 return RedirectToAction("ViewAllRostersAsync");
             }
+        }
+
+        [HttpGet]
+        public IActionResult UpdateRosterLineup(IEnumerable<DetailedSummonerInfoView> players)
+        {
+            return View(players);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateRosterLineup(UpdateRosterLineupView view)
+        {
+            //return View(model: players);
+            throw new NotImplementedException();
         }
     }
 }
