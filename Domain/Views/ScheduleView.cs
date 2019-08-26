@@ -14,5 +14,17 @@ namespace Domain.Views
         public DateTime WeekOf { get; set; }
         public DateTime? PlayTime { get; set; }
         public string CasterName { get; set; }
+
+        public ScheduleView() { }
+
+        public ScheduleView(string home, string away, DateTime week)
+        {
+            ScheduleId = Guid.NewGuid();
+            HomeTeam = home;
+            AwayTeam = away;
+            HomeTeamScore = 0;
+            AwayTeamScore = 0;
+            WeekOf = week;
+        }
     }
 }
