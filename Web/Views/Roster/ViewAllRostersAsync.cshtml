@@ -73,7 +73,7 @@
                         <th>Wins</th>
                         <th>Losses</th>
                     </tr>
-                    @foreach (var team in division.Value)
+                    @foreach (var team in division.Value.OrderBy(x=>x.TeamTierScore))
                     {
                         <tr>
                             <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
