@@ -6,7 +6,7 @@ namespace Domain.Views
     public class SeasonInfoView
     {
         public SeasonInfoViewPartial SeasonInfo { get; set; }
-        public IEnumerable<RosterView> Rosters { get; set; }      
+        public List<RosterView> Rosters { get; set; }      
         public string StatusMessage { get; set; }
     }
 

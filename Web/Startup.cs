@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Microsoft.AspNetCore.Builder;
@@ -35,6 +36,8 @@ namespace Web
 
             Task.Run(() => CreateAdminRole(services)).Wait();
 
+            DeleteBadImages();
+
             services.AddMvc();
         }
 
@@ -52,13 +55,33 @@ namespace Web
                 };
                 await roleManager.CreateAsync(role);
 
-                
+
             }
             //Add any other user who will NEED Admin privileges 
             var user = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
             if (!await userManager.IsInRoleAsync(user, "Admin"))
             {
                 await userManager.AddToRoleAsync(user, "Admin");
+            }
+        }
+
+        private void DeleteBadImages()
+        {
+            var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
+
+            var files = Directory.GetFiles(folder);
+            var tempList = new List<string>(files);
+            foreach (var file in tempList)
+            {
+                if (file.EndsWith(".png") || file.EndsWith(".jpg")
+                                          || file.EndsWith(".jpeg") || file.EndsWith(".gif"))
+                {
+                    //skip
+                }
+                else
+                {
+                    File.Delete(file);
+                }
             }
         }
 

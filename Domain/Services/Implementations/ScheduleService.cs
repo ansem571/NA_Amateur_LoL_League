@@ -321,7 +321,6 @@ namespace Domain.Services.Implementations
             return views;
         }
 
-
         //TODO: Make a calculator for this, someday
         private IEnumerable<ScheduleView> CreateForWeek(int week, IEnumerable<string> teamNames, DateTime date)
         {
@@ -363,7 +362,7 @@ namespace Domain.Services.Implementations
             if (week == 4)
             {
                 list.Add(new ScheduleView(t[0], t[5], date));
-                list.Add(new ScheduleView(t[1], t[6], date));
+                list.Add(new ScheduleView(t[1], t[2], date));
                 list.Add(new ScheduleView(t[2], t[4], date));
                 list.Add(new ScheduleView(t[3], t[4], date));
                 list.Add(new ScheduleView(t[5], t[6], date));
