@@ -83,7 +83,7 @@ namespace Domain.Services.Implementations
                     };
                 }
 
-                view.Rosters = rosters.OrderByDescending(x => x.Division.DivisionMinScore);
+                view.Rosters = rosters.OrderByDescending(x => x.Division.DivisionMinScore).ToList();
             }
             catch (Exception)
             {
@@ -241,7 +241,15 @@ namespace Domain.Services.Implementations
                 return (false, "file not selected");
 
             var roster = await _teamRosterRepository.GetByTeamIdAsync(rosterId);
-            var extension = GetMimeTypes().FirstOrDefault(x => x.Value.Equals(file.ContentType)).Key;
+            var extension = "";
+            try
+            {
+                extension = GetMimeTypes().FirstOrDefault(x => x.Value.Equals(file.ContentType)).Key;
+            }
+            catch (Exception e)
+            {
+                return (false, "This file extension is not supported is not supported");
+            }
 
             var directory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
             var files = Directory.GetFiles(directory).Where(x => x.Contains(rosterId.ToString()));

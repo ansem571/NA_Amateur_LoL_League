@@ -23,9 +23,9 @@
     </div>
     <div class="col-md-4">
         <div class="card">
-            <div class="card-body">
-                Registration Closes: @Model.SeasonInfo.ClosedRegistrationDate
-            </div>
+                <div class="card-body">
+                    Registration Closes: @Model.SeasonInfo.ClosedRegistrationDate
+                </div>
         </div>
     </div>
 </div>
@@ -33,7 +33,7 @@
     &#x2605; means they are the captain
 </div>
 @{
-    if (!Model.Rosters.ToList().Any())
+    if (!Model.Rosters.Any())
     {
         <div class="row">No official rosters yet. Check back later.</div>
     }
@@ -73,7 +73,7 @@
                         <th>Wins</th>
                         <th>Losses</th>
                     </tr>
-                    @foreach (var team in division.Value)
+                    @foreach (var team in division.Value.OrderBy(x => x.TeamTierScore))
                     {
                         <tr>
                             <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
@@ -90,7 +90,7 @@
                                         <td>
                                             @if (player.SummonerName == team.Captain)
                                             {
-                                            <div> @player.SummonerName &#x2605;</div>
+                                                <div> @player.SummonerName &#x2605;</div>
                                             }
                                             else
                                             {
@@ -125,7 +125,7 @@
         if (arguments.length < 2)
             return;
         var teamName = arguments[0];
-        var index = arguments[1];     
+        var index = arguments[1];
         var x = document.getElementById("{{'showDetailedInfo'" + teamName + index + "}}");
         var y = document.getElementById("{{'showDetailedInfoButton'" + teamName + index + "}}");
         if (x.style.display === "none") {

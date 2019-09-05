@@ -155,7 +155,8 @@ namespace Domain.Services.Implementations
                 {
                     Id = Guid.NewGuid(),
                     TeamName = $"Team{teamsCount}",
-                    TeamTierScore = teamTierScore / MinTeamCountRequirement
+                    TeamTierScore = teamTierScore / MinTeamCountRequirement,
+                    SeasonInfoId = seasonInfo.Id
                 };
 
                 var createTeamResult = await _teamRosterRepository.CreateAsync(team);
@@ -361,7 +362,6 @@ namespace Domain.Services.Implementations
                     teamTierScores.Add(divisionScore + player.CurrentLp);
                 }
                 var currentScore = teamTierScores.OrderByDescending(x => x).Take(MinTeamCountRequirement).Sum() / MinTeamCountRequirement;
-                currentScore /= roster.Players.Count();
                 var rosterEntity = await _teamRosterRepository.GetByTeamIdAsync(roster.RosterId);
                 rosterEntity.TeamTierScore = currentScore;
                 try
