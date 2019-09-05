@@ -291,6 +291,12 @@ namespace Domain.Services.Implementations
         public async Task<bool> AddToTeamScoreAsync(string teamName, int wins, int loses)
         {
             var roster = await _teamRosterRepository.GetByTeamNameAsync(teamName);
+            if (roster.Wins == null)
+            {
+                roster.Wins = 0;
+                roster.Loses = 0;
+                roster.Points = 0;
+            }
             roster.Wins += wins;
             roster.Loses += loses;
 
