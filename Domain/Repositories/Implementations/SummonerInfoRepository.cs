@@ -34,7 +34,7 @@ namespace Domain.Repositories.Implementations
 
         public async Task<IEnumerable<SummonerInfoEntity>> GetAllValidSummonersAsync()
         {
-            return await _table.ReadManyAsync("IsValidPlayer = 1");
+            return await _table.ReadManyAsync("IsValidPlayer = 1 or IsSubOnly = 1");
         }
 
         public async Task<IEnumerable<SummonerInfoEntity>> GetAllForSummonerIdsAsync(IEnumerable<Guid> summonerIds)
