@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\images\league.png" />
+    <None Include="wwwroot\riot.txt" />
   </ItemGroup>
 
   <ItemGroup>
