@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DAL.Contracts;
 using DAL.Entities.LeagueInfo;
@@ -224,14 +225,24 @@ namespace Domain.Services.Implementations
         {
             var newStats = new List<PartialPlayerInfo>();
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
-            var playerStatsTask = _playerStatsRepository.GetAllStatsAsync(seasonInfo.Id);
+            var teamsTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var registeredPlayersTask = _summonerInfoRepository.GetAllSummonersAsync();
+            var playerStatsTask = _playerStatsRepository.GetAllStatsAsync(seasonInfo.Id);
+            var teams = (await teamsTask).ToDictionary(x => x.TeamName, x => x);
+            var teamPlayers = (await _teamPlayerRepository.ReadAllAsync()).ToList();
+            var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
+
             foreach (var file in files)
             {
                 if (file == null || file.Length <= 0)
                 {
                     continue;
                 }
+                var split = file.FileName.Split("vs");
+                var team1 = split[0].Trim();
+                var regexSplit = Regex.Matches(split[1], @"^ [a-zA-z ]*");
+                var team2 = regexSplit.First().Value;
+                team2 = team2.Remove(team2.Length - 1).Trim();
 
                 using (var stream = file.OpenReadStream())
                 {
@@ -272,6 +283,22 @@ namespace Domain.Services.Implementations
                             {
                                 var player = matchStats[row - 1];
                                 player.Name = (string)sheet.Rows[row][4];
+
+                                //This is to check if a player is on the team from the match or an e-sub
+                                registeredPlayers.TryGetValue(player.Name.ToLowerInvariant(), out var registeredPlayer);
+
+                                teams.TryGetValue(team1, out var dbTeam1);
+                                teams.TryGetValue(team2, out var dbTeam2);
+                                if (registeredPlayer != null && (dbTeam1 != null || dbTeam2 != null))
+                                {
+                                    var teamPlayer = teamPlayers.FirstOrDefault(x =>
+                                        x.SummonerId == registeredPlayer.Id && (x.TeamRosterId == dbTeam1?.Id || x.TeamRosterId == dbTeam2?.Id));
+                                    if (teamPlayer == null)
+                                    {
+                                        player.SoftDelete = true;
+                                    }
+                                }
+
                                 player.Assists = Convert.ToInt32((double)sheet.Rows[row][7]);
                                 player.Deaths = Convert.ToInt32((double)sheet.Rows[row][9]);
                                 player.Gold = Convert.ToInt32((double)sheet.Rows[row][16]);
@@ -310,6 +337,11 @@ namespace Domain.Services.Implementations
             var newList = new List<PartialPlayerInfo>();
             foreach (var newStat in newStats)
             {
+                if (newStat.SoftDelete)
+                {
+                    continue;
+                }
+
                 var existing = newList.FirstOrDefault(x => x.Name.ToLowerInvariant() == newStat.Name.ToLowerInvariant());
                 if (existing != null)
                 {
@@ -320,7 +352,6 @@ namespace Domain.Services.Implementations
                     newList.Add(newStat);
                 }
             }
-            var registeredPlayers = (await registeredPlayersTask).OrderBy(x => x.SummonerName).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
             var playerStats = (await playerStatsTask).ToDictionary(x => x.SummonerId, x => x);
 
             var updateList = new List<PlayerStatsEntity>();

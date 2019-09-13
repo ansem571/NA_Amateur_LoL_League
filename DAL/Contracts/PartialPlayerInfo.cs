@@ -15,6 +15,7 @@ namespace DAL.Contracts
         public TimeSpan Duration { get; set; }
         public int TotalTeamKills { get; set; }
         public int Games { get; set; } = 1;
+        public bool SoftDelete { get; set; }
 
         public PartialPlayerInfo()
         {
