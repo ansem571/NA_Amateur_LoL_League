@@ -41,7 +41,7 @@ namespace Domain.Services.Implementations
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromEmail, "zjxpzupexbqpigjg")
+                Credentials = new NetworkCredential(fromEmail, "minxkypicbyguvzv")
             };
             message.IsBodyHtml = true;
 
