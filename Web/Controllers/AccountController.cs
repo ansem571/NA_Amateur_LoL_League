@@ -417,7 +417,6 @@ namespace Web.Controllers
         {
             try
             {
-
                 if (userId == null || code == null)
                 {
                     return RedirectToAction(nameof(HomeController.Index), "Home");
@@ -431,7 +430,19 @@ namespace Web.Controllers
                 }
 
                 var result = await _userManager.ConfirmEmailAsync(user, code);
-                return View(result.Succeeded ? "ConfirmEmail" : "Error");
+                _logger.LogInformation($"Email confirmation? {result.Succeeded}");
+
+                if (!result.Succeeded)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = code
+                    });
+                }
+                else
+                {
+                    return View("ConfirmEmail");
+                }
             }
             catch (Exception e)
             {

@@ -98,8 +98,8 @@
                                             }
                                             @if (player.AlternateAccounts.Any())
                                             {
-                                                <button id="{{'showDetailedInfoButton'@team.TeamName@i}}" onclick="showDetailedInfo('@team.TeamName', '@i')">+</button>
-                                                <div id="{{'showDetailedInfo'@team.TeamName@i}}" style="display: none">
+                                                <button id="{{'showDetailedInfoButton'@team.TeamName.Replace("'", "&quot;")@i}}" onclick="showDetailedInfo('@team.TeamName.Replace("'", "&quot;")', '@i')">+</button>
+                                                <div id="{{'showDetailedInfo'@team.TeamName.Replace("'", "&quot;")@i}}" style="display: none">
                                                     @foreach (var alt in player.AlternateAccounts)
                                                     {
                                                         <div>@alt.AlternateName</div>
@@ -122,10 +122,12 @@
 
 <script>
     function showDetailedInfo() {
+        //alert("showDetailedInfo called");
         if (arguments.length < 2)
             return;
         var teamName = arguments[0];
         var index = arguments[1];
+        //alert("{{'showDetailedInfo'" + teamName + index + "}}");
         var x = document.getElementById("{{'showDetailedInfo'" + teamName + index + "}}");
         var y = document.getElementById("{{'showDetailedInfoButton'" + teamName + index + "}}");
         if (x.style.display === "none") {
