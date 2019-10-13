@@ -31,8 +31,15 @@ namespace Web
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
 
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/logos");
+
+            if (!Directory.Exists("wwwroot/logos"))
+            {
+                Directory.CreateDirectory(path);
+            }
+
             services.AddSingleton<IFileProvider>(
-                new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/logos")));
+                new PhysicalFileProvider(path));
 
             Task.Run(() => CreateAdminRole(services)).Wait();
 
