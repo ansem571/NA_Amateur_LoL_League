@@ -23,9 +23,9 @@
     </div>
     <div class="col-md-4">
         <div class="card">
-                <div class="card-body">
-                    Registration Closes: @Model.SeasonInfo.ClosedRegistrationDate
-                </div>
+            <div class="card-body">
+                Registration Closes: @Model.SeasonInfo.ClosedRegistrationDate
+            </div>
         </div>
     </div>
 </div>
@@ -90,11 +90,15 @@
                                         <td>
                                             @if (player.SummonerName == team.Captain)
                                             {
-                                                <div> @player.SummonerName &#x2605;</div>
+                                            <div>
+                                                @player.SummonerName &#x2605;
+                                            </div>
                                             }
                                             else
                                             {
-                                                <div>@player.SummonerName</div>
+                                            <div>
+                                                @player.SummonerName
+                                            </div>
                                             }
                                             @if (player.AlternateAccounts.Any())
                                             {

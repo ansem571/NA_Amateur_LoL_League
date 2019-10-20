@@ -68,6 +68,7 @@ namespace Domain.Mappers.Implementations
         {
             return new DetailedSummonerInfoView
             {
+                UserId = entity.UserId,
                 SummonerName = entity.SummonerName,
                 AlternateAccounts = alternates != null ? _alternateAccountMapper.Map(alternates).ToList() : new List<AlternateAccountView>(),
                 Role = _summonerRoleMapper.Map(entity.RoleId),

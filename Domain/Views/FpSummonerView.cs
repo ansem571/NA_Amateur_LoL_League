@@ -11,6 +11,7 @@ namespace Domain.Views
 
     public class FpSummonerInfo
     {
+        public Guid UserId { get; set; }
         public string SummonerName { get; set; }
         public bool IsTeamCaptain { get; set; }
         public SummonerRoleEnum Role { get; set; }

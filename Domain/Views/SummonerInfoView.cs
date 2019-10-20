@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
 
@@ -21,6 +22,7 @@ namespace Domain.Views
         [Required]
         public bool IsValid { get; set; }
         public bool IsSubOnly { get; set; }
+        public Guid UserId { get; set; }
 
         public SummonerRoleEnum TeamRole { get; set; }
 

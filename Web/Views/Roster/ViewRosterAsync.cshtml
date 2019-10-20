@@ -102,12 +102,20 @@
                     </td>
                     @if (player.SummonerName == Model.RosterView.Captain)
                     {
-                        <td>@player.SummonerName &#x2605;</td>
+                        <td>
+                            <form asp-controller="UserProfile" asp-action="PlayerProfile" method="post">
+                                <input type="hidden" name="userId" value="@player.UserId" />
+                                <button class="btn-link" type="submit">@player.SummonerName &#x2605;</button>
+                            </form>
+                        </td>
                     }
                     else
                     {
                         <td>
-                            @player.SummonerName
+                            <form asp-controller="UserProfile" asp-action="PlayerProfile" method="post">
+                                <input type="hidden" name="userId" value="@player.UserId" />
+                                <button class="btn-link" type="submit">@player.SummonerName</button>
+                            </form>
                             @{
                                 if (Model.IsCaptain && !string.IsNullOrEmpty(player.SummonerName))
                                 {

@@ -73,6 +73,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<ScheduleEntity>, ScheduleStore>();
             services.TryAddSingleton<ITableStorageRepository<BlacklistEntity>, BlacklistStore>();
             services.TryAddSingleton<ITableStorageRepository<GoogleDriveFolderEntity>, GoogleDriveFolderStore>();
+            services.TryAddSingleton<ITableStorageRepository<AchievementEntity>, AchievementStore>();
             return services;
         }
 
@@ -104,6 +105,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IScheduleRepository, ScheduleRepository>();
             services.TryAddSingleton<IBlacklistRepository, BlacklistRepository>();
             services.TryAddSingleton<IGoogleDriveFolderRepository, GoogleDriveFolderRepository>();
+            services.TryAddSingleton<IAchievementRepository, AchievementRepository>();
             return services;
         }
 
@@ -115,6 +117,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IRosterService, RosterService>();
             services.TryAddSingleton<IScheduleService, ScheduleService>();
             services.TryAddSingleton<IGoogleDriveService, GoogleDriveService>();
+            services.TryAddSingleton<IPlayerProfileService, PlayerProfileService>();
             return services;
         }
     }

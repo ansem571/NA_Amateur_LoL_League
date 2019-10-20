@@ -1,0 +1,111 @@
+﻿@using Domain.Helpers
+@model Domain.Views.PlayerProfileView
+@{
+    ViewBag.Title = $"{Model.PlayerName} Achievements";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h4>Current Team: @Model.TeamName</h4>
+<h4>Current Season Stats</h4>
+<table class="table table-bordered">
+    <tr>
+        <th>Rank</th>
+        <th>Kills (total)</th>
+        <th>Deaths (total)</th>
+        <th>Assists (total)</th>
+        <th>KDA</th>
+        <th>CS/MIN</th>
+        <th>Gold/Min</th>
+        <th>KP</th>
+        <th>Vision Score</th>
+    </tr>
+    <tr>
+        <td>
+            @Model.Rank.ToString()
+        </td>
+        @if (Model.PlayerStats == null)
+        {
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        }
+        else
+        {
+            <td>
+                @*Kills*@
+                @Model.PlayerStats.Kills
+            </td>
+            <td>
+                @*Deaths*@
+                @Model.PlayerStats.Deaths
+            </td>
+            <td>
+                @*Assists*@
+                @Model.PlayerStats.Assists
+            </td>
+            <td>
+                @*KDA*@
+                @Model.PlayerStats.Kda
+            </td>
+            <td>
+                @*CS/Min*@
+                @Model.PlayerStats.CSperMin
+            </td>
+            <td>
+                @*Gold/Min*@
+                @Model.PlayerStats.DamagePerMin
+            </td>
+            <td>
+                @*KP*@
+                @Model.PlayerStats.Kp %
+            </td>
+            <td>
+                @*Vision Score*@
+                @Model.PlayerStats.VisionScore
+            </td>
+        }
+    </tr>
+</table>
+
+<h4>Achievements (All time)</h4>
+<table class="table table-bordered">
+    <tr>
+        <th>Achievement</th>
+        <th>Date Achieved</th>
+        <th>On Team (if applicable)</th>
+        <th>Against Team(if applicable)</th>
+    </tr>
+    @foreach (var achievement in Model.Achievements.OrderBy(x=>x.AchievedDate))
+    {
+    <tr>
+        <td>@achievement.Achievement</td>
+        <td>@achievement.AchievedDate</td>
+        @{
+            if (string.IsNullOrEmpty(achievement.AchievedTeam))
+            {
+                <td>N/A</td>
+            }
+            else
+            {
+                <td>@achievement.AchievedTeam</td>
+            }
+        }
+        @{
+            if (string.IsNullOrEmpty(achievement.AchievedAgainst))
+            {
+                <td>N/A</td>
+            }
+            else
+            {
+                <td>@achievement.AchievedAgainst</td>
+            }
+        }
+    </tr>
+    }
+</table>

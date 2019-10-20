@@ -344,6 +344,7 @@ namespace Domain.Services.Implementations
                         var mapped = _summonerMapper.Map(summoner);
                         fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
                         {
+                            UserId = summoner.UserId,
                             RosterId = team.Key,
                             SummonerName = summoner.SummonerName,
                             Role = mapped.Role,
@@ -368,6 +369,7 @@ namespace Domain.Services.Implementations
                 var mapped = _summonerMapper.Map(remainingSummoner.Value);
                 fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
                 {
+                    UserId = remainingSummoner.Value.UserId,
                     SummonerName = mapped.SummonerName,
                     Role = mapped.Role,
                     OffRole = mapped.OffRole,

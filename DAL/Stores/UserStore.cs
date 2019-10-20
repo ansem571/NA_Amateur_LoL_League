@@ -69,6 +69,18 @@ namespace DAL.Stores
             }
         }
 
+        public async Task<IEnumerable<UserEntity>> ReadAllAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync(cancellationToken);
+                var result = await connection.QueryAsync<UserEntity>($@"Select * from [User]");
+                return result.ToList();
+            }
+        }
+
         public async Task<UserEntity> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
