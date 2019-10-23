@@ -64,7 +64,7 @@ namespace Domain.Services.Implementations
             var view = new SeasonInfoView();
 
             var rostersTask = GetAllRosters();
-            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
 
             var seasonInfo = await seasonInfoTask;
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
@@ -107,7 +107,7 @@ namespace Domain.Services.Implementations
         public async Task<IEnumerable<RosterView>> GetAllRosters()
         {
             var list = new List<RosterView>();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var captainsTask = _teamCaptainRepository.GetAllTeamCaptainsAsync();
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
@@ -172,7 +172,7 @@ namespace Domain.Services.Implementations
         /// <returns></returns>
         public async Task<RosterView> GetRosterAsync(Guid rosterId)
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
 
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
             var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);

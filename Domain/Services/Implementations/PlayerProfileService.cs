@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
@@ -29,8 +30,8 @@ namespace Domain.Services.Implementations
         //Skarner Alston Reztip pentakill 5/29/2019
         //Perfect Game ABCDE vs TDK semi finals 10/17/2019
 
-        public PlayerProfileService(ISummonerInfoRepository summonerInfoRepository, IAchievementRepository achievementRepository, ITeamPlayerRepository teamPlayerRepository, 
-            ITeamRosterRepository teamRosterRepository, IAlternateAccountRepository alternateAccountRepository, IPlayerStatsRepository playerStatsRepository, ISeasonInfoRepository seasonInfoRepository, 
+        public PlayerProfileService(ISummonerInfoRepository summonerInfoRepository, IAchievementRepository achievementRepository, ITeamPlayerRepository teamPlayerRepository,
+            ITeamRosterRepository teamRosterRepository, IAlternateAccountRepository alternateAccountRepository, IPlayerStatsRepository playerStatsRepository, ISeasonInfoRepository seasonInfoRepository,
             IPlayerStatsMapper playerStatsMapper, IAlternateAccountMapper alternateAccountMapper, ITierDivisionMapper tierDivisionMapper)
         {
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
@@ -53,8 +54,7 @@ namespace Domain.Services.Implementations
                 UserId = form.UserId,
                 Achievement = form.Achievement,
                 AchievedDate = form.Date,
-                AchievedTeam = form.TeamName,
-                AchievedAgainst = form.AgainstTeam
+                AchievedTeam = form.TeamName
             };
 
             return await _achievementRepository.InsertAsync(achievement);
@@ -62,7 +62,7 @@ namespace Domain.Services.Implementations
 
         public async Task<PlayerProfileView> GetPlayerProfileAsync(Guid userId)
         {
-            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDate(DateTime.Today);
+            var seasonsTask = _seasonInfoRepository.GetAllSeasonsAsync();
             var summonerTask = _summonerInfoRepository.ReadOneByUserIdAsync(userId);
             var achievementsTask = _achievementRepository.GetAchievementsForUserAsync(userId);
 
@@ -71,20 +71,39 @@ namespace Domain.Services.Implementations
 
             var alternateAccountsTask = _alternateAccountRepository.ReadAllForSummonerAsync(summoner.Id);
             var teamPlayer = await _teamPlayerRepository.GetBySummonerIdAsync(summoner.Id);
-            var team = await _teamRosterRepository.GetByTeamIdAsync(teamPlayer.TeamRosterId);
+            var teamname = "None";
+            if (teamPlayer != null)
+            {
+                var team = await _teamRosterRepository.GetByTeamIdAsync(teamPlayer.TeamRosterId);
+                teamname = team.TeamName;
+            }
 
-            var seasonInfo = await seasonInfoTask;
-            var playerStats = await _playerStatsRepository.GetStatsForSummonerAsync(summoner.Id, seasonInfo.Id);
-            var mappedStats = _playerStatsMapper.Map(playerStats);
+            var seasons = (await seasonsTask).OrderBy(x => x.SeasonStartDate).ToList();
+            var playerStats = await _playerStatsRepository.GetStatsForSummonerAsync(summoner.Id, seasons.Last().Id);
+            var mappedStats = new PlayerStatsView();
+            if (playerStats != null)
+            {
+                mappedStats = _playerStatsMapper.Map(playerStats);
+            }
             var alternateAccounts = await alternateAccountsTask;
             var altAccountsMapped = _alternateAccountMapper.Map(alternateAccounts);
+            var achievementViews = new List<AchievementView>();
+            foreach (var achievement in achievements)
+            {
+                var achievementView = new AchievementView(achievement);
+                var seasonAchieved = seasons.FirstOrDefault(x =>
+                    x.SeasonStartDate < achievement.AchievedDate &&
+                    (x.SeasonEndDate ?? DateTime.MaxValue) > achievement.AchievedDate);
+                achievementView.Season = seasonAchieved != null ? seasonAchieved.SeasonName : "PreSeason";
+                achievementViews.Add(achievementView);
+            }
 
             var view = new PlayerProfileView
             {
                 PlayerName = summoner.SummonerName,
                 Rank = _tierDivisionMapper.Map(summoner.Tier_DivisionId),
-                TeamName = string.IsNullOrEmpty(team.TeamName) ? "None" : team.TeamName,
-                Achievements = achievements,
+                TeamName = string.IsNullOrEmpty(teamname) ? "None" : teamname,
+                Achievements = achievementViews,
                 PlayerStats = mappedStats,
                 AlternateAccountViews = altAccountsMapped
             };

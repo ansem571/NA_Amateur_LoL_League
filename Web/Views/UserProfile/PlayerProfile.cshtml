@@ -77,15 +77,14 @@
 <table class="table table-bordered">
     <tr>
         <th>Achievement</th>
-        <th>Date Achieved</th>
+        <th>Season Achieved</th>
         <th>On Team (if applicable)</th>
-        <th>Against Team(if applicable)</th>
     </tr>
     @foreach (var achievement in Model.Achievements.OrderBy(x=>x.AchievedDate))
     {
     <tr>
         <td>@achievement.Achievement</td>
-        <td>@achievement.AchievedDate</td>
+        <td>@achievement.Season</td>
         @{
             if (string.IsNullOrEmpty(achievement.AchievedTeam))
             {
@@ -94,16 +93,6 @@
             else
             {
                 <td>@achievement.AchievedTeam</td>
-            }
-        }
-        @{
-            if (string.IsNullOrEmpty(achievement.AchievedAgainst))
-            {
-                <td>N/A</td>
-            }
-            else
-            {
-                <td>@achievement.AchievedAgainst</td>
             }
         }
     </tr>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
@@ -16,11 +17,16 @@ namespace Domain.Repositories.Implementations
             _table = table ?? throw new ArgumentNullException(nameof(table));
         }
 
-        public async Task<SeasonInfoEntity> GetActiveSeasonInfoByDate(DateTime date)
+        public async Task<SeasonInfoEntity> GetActiveSeasonInfoByDateAsync(DateTime date)
         {
             var season = (await _table.ReadManyAsync("SeasonEndDate is null OR SeasonEndDate <= @date",
                 new { date }, top: 1)).FirstOrDefault();
             return season;
+        }
+
+        public async Task<IEnumerable<SeasonInfoEntity>> GetAllSeasonsAsync()
+        {
+            return await _table.ReadAllAsync();
         }
     }
 }

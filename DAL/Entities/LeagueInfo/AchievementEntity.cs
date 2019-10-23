@@ -14,6 +14,5 @@ namespace DAL.Entities.LeagueInfo
         public string Achievement { get; set; }
         public DateTime AchievedDate { get; set; }
         public string AchievedTeam { get; set; }
-        public string AchievedAgainst { get; set; }
     }
 }

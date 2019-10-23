@@ -326,7 +326,7 @@ namespace Domain.Services.Implementations
 
         public async Task<FpSummonerView> GetFpSummonerView()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var teams = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).ToDictionary(x => x.Id, x => x);
 
@@ -385,7 +385,7 @@ namespace Domain.Services.Implementations
 
         public async Task<SeasonInfoViewPartial> GetSeasonInfoAsync()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime());
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime());
 
             var partialSeasonView = new SeasonInfoViewPartial
             {

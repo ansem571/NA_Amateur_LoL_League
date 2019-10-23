@@ -31,7 +31,7 @@ namespace Domain.Services.Implementations
 
         public async Task<IEnumerable<PlayoffSeedView>> GetPlayoffSchedule()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
 
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var divisions = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
@@ -42,7 +42,7 @@ namespace Domain.Services.Implementations
 
         public async Task<IEnumerable<PlayoffSeedView>> GetView()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var divisions = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
             throw new NotImplementedException();
@@ -51,7 +51,7 @@ namespace Domain.Services.Implementations
         public async Task<bool> SetupPlayoffSchedule(IEnumerable<PlayoffSeedInsertView> playoffSeeds)
         {
             playoffSeeds = playoffSeeds.ToList();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
 
             var list = playoffSeeds.Select(playoffSeed => new PlayoffSeedEntity
             {

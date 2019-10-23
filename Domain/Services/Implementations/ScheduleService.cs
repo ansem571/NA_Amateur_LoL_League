@@ -45,7 +45,7 @@ namespace Domain.Services.Implementations
         public async Task<Dictionary<string, List<ScheduleView>>> GetAllSchedules()
         {
             var views = new Dictionary<string, List<ScheduleView>>();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime());
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime());
             var divisionsTask = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
             var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
@@ -103,7 +103,7 @@ namespace Domain.Services.Implementations
         public async Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId)
         {
             var views = new List<ScheduleView>();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDate(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
             var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
