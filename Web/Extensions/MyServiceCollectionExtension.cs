@@ -76,6 +76,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<BlacklistEntity>, BlacklistStore>();
             services.TryAddSingleton<ITableStorageRepository<GoogleDriveFolderEntity>, GoogleDriveFolderStore>();
             services.TryAddSingleton<ITableStorageRepository<AchievementEntity>, AchievementStore>();
+            services.TryAddSingleton<ITableStorageRepository<MatchDetailEntity>, MatchDetailStore>();
             return services;
         }
 
@@ -108,6 +109,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IBlacklistRepository, BlacklistRepository>();
             services.TryAddSingleton<IGoogleDriveFolderRepository, GoogleDriveFolderRepository>();
             services.TryAddSingleton<IAchievementRepository, AchievementRepository>();
+            services.TryAddSingleton<IMatchDetailRepository, MatchDetailRepository>();
             return services;
         }
 
