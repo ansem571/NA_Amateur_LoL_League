@@ -398,7 +398,7 @@ namespace Domain.Services.Implementations
 
         public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
         {
-            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
+            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).Where(x=>x.IsValidPlayer).ToDictionary(x => x.Id, x => x);
             var requests = (await _requestedSummonerRepository.ReadAllAsync()).GroupBy(x => x.SummonerId)
                 .ToDictionary(y => y.Key, y => y.ToList());
             var players = (await _teamPlayerRepository.ReadAllAsync()).ToList();
