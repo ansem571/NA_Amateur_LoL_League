@@ -48,6 +48,13 @@ namespace RiotSharp.Caching
             }
         }
 
+        public bool IsEmpty()
+        {
+            DirectoryInfo di = new DirectoryInfo(_directory);
+
+            return di.GetFiles().Length == 0 && di.GetDirectories().Length == 0;
+        }
+
         /// <inheritdoc />
         public TV Get<TK, TV>(TK key) where TV : class
         {

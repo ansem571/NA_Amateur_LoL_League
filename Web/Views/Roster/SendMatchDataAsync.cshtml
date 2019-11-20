@@ -1,4 +1,5 @@
-﻿@using Domain.Views
+﻿@using Domain.Enums
+@using Domain.Views
 @model Domain.Views.MatchSubmissionView
 
 @{
@@ -14,6 +15,7 @@
     <form method="post">
         <input type="hidden" name="HomeTeamName" value="@Model.HomeTeamName" />
         <input type="hidden" name="AwayTeamName" value="@Model.AwayTeamName" />
+        <input type="hidden" name="ScheduleId" value="@Model.ScheduleId"/>
         <input type="hidden" name="Week" value="@Model.Week" />
         @{
             if (Model.GameInfos == null)
@@ -69,25 +71,25 @@
                         <div class="card col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop"/>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop" />
                             </div>
                         </div>
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionTop"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionTop"/>
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].BlueTeam.ChampionTop" class="form-control"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle"/>
+                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle" />
                             </div>
                         </div>
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionJungle"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionJungle"/>
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].BlueTeam.ChampionJungle" class="form-control"></select>
                             </div>
                         </div>
                     </div>
@@ -101,7 +103,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionMid"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionMid" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].BlueTeam.ChampionMid" class="form-control"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -113,7 +115,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionAdc"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionAdc" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].BlueTeam.ChampionAdc" class="form-control"></select>
                             </div>
                         </div>
                     </div>
@@ -127,7 +129,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.ChampionSup"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.ChampionSup" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].BlueTeam.ChampionSup" class="form-control"></select>
                             </div>
                         </div>
                     </div>
@@ -143,7 +145,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.ChampionTop"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionTop" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].RedTeam.ChampionTop" class="form-control"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -155,7 +157,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.ChampionJungle"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionJungle" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].RedTeam.ChampionJungle" class="form-control"></select>
                             </div>
                         </div>
                     </div>
@@ -169,7 +171,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.ChampionMid"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionMid" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].RedTeam.ChampionMid" class="form-control"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -181,7 +183,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.ChampionAdc"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionAdc" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].RedTeam.ChampionAdc" class="form-control"></select>
                             </div>
                         </div>
                     </div>
@@ -195,7 +197,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.ChampionSup"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.ChampionSup" />
+                                <select asp-items="Html.GetEnumSelectList<ChampionsEnum>()" asp-for="@Model.GameInfos[i].RedTeam.ChampionSup" class="form-control"></select>
                             </div>
                         </div>
                     </div>

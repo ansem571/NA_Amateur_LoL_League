@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using RiotSharp.Caching;
 
 namespace Web.Extensions
 {
@@ -25,6 +26,7 @@ namespace Web.Extensions
 
         public static IServiceCollection AddMyServices(this IServiceCollection services, IConfiguration config)
         {
+            
             return services
                 .AddDbConnections(config)
                 .AddStores()
@@ -40,7 +42,7 @@ namespace Web.Extensions
             {
                 var logStore = x.GetService<ITableStorageRepository<MessageLogEntity>>();
                 var mapper = x.GetService<ILogLevelMapper>();
-                var dbLogger = new DbLogService(logStore, mapper, "Ca.S.U.L.");
+                var dbLogger = new DbLogService(logStore, mapper, "CasualEsportsAmateurLeague LLC.");
                 return dbLogger;
             });
         }
@@ -116,7 +118,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IAdminService, AdminService>();
             services.TryAddSingleton<IRosterService, RosterService>();
             services.TryAddSingleton<IScheduleService, ScheduleService>();
-            services.TryAddSingleton<IGoogleDriveService, GoogleDriveService>();
+            services.TryAddSingleton<IMatchDetailService, MatchDetailService>();
             services.TryAddSingleton<IPlayerProfileService, PlayerProfileService>();
             return services;
         }

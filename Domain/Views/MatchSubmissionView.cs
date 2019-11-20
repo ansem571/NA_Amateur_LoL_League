@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Domain.Enums;
+using Domain.Helpers;
 
 namespace Domain.Views
 {
@@ -22,6 +24,8 @@ namespace Domain.Views
         public List<GameInfo> GameInfos { get; set; }
 
         public string StatusMessage { get; set; }
+
+        public Guid ScheduleId { get; set; }
     }
 
     public class TeamInfo
@@ -38,15 +42,21 @@ namespace Domain.Views
         public string PlayerSup { get; set; }
 
         [Required]
-        public string ChampionTop { get; set; }
+        public ChampionsEnum ChampionTop { get; set; }
         [Required]
-        public string ChampionJungle { get; set; }
+        public ChampionsEnum ChampionJungle { get; set; }
         [Required]
-        public string ChampionMid { get; set; }
+        public ChampionsEnum ChampionMid { get; set; }
         [Required]
-        public string ChampionAdc { get; set; }
+        public ChampionsEnum ChampionAdc { get; set; }
         [Required]
-        public string ChampionSup { get; set; }
+        public ChampionsEnum ChampionSup { get; set; }
+
+        internal string LocalChampionTop => GlobalVariables.ChampionCache.Get<string, string>(ChampionTop.ToString());
+        internal string LocalChampionJungle => GlobalVariables.ChampionCache.Get<string, string>(ChampionJungle.ToString());
+        internal string LocalChampionMid => GlobalVariables.ChampionCache.Get<string, string>(ChampionMid.ToString());
+        internal string LocalChampionAdc => GlobalVariables.ChampionCache.Get<string, string>(ChampionAdc.ToString());
+        internal string LocalChampionSupport => GlobalVariables.ChampionCache.Get<string, string>(ChampionSup.ToString());
     }
 
     public class GameInfo
@@ -78,5 +88,55 @@ namespace Domain.Views
 
         public bool HomeTeamForfeit { get; set; } = false;
         public bool AwayTeamForfeit { get; set; } = false;
+
+        internal (bool isBlue, string playerName) PlayerName(string riotChampionName)
+        {
+            //Blue team check
+            if (BlueTeam.LocalChampionTop == riotChampionName)
+            {
+                return (true, BlueTeam.PlayerTop);
+            }
+            if (BlueTeam.LocalChampionJungle == riotChampionName)
+            {
+                return (true, BlueTeam.PlayerJungle);
+            }
+            if (BlueTeam.LocalChampionMid == riotChampionName)
+            {
+                return (true, BlueTeam.PlayerMid);
+            }
+            if (BlueTeam.LocalChampionAdc == riotChampionName)
+            {
+                return (true, BlueTeam.PlayerAdc);
+            }
+            if (BlueTeam.LocalChampionSupport == riotChampionName)
+            {
+                return (true, BlueTeam.PlayerSup);
+            }
+
+            //Red team check
+            if (RedTeam.LocalChampionTop == riotChampionName)
+            {
+                return (false, RedTeam.PlayerTop);
+            }
+            if (RedTeam.LocalChampionJungle == riotChampionName)
+            {
+                return (false, RedTeam.PlayerJungle);
+            }
+            if (RedTeam.LocalChampionMid == riotChampionName)
+            {
+                return (false, RedTeam.PlayerMid);
+            }
+            if (RedTeam.LocalChampionAdc == riotChampionName)
+            {
+                return (false, RedTeam.PlayerAdc);
+            }
+            if (RedTeam.LocalChampionSupport == riotChampionName)
+            {
+                return (false, RedTeam.PlayerSup);
+            }
+
+
+            return (false, null);
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RiotSharp.Caching;
 
 namespace RiotSharp.AspNetCore
@@ -55,6 +56,25 @@ namespace RiotSharp.AspNetCore
                 _distributedCache.Remove(usedKey.ToString());
                 _usedKeys.Remove(usedKey);
             }
+        }
+
+        public bool IsEmpty()
+        {
+            foreach (var usedKey in _usedKeys)
+            {
+                if (_memoryCache.TryGetValue(usedKey, out var value))
+                {
+                    return false;
+                }
+
+                var distributedCache = _distributedCache.Get(usedKey.ToString());
+                if (distributedCache != null && distributedCache.Length > 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <inheritdoc />

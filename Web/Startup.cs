@@ -1,13 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
+using Domain.Enums;
+using Domain.Helpers;
+using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using RiotSharp.Caching;
 using Web.Extensions;
 
 namespace Web
@@ -45,7 +51,17 @@ namespace Web
 
             DeleteBadImages();
 
+            Task.Run(() => SetupChampionCache(services)).Wait();
+
             services.AddMvc();
+        }
+
+        private async Task SetupChampionCache(IServiceCollection services)
+        {
+            var builder = services.BuildServiceProvider();
+            var lookupRepo = builder.GetService<ILookupRepository>();
+            GlobalVariables.ChampionCache = new Cache();
+            await GlobalVariables.SetupChampionCache(lookupRepo);
         }
 
         private async Task CreateAdminRole(IServiceCollection services)
@@ -61,8 +77,6 @@ namespace Web
                     Name = "Admin"
                 };
                 await roleManager.CreateAsync(role);
-
-
             }
             //Add any other user who will NEED Admin privileges 
             var user = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");

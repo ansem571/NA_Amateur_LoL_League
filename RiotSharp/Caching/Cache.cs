@@ -89,6 +89,12 @@ namespace RiotSharp.Caching
                 }
             }
         }
+
+        public bool IsEmpty()
+        {
+            return _cache.Count == 0;
+        }
+
         #endregion
 
         /// <summary>

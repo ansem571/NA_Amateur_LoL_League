@@ -6,10 +6,8 @@ using Domain.Views;
 
 namespace Domain.Services.Interfaces
 {
-    public interface IGoogleDriveService
+    public interface IMatchDetailService
     {
-        void SetupCredentials();
-        Task<bool> CreateFolders();
         Task<bool> SendFileData(MatchSubmissionView view);
     }
 }

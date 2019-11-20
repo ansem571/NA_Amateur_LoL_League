@@ -22,6 +22,11 @@ namespace RiotSharp.Caching
         {
         }
 
+        public bool IsEmpty()
+        {
+            return false;
+        }
+
         /// <inheritdoc />
         public TV Get<TK, TV>(TK key) where TV : class
         {

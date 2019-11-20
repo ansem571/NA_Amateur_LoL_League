@@ -244,7 +244,7 @@
                         if (Model.IsCaptain)
                         {
                             <td>
-                                <button onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam}) + "'");"
+                                <button onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam, week.ScheduleId}) + "'");"
                                         class="btn">
                                     Send Match Detail Data
                                 </button>

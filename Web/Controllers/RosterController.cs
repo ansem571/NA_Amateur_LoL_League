@@ -21,10 +21,10 @@ namespace Web.Controllers
         private readonly UserManager<UserEntity> _userManager;
         private readonly ILogger _logger;
         private readonly IScheduleService _scheduleService;
-        private readonly IGoogleDriveService _googleDriveService;
+        private readonly IMatchDetailService _googleDriveService;
 
         public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
-            ILogger logger, IScheduleService scheduleService, IGoogleDriveService googleDriveService)
+            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
@@ -218,12 +218,13 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult SendMatchDataAsync(int weekNumber, string hometeam, string awayteam)
+        public IActionResult SendMatchDataAsync(int weekNumber, string hometeam, string awayteam, Guid scheduleId)
         {
             var view = new MatchSubmissionView();
             view.Week = $"Week {weekNumber}";
             view.HomeTeamName = hometeam;
             view.AwayTeamName = awayteam;
+            view.ScheduleId = scheduleId;
             return View(view);
         }
 

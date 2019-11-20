@@ -47,6 +47,19 @@ namespace RiotSharp.AspNetCore
             }
         }
 
+        public bool IsEmpty()
+        {
+            foreach (var usedKey in _usedKeys)
+            {
+                if (_memoryCache.TryGetValue(usedKey, out var value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /// <inheritdoc />
         public TV Get<TK, TV>(TK key) where TV : class
         {

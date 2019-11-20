@@ -15,9 +15,9 @@ namespace Web.Controllers
     {
         private readonly IAdminService _adminService;
         private readonly ILogger _logger;
-        private readonly IGoogleDriveService _googleDriveService;
+        private readonly IMatchDetailService _googleDriveService;
 
-        public AdminController(IAdminService adminService, ILogger logger, IGoogleDriveService googleDriveService)
+        public AdminController(IAdminService adminService, ILogger logger, IMatchDetailService googleDriveService)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -125,29 +125,6 @@ namespace Web.Controllers
                 }
 
                 StatusMessage = "Updated Official Rosters tier scores";
-                return RedirectToAction("Index");
-            }
-            catch (Exception e)
-            {
-                StatusMessage = e.Message;
-                _logger.LogError(e, StatusMessage);
-                return RedirectToAction("Index");
-            }
-        }
-
-        public async Task<IActionResult> CreateGoogleDriveFoldersAsync()
-        {
-            try
-            {
-                _googleDriveService.SetupCredentials();
-
-                var result = await _googleDriveService.CreateFolders();
-                if (!result)
-                {
-                    throw new Exception("Failed to create folders on google drive");
-                }
-
-                StatusMessage = "Created Google Drive Folders For Season 0";
                 return RedirectToAction("Index");
             }
             catch (Exception e)

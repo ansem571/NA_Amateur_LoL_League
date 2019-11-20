@@ -49,5 +49,11 @@ namespace RiotSharp.Caching
         /// Clear the cache.
         /// </summary>
         void Clear();
+
+        /// <summary>
+        /// Will check the cache to determine if any objects are contained
+        /// </summary>
+        /// <returns></returns>
+        bool IsEmpty();
     }
 }
