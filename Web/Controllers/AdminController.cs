@@ -141,6 +141,7 @@ namespace Web.Controllers
             return View(model: StatusMessage);
         }
 
+        [Obsolete]
         [HttpPost]
         public async Task<IActionResult> UploadStatsAsync(IEnumerable<IFormFile> files)
         {

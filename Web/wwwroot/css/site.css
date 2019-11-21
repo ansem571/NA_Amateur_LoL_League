@@ -3,6 +3,8 @@
     padding-bottom: 20px;
     font-family: "Garamond" !important;
     font-size: 16px !important;
+    background-color: #252525;
+    color: white;
 }
 
 .bigRedButton {
@@ -17,7 +19,7 @@
 
 .navbar {
     background: #1c2951;
-    color: #f0f0f0;
+    color: #f0f0f0 !important;
 }
 
 
@@ -80,9 +82,9 @@ table, th, td {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
 }
 
-.card .card-body input {
-    color: black !important;
-}
+    .card .card-body input {
+        color: black !important;
+    }
 
 .icon-row {
     text-align: center;

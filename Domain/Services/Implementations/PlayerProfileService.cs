@@ -26,13 +26,15 @@ namespace Domain.Services.Implementations
         private readonly IPlayerStatsMapper _playerStatsMapper;
         private readonly IAlternateAccountMapper _alternateAccountMapper;
         private readonly ITierDivisionMapper _tierDivisionMapper;
+        private readonly IMatchDetailRepository _matchDetailRepository;
 
         //Skarner Alston Reztip pentakill 5/29/2019
         //Perfect Game ABCDE vs TDK semi finals 10/17/2019
 
-        public PlayerProfileService(ISummonerInfoRepository summonerInfoRepository, IAchievementRepository achievementRepository, ITeamPlayerRepository teamPlayerRepository,
-            ITeamRosterRepository teamRosterRepository, IAlternateAccountRepository alternateAccountRepository, IPlayerStatsRepository playerStatsRepository, ISeasonInfoRepository seasonInfoRepository,
-            IPlayerStatsMapper playerStatsMapper, IAlternateAccountMapper alternateAccountMapper, ITierDivisionMapper tierDivisionMapper)
+        public PlayerProfileService(ISummonerInfoRepository summonerInfoRepository, IAchievementRepository achievementRepository,
+            ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository, IAlternateAccountRepository alternateAccountRepository,
+            IPlayerStatsRepository playerStatsRepository, ISeasonInfoRepository seasonInfoRepository, IPlayerStatsMapper playerStatsMapper,
+            IAlternateAccountMapper alternateAccountMapper, ITierDivisionMapper tierDivisionMapper, IMatchDetailRepository matchDetailRepository)
         {
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
             _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));
@@ -44,6 +46,7 @@ namespace Domain.Services.Implementations
             _playerStatsMapper = playerStatsMapper ?? throw new ArgumentNullException(nameof(playerStatsMapper));
             _alternateAccountMapper = alternateAccountMapper ?? throw new ArgumentNullException(nameof(alternateAccountMapper));
             _tierDivisionMapper = tierDivisionMapper ?? throw new ArgumentNullException(nameof(tierDivisionMapper));
+            _matchDetailRepository = matchDetailRepository ?? throw new ArgumentNullException(nameof(matchDetailRepository));
         }
 
         public async Task<bool> InsertAchievement(UserAchievementForm form)
@@ -70,21 +73,10 @@ namespace Domain.Services.Implementations
             var achievements = await achievementsTask;
 
             var alternateAccountsTask = _alternateAccountRepository.ReadAllForSummonerAsync(summoner.Id);
-            var teamPlayer = await _teamPlayerRepository.GetBySummonerIdAsync(summoner.Id);
-            var teamname = "None";
-            if (teamPlayer != null)
-            {
-                var team = await _teamRosterRepository.GetByTeamIdAsync(teamPlayer.TeamRosterId);
-                teamname = team.TeamName;
-            }
+            var teamPlayer = (await _teamPlayerRepository.GetAllRostersForPlayerAsync(summoner.Id)).ToList();
 
             var seasons = (await seasonsTask).OrderBy(x => x.SeasonStartDate).ToList();
-            var playerStats = await _playerStatsRepository.GetStatsForSummonerAsync(summoner.Id, seasons.Last().Id);
-            var mappedStats = new PlayerStatsView();
-            if (playerStats != null)
-            {
-                mappedStats = _playerStatsMapper.Map(playerStats);
-            }
+
             var alternateAccounts = await alternateAccountsTask;
             var altAccountsMapped = _alternateAccountMapper.Map(alternateAccounts);
             var achievementViews = new List<AchievementView>();
@@ -97,14 +89,32 @@ namespace Domain.Services.Implementations
                 achievementView.Season = seasonAchieved != null ? seasonAchieved.SeasonName : "PreSeason";
                 achievementViews.Add(achievementView);
             }
+            var playerStatsDictionary = new Dictionary<int, PlayerStatsView>();
+            var matchDetails = await _matchDetailRepository.GetMatchDetailsForPlayerAsync(new List<Guid> { summoner.Id });
+            var allPlayerStats = await _playerStatsRepository.GetStatsAsync(matchDetails.Keys);
+            var seasonNum = 0;
+            var teamname = "None";
+            if (teamPlayer.Any())
+            {
+                var latestSeason = seasons.Last();
+                var team = await _teamRosterRepository.GetTeamAsync(latestSeason.Id, teamPlayer.Select(x => x.TeamRosterId));
+                if (team != null)
+                    teamname = team.TeamName;
+            }
+            foreach (var season in allPlayerStats)
+            {
+                var mappedStats = _playerStatsMapper.MapForSeason(season.Value);
 
+                playerStatsDictionary.Add(seasonNum, mappedStats);
+                seasonNum++;
+            }
             var view = new PlayerProfileView
             {
                 PlayerName = summoner.SummonerName,
                 Rank = _tierDivisionMapper.Map(summoner.Tier_DivisionId),
                 TeamName = string.IsNullOrEmpty(teamname) ? "None" : teamname,
                 Achievements = achievementViews,
-                PlayerStats = mappedStats,
+                PlayerStats = playerStatsDictionary,
                 AlternateAccountViews = altAccountsMapped
             };
 

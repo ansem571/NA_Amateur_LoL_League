@@ -53,5 +53,27 @@ namespace DAL.Entities.LeagueInfo
             TotalTeamKills = newStats.TotalTeamKills;
             Games = newStats.Games;
         }
+
+        public static PlayerStatsEntity operator +(PlayerStatsEntity current, PlayerStatsEntity other)
+        {
+            if (current.SummonerId != other.SummonerId || current.SeasonInfoId != other.SeasonInfoId)
+            {
+                throw new Exception("Invalid summoner stats merge");
+            }
+            return new PlayerStatsEntity
+            {
+                SummonerId = current.SummonerId,
+                Kills = current.Kills + other.Kills,
+                Deaths = current.Deaths + other.Deaths,
+                Assists = current.Assists + other.Assists,
+                CS = current.CS + other.CS,
+                Gold = current.Gold + other.Gold,
+                TotalTeamKills = current.TotalTeamKills + other.TotalTeamKills,
+                VisionScore = current.VisionScore + other.VisionScore,
+                GameTime = current.GameTime + other.GameTime,
+                Games = current.Games++,
+                SeasonInfoId = current.SeasonInfoId
+            };
+        }
     }
 }

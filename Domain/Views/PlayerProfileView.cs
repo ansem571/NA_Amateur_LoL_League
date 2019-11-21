@@ -12,7 +12,8 @@ namespace Domain.Views
         public string TeamName { get; set; }
         public TierDivisionEnum Rank { get; set; }
         public IEnumerable<AchievementView> Achievements { get; set; }
-        public PlayerStatsView PlayerStats { get; set; }
+        public Dictionary<int, PlayerStatsView> PlayerStats { get; set; }
+        //public PlayerStatsView PlayerStats { get; set; }
         public IEnumerable<AlternateAccountView> AlternateAccountViews { get; set; }
     }
 }

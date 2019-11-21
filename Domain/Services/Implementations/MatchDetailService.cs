@@ -103,7 +103,6 @@ namespace Domain.Services.Implementations
                 }
 
 
-                //There will always ever be 10 players per match
                 //matchhistory.na.leagueoflegends.com/en/#match-details/NA1/{match id}/{dont care}?tab=overview
                 var split = gameInfo.MatchHistoryLink.Split("/");
                 if (!uint.TryParse(split[4], out var matchId))
@@ -150,7 +149,8 @@ namespace Domain.Services.Implementations
 
                         if (teamPlayer == null)
                         {
-                            //Player was not on team
+                            //Player was not on team, so we will not create the record
+                            continue;
                         }
 
                     }
@@ -202,10 +202,10 @@ namespace Domain.Services.Implementations
                 return false;
             }
 
-            var insertDetailsResultTask = _matchDetailRepository.InsertAsync(insertDetailsList);
-            var insertStatsResultTask = _playerStatsRepository.InsertAsync(insertStatsList);
+            var insertStatsResult = await _playerStatsRepository.InsertAsync(insertStatsList);
+            var insertDetailsResult = await _matchDetailRepository.InsertAsync(insertDetailsList);
 
-            return await insertDetailsResultTask && await insertStatsResultTask;
+            return insertStatsResult && insertDetailsResult;
         }
 
         private static PlayerStatsEntity CreatePlayerMatchStat(SummonerInfoEntity registeredPlayer, Participant participant,

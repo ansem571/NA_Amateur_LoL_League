@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
 using DAL.Entities.LeagueInfo;
+using Domain.Helpers;
 using Domain.Repositories.Interfaces;
 
 namespace Domain.Repositories.Implementations
@@ -16,6 +17,22 @@ namespace Domain.Repositories.Implementations
         public PlayerStatsRepository(ITableStorageRepository<PlayerStatsEntity> table)
         {
             _table = table ?? throw new ArgumentNullException(nameof(table));
+        }
+
+        public async Task<Dictionary<StatsKey, List<PlayerStatsEntity>>> GetStatsAsync(IEnumerable<StatsKey> keys)
+        {
+            keys = keys.ToList();
+            var entities = await _table.ReadManyAsync("SummonerId in @summonerIds AND SeasonInfoId in @seasonIds", new
+            {
+                summonerIds = keys.Select(x => x.SummonerId),
+                seasonIds = keys.Select(x => x.SeasonId)
+            });
+
+
+            var dictionary = entities.Where(x => x.SeasonInfoId.HasValue).GroupBy(x => (x.SummonerId, x.SeasonInfoId))
+                .ToDictionary(x =>
+                    new StatsKey(x.Key.Item1, x.Key.Item2.Value), x => x.ToList());
+            return dictionary;
         }
 
         public async Task<PlayerStatsEntity> GetStatsForSummonerAsync(Guid summonerId, Guid? seasonInfoId)

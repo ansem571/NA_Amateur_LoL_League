@@ -14,7 +14,27 @@ namespace Domain.Views
         public double CSperMin { get; set; }
         public double DamagePerMin { get; set; }
         public double Kp { get; set; }
-        public int VisionScore { get; set; }
+        public double VisionScore { get; set; }
         public Guid? SeasonInfoId { get; set; }
+
+
+        public PlayerStatsView()
+        {
+        }
+
+        public static PlayerStatsView operator +(PlayerStatsView current, PlayerStatsView other)
+        {
+            if (current.SummonerId != other.SummonerId)
+            {
+                throw new Exception("Invalid summoner stats");
+            }
+            return new PlayerStatsView
+            {
+                SummonerId = current.SummonerId,
+                Kills = current.Kills + other.Kills,
+                Deaths = current.Deaths + other.Deaths,
+                Assists = current.Assists + other.Assists,
+            };
+        }
     }
 }

@@ -3,6 +3,8 @@ body {
     padding-bottom: 20px;
     font-family: "Garamond" !important;
     font-size: 16px !important;
+    background-color: #252525;
+    color: white;
 }
 
 .bigRedButton {
@@ -17,7 +19,7 @@ body {
 
 .navbar {
     background: #1c2951;
-    color: #f0f0f0;
+    color: #f0f0f0 !important;
 }
 
 .body-content {

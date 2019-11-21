@@ -33,6 +33,19 @@ namespace Domain.Repositories.Implementations
             return dictionary;
         }
 
+        public async Task<Dictionary<StatsKey, List<MatchDetailEntity>>> GetMatchDetailsForPlayerAsync(IEnumerable<Guid> summonerIds)
+        {
+            var result = (await _table.ReadManyAsync("PlayerId in @summonerIds", new {summonerIds})).ToList();
+
+            var dictionary = result.GroupBy(x => (x.PlayerId, x.SeasonInfoId))
+                .ToDictionary(x => new StatsKey
+                {
+                    SummonerId = x.Key.Item1,
+                    SeasonId = x.Key.Item2
+                }, x => x.ToList());
+            return dictionary;
+        }
+
         public async Task<bool> InsertAsync(IEnumerable<MatchDetailEntity> entities)
         {
             entities = entities.ToList();

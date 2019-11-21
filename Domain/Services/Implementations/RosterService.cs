@@ -28,12 +28,13 @@ namespace Domain.Services.Implementations
         private readonly IPlayerStatsRepository _playerStatsRepository;
         private readonly IPlayerStatsMapper _playerStatsMapper;
         private readonly IAlternateAccountRepository _alternateAccountRepository;
+        private readonly IMatchDetailRepository _matchDetailRepository;
 
         public RosterService(ILogger logger, ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, ISeasonInfoRepository seasonInfoRepository,
             IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper,
-            IAlternateAccountRepository alternateAccountRepository)
+            IAlternateAccountRepository alternateAccountRepository, IMatchDetailRepository matchDetailRepository)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -57,6 +58,8 @@ namespace Domain.Services.Implementations
                                  throw new ArgumentNullException(nameof(playerStatsMapper));
             _alternateAccountRepository = alternateAccountRepository ??
                                           throw new ArgumentNullException(nameof(alternateAccountRepository));
+            _matchDetailRepository = matchDetailRepository ??
+                                    throw new ArgumentNullException(nameof(matchDetailRepository));
         }
 
         public async Task<SeasonInfoView> GetSeasonInfoView()
@@ -179,9 +182,17 @@ namespace Domain.Services.Implementations
             var captainTask = _teamCaptainRepository.GetCaptainByRosterId(rosterId);
             var playersSummoner = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).ToList();
             var summonersTask = _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummoner.Select(x => x.SummonerId));
-            var playerStats = await _playerStatsRepository.GetStatsForSummonersAsync(playersSummoner.Select(x => x.SummonerId), seasonInfo.Id);
+            var matchDetails = await _matchDetailRepository.GetMatchDetailsForPlayerAsync(playersSummoner.Select(x => x.SummonerId));
 
-            var mappedStats = _playerStatsMapper.Map(playerStats).ToList();
+            matchDetails = matchDetails.Where(x => x.Key.SummonerId == seasonInfo.Id).ToDictionary(x => x.Key, x => x.Value);
+
+            var playerStats = await _playerStatsRepository.GetStatsAsync(matchDetails.Keys);
+            var mappedStats = new List<PlayerStatsView>();
+            foreach (var playerStat in playerStats)
+            {
+                var mappedStat = _playerStatsMapper.MapForSeason(playerStat.Value);
+                mappedStats.Add(mappedStat);
+            }
 
             var alternateAccounts = (await alternateAccountsTask).ToList();
             var summoners = (await summonersTask).ToList();
@@ -280,7 +291,7 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> SetPlayerAsSubAsync(string summonerName, Guid rosterId)
         {
-            var summoner = (await _summonerInfoRepository.GetAllForSummonerNamesAsync(new List<string> {summonerName})).FirstOrDefault();
+            var summoner = (await _summonerInfoRepository.GetAllForSummonerNamesAsync(new List<string> { summonerName })).FirstOrDefault();
             if (summoner == null)
             {
                 throw new Exception($"{summonerName} was not found");
@@ -312,7 +323,7 @@ namespace Domain.Services.Implementations
             {
                 roster.Points += 3;
             }
-            else if(wins == 1 && loses == 1)
+            else if (wins == 1 && loses == 1)
             {
                 roster.Points += 1;
             }

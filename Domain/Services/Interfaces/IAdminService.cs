@@ -16,6 +16,7 @@ namespace Domain.Services.Interfaces
         Task<bool> RemovePlayerFromRosterAsync(Guid summonerId, Guid rosterId);
         Task<bool> AssignTeamCaptain(TeamCaptainView view);
 
+        [Obsolete("We will be using a new service in this ones place", true)]
         Task<bool> UploadPlayerStatsAsync(IEnumerable<IFormFile> files);
     }
 }

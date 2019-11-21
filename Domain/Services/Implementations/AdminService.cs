@@ -221,6 +221,7 @@ namespace Domain.Services.Implementations
             return await _teamCaptainRepository.CreateCaptainAsync(entity);
         }
 
+        [Obsolete("Refer to interface")]
         public async Task<bool> UploadPlayerStatsAsync(IEnumerable<IFormFile> files)
         {
             var newStats = new List<PartialPlayerInfo>();

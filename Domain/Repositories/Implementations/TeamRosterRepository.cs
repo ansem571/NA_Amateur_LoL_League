@@ -29,7 +29,12 @@ namespace Domain.Repositories.Implementations
 
         public async Task<IEnumerable<TeamRosterEntity>> GetAllTeamsAsync(Guid? seasonInfoId)
         {
-            return await _table.ReadManyAsync("SeasonInfoId = @seasonInfoId", new { seasonInfoId });
+            return await _table.ReadManyAsync(seasonInfoId.HasValue ? "SeasonInfoId = @seasonInfoId" : "SeasonInfoId is null", new { seasonInfoId });
+        }
+
+        public async Task<TeamRosterEntity> GetTeamAsync(Guid seasonId, IEnumerable<Guid> id)
+        {
+            return (await _table.ReadManyAsync("SeasonInfoId = @seasonId AND Id in @id", new {seasonId, id})).FirstOrDefault();
         }
 
         public async Task<bool> CreateAsync(TeamRosterEntity entity)
