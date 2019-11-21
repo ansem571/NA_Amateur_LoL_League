@@ -53,13 +53,20 @@
             </div>
         </div>
     </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2019 - Casual eSports Amateur League LLC</p>
-        </footer>
+<div class="container body-content">
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider round"></div>
+        </label>
+        <em>Enable Dark Mode!</em>
     </div>
+    @RenderBody()
+    <hr/>
+    <footer>
+        <p>&copy; 2019 - Casual eSports Amateur League LLC</p>
+    </footer>
+</div>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
