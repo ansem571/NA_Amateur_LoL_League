@@ -98,7 +98,7 @@ body {
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
-    padding-top: 75px;
+    padding-top: 50px;
 }
 
 .carousel-caption p {
@@ -124,7 +124,6 @@ table, th, td {
     border-width: 5px !important;
     border-color: black !important;
 }
-
 
 .primary {
     background: #ffbf00;
@@ -175,4 +174,8 @@ table, th, td {
     left: 50%;
     border-left: 1px solid black;
     z-index: -1;
+}
+
+.btn {
+    color: black !important;
 }

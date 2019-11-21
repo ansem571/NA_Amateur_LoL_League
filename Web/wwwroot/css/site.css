@@ -1,17 +1,11 @@
 ﻿:root {
-    --primary-color: #302AE6;
-    --secondary-color: #536390;
     --font-color: #424242;
     --bg-color: #fff;
-    --heading-color: #292922;
 }
 
 [data-theme="dark"] {
-    --primary-color: #9A97F3;
-    --secondary-color: #818cab;
     --font-color: #e1e1ff;
     --bg-color: #161625;
-    --heading-color: #818cab;
 }
 
 .theme-switch-wrapper {
@@ -100,7 +94,7 @@ body {
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
-    padding-top: 75px;
+    padding-top: 50px;
 }
 
 /* Carousel */
@@ -139,7 +133,6 @@ table, th, td {
 .secondary {
     background-color: #1c2951
 }
-
 
 .center-text {
     margin: auto;
@@ -182,4 +175,8 @@ table, th, td {
     height: inherit;
     border-left: 1px solid black;
     z-index: -1;
+}
+
+.btn {
+    color: black !important;
 }

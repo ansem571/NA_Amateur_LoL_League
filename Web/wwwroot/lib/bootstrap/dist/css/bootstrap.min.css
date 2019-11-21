@@ -1841,9 +1841,9 @@ pre {
     }
 }
 
-@media (min-width:1200px) {
+@media (min-width:1300px) {
     .container {
-        width: 1170px
+        width: 1270px
     }
 }
 
@@ -4855,15 +4855,6 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
     .navbar-left {
         float: left !important
     }
-
-    .navbar-right {
-        float: right !important;
-        margin-right: -15px
-    }
-
-        .navbar-right ~ .navbar-right {
-            margin-right: 0
-        }
 }
 
 .navbar-default {

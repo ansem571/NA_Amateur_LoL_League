@@ -1597,9 +1597,9 @@ pre code {
     width: 970px;
   }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1300px) {
   .container {
-    width: 1170px;
+    width: 1270px;
   }
 }
 .container-fluid {
@@ -4317,7 +4317,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 @media (min-width: 768px) {
   .navbar-toggle {
-    display: none;
+    /*display: none;*/
   }
 }
 .navbar-nav {
@@ -4480,16 +4480,9 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
     margin-left: 15px;
   }
 }
-@media (min-width: 768px) {
+@media {
   .navbar-left {
     float: left !important;
-  }
-  .navbar-right {
-    float: right !important;
-    margin-right: -15px;
-  }
-  .navbar-right ~ .navbar-right {
-    margin-right: 0;
   }
 }
 .navbar-default {
