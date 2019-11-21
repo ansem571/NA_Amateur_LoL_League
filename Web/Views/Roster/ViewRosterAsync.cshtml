@@ -1,9 +1,19 @@
-﻿@using Domain.Enums
+﻿@using DAL.Entities.UserData
+@using Domain.Enums
+@using Microsoft.AspNetCore.Identity
+@using Web.Models.Roster
+
+@inject SignInManager<UserEntity> SignInManager
+@inject UserManager<UserEntity> UserManager
+@inject RoleManager<UserRoleEntity> UserRoleManager
 @model Web.Models.Roster.RosterViewModel
 
 @{
     ViewBag.Title = Model.RosterView.TeamName;
+    var user = await UserManager.GetUserAsync(User);
+    var userIsAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");   
 }
+
 <h2>@ViewData["Title"]</h2>
 @{
     if (Model.IsCaptain)
@@ -16,7 +26,10 @@
             <button type="submit">Submit name change</button>
         </form>
 
-        //<button onclick="@("window.location.href='" + Url.Action("UpdateRosterLineup", "Roster", new { players = Model.RosterView.Players }) + "'");">Update Roster Lineup</button>
+    }
+    if (Model.IsCaptain || userIsAdmin)
+    {
+        @Html.ActionLink("Update Roster Lineup", "UpdateRosterLineup", "Roster", new { rosterId = Model.RosterView.RosterId })
     }
 }
 <div class="row">

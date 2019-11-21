@@ -29,12 +29,13 @@ namespace Domain.Services.Implementations
         private readonly IPlayerStatsMapper _playerStatsMapper;
         private readonly IAlternateAccountRepository _alternateAccountRepository;
         private readonly IMatchDetailRepository _matchDetailRepository;
+        private readonly ISummonerRoleMapper _roleMapper;
 
         public RosterService(ILogger logger, ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, ISeasonInfoRepository seasonInfoRepository,
             IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper,
-            IAlternateAccountRepository alternateAccountRepository, IMatchDetailRepository matchDetailRepository)
+            IAlternateAccountRepository alternateAccountRepository, IMatchDetailRepository matchDetailRepository, ISummonerRoleMapper roleMapper)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -60,16 +61,25 @@ namespace Domain.Services.Implementations
                                           throw new ArgumentNullException(nameof(alternateAccountRepository));
             _matchDetailRepository = matchDetailRepository ??
                                     throw new ArgumentNullException(nameof(matchDetailRepository));
+            _roleMapper = roleMapper ??
+                          throw new ArgumentNullException(nameof(roleMapper));
         }
 
         public async Task<SeasonInfoView> GetSeasonInfoView()
         {
             var view = new SeasonInfoView();
+            //TODO: Uncomment when testing
+            var seasonInfoTask = _seasonInfoRepository.GetAllSeasonsAsync();
 
-            var rostersTask = GetAllRosters();
-            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasons = (await seasonInfoTask).OrderByDescending(x => x.SeasonStartDate).ToList();
+            var seasonInfo = seasons[1];
 
-            var seasonInfo = await seasonInfoTask;
+            var rostersTask = GetAllRosters(seasonInfo);
+            //TODO: Uncomment when ready to push
+            //var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            //var seasonInfo = await seasonInfoTask;
+
+
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
             try
             {
@@ -107,10 +117,13 @@ namespace Domain.Services.Implementations
         /// For Admin usage only
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<RosterView>> GetAllRosters()
+        public async Task<IEnumerable<RosterView>> GetAllRosters(SeasonInfoEntity seasonInfo = null)
         {
             var list = new List<RosterView>();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            if (seasonInfo == null)
+            {
+                seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            }
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var captainsTask = _teamCaptainRepository.GetAllTeamCaptainsAsync();
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
@@ -329,6 +342,25 @@ namespace Domain.Services.Implementations
             }
             var result = await _teamRosterRepository.UpdateAsync(roster);
             return result;
+        }
+
+        public async Task<bool> UpdateRosterLineupAsync(UpdateRosterLineupView view)
+        {
+            var summoners = await _summonerInfoRepository.GetAllForSummonerIdsAsync(view.Lineup.Keys);
+
+            var updateList = new List<SummonerInfoEntity>();
+            foreach (var summoner in summoners)
+            {
+                var summonerDbRole = _roleMapper.Map(summoner.RoleId);
+                view.Lineup.TryGetValue(summoner.Id, out var viewSummoner);
+                if (viewSummoner != summonerDbRole)
+                {
+                    summoner.TeamRoleId = _roleMapper.Map(viewSummoner);
+                    updateList.Add(summoner);
+                }
+            }
+
+            return await _summonerInfoRepository.UpdateAsync(updateList);
         }
 
         private string GetContentType(string path)

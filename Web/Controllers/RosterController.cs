@@ -310,17 +310,33 @@ namespace Web.Controllers
             }
         }
 
-        [HttpGet]
-        public IActionResult UpdateRosterLineup(IEnumerable<DetailedSummonerInfoView> players)
+        public async Task<IActionResult> TestingCalls(string testCall)
         {
-            return View(players);
+            return await Index(null);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateRosterLineup(Guid rosterId)
+        {
+            var roster = await _rosterService.GetRosterAsync(rosterId);
+            return View(roster.Players);
         }
 
         [HttpPost]
-        public IActionResult UpdateRosterLineup(UpdateRosterLineupView view)
+        public async Task<IActionResult> UpdateRosterLineup(UpdateRosterLineupView view)
         {
             //return View(model: players);
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _rosterService.UpdateRosterLineupAsync(view);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error updating RosterLineup");
+            }
+            var roster = await _rosterService.GetRosterAsync(view.RosterId);
+
+            return View(roster.Players);
         }
     }
 }

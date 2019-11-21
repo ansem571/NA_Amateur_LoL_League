@@ -7,6 +7,11 @@ namespace Domain.Views
 {
     public class RosterView
     {
+        public RosterView()
+        {
+            Players = new List<DetailedSummonerInfoView>();
+        }
+
         public Guid RosterId { get; set; }
         public string Captain { get; set; }
         public string TeamName { get; set; }
@@ -15,7 +20,7 @@ namespace Domain.Views
         public int Wins { get; set; }
         public int Loses { get; set; }
         public int Points { get; set; }
-        public IEnumerable<DetailedSummonerInfoView> Players { get; set; } = new List<DetailedSummonerInfoView>();
+        public IEnumerable<DetailedSummonerInfoView> Players { get; set; }
         public string FileSource { get; set; }
         public IEnumerable<ScheduleView> Schedule { get; set; }
 

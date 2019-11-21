@@ -35,16 +35,16 @@ namespace Domain.Services.Implementations
 
         public AccountService(ILogger logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
             ISummonerInfoRepository summonerInfoRepository, IAlternateAccountRepository alternateAccountRepository,
-            IRequestedSummonerRepository requestedSummonerRepository, ITeamPlayerRepository teamPlayerRepository, 
+            IRequestedSummonerRepository requestedSummonerRepository, ITeamPlayerRepository teamPlayerRepository,
             ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository)
         {
-            _logger = logger ?? 
+            _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
-            _summonerMapper = summonerMapper ?? 
+            _summonerMapper = summonerMapper ??
                               throw new ArgumentNullException(nameof(summonerMapper));
             _alternateAccountMapper = alternateAccountMapper ??
-                                      throw new ArgumentNullException(nameof(alternateAccountMapper));        
-            _summonerInfoRepository = summonerInfoRepository ?? 
+                                      throw new ArgumentNullException(nameof(alternateAccountMapper));
+            _summonerInfoRepository = summonerInfoRepository ??
                                       throw new ArgumentNullException(nameof(summonerInfoRepository));
             _alternateAccountRepository = alternateAccountRepository ??
                                           throw new ArgumentNullException(nameof(alternateAccountRepository));
@@ -64,7 +64,7 @@ namespace Domain.Services.Implementations
             {
                 var newEntity = _summonerMapper.Map(view);
                 newEntity.Id = Guid.NewGuid();
-                newEntity.UserId = user.Id;         
+                newEntity.UserId = user.Id;
 
                 var result = await _summonerInfoRepository.InsertAsync(newEntity);
 
@@ -114,7 +114,7 @@ namespace Domain.Services.Implementations
                 summonerInfo.IsValidPlayer = readEntity.IsValidPlayer;
 
                 var altAccountTask = UpdateAlternateAccountsAsync(summonerInfo.Id, view.AlternateAccounts);
-                var updateSummonerInfoTask = _summonerInfoRepository.UpdateAsync(summonerInfo);
+                var updateSummonerInfoTask = _summonerInfoRepository.UpdateAsync(new List<SummonerInfoEntity> { summonerInfo });
                 return await altAccountTask && await updateSummonerInfoTask;
             }
             catch (SummonerInfoException)
@@ -135,7 +135,7 @@ namespace Domain.Services.Implementations
 
             account.IsValidPlayer = true;
 
-            return await _summonerInfoRepository.UpdateAsync(account);
+            return await _summonerInfoRepository.UpdateAsync(new List<SummonerInfoEntity> { account });
         }
 
         public async Task<bool> UpdateAlternateAccountsAsync(Guid summonerId, IEnumerable<AlternateAccountView> viewList)
@@ -398,7 +398,7 @@ namespace Domain.Services.Implementations
 
         public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
         {
-            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).Where(x=>x.IsValidPlayer).ToDictionary(x => x.Id, x => x);
+            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).Where(x => x.IsValidPlayer).ToDictionary(x => x.Id, x => x);
             var requests = (await _requestedSummonerRepository.ReadAllAsync()).GroupBy(x => x.SummonerId)
                 .ToDictionary(y => y.Key, y => y.ToList());
             var players = (await _teamPlayerRepository.ReadAllAsync()).ToList();

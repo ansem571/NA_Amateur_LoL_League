@@ -12,6 +12,7 @@ namespace Web.Models.Roster
         public string StatusMessage { get; set; }
         public IEnumerable<ScheduleView> ScheduleLineup { get; set; }
         public string TeamOpGg => Setup();
+        public RosterViewSubModel Roster => new RosterViewSubModel(RosterView.Players);
 
         private string Setup()
         {

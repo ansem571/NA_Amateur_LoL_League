@@ -52,9 +52,14 @@ namespace Domain.Repositories.Implementations
             return await _table.InsertAsync(entity) == 1;
         }
 
-        public async Task<bool> UpdateAsync(SummonerInfoEntity entity)
+        public async Task<bool> UpdateAsync(IEnumerable<SummonerInfoEntity> entities)
         {
-            return await _table.UpdateAsync(entity);
+            entities = entities.ToList();
+            if (!entities.Any())
+            {
+                return true;
+            }
+            return await _table.UpdateAsync(entities);
         }
     }
 }
