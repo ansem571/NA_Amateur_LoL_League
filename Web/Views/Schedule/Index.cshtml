@@ -11,13 +11,13 @@
     ViewData["Title"] = "All schedules";
 }
 @{
-    var isSignedIn = SignInManager.IsSignedIn(User);
     var user = await UserManager.GetUserAsync(User);
     var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var isTribunal = user != null && await UserManager.IsInRoleAsync(user, "Tribunal");
+    var isModerator = user != null && await UserManager.IsInRoleAsync(user, "Moderator");
 }
 
 <h2>@ViewData["Title"]</h2>
-
 @{
     if (!Model.Any())
     {
@@ -27,16 +27,12 @@
             </div>
         </div>
 
-        if (isSignedIn)
+        if (isAdmin)
         {
-            if (await UserManager.IsInRoleAsync(user, "Admin"))
-            {
-                <button class="bigRedButton center-block">
-                    @Html.ActionLink("Create Schedules", "CreateScheduleAsync")
-                </button>
-            }
+            <button class="bigRedButton center-block">
+                @Html.ActionLink("Create Schedules", "CreateScheduleAsync")
+            </button>
         }
-
     }
     else
     {
@@ -75,17 +71,14 @@
                                 {
                                     <td>
                                         TBD
-                                        @if (isSignedIn)
+                                        @if (isAdmin || isTribunal || isModerator)
                                         {
-                                            if (isAdmin)
-                                            {
-                                                <button id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule('@week.ScheduleId')">+</button>
-                                                <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showSchedule'@week.ScheduleId}}" style="display: none">
-                                                    <input type="datetime-local" name="playTime" />
-                                                    <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
-                                                    <button class="center-block">Submit play time</button>
-                                                </form>
-                                            }
+                                            <button id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule('@week.ScheduleId')">+</button>
+                                            <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showSchedule'@week.ScheduleId}}" style="display: none">
+                                                <input type="datetime-local" name="playTime" />
+                                                <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                                <button class="center-block">Submit play time</button>
+                                            </form>
                                         }
                                     </td>
                                 }
@@ -99,17 +92,15 @@
                                 {
                                     <td>
                                         TBD
-                                        @if (isSignedIn)
+                                        @if (isAdmin || isTribunal || isModerator)
                                         {
-                                            if (isAdmin)
-                                            {
-                                                <button id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster('@week.ScheduleId')">+</button>
-                                                <form asp-controller="Schedule" asp-action="AssignCastersAsync" method="post" id="{{'showCaster'@week.ScheduleId}}" style="display: none">
-                                                    <input type="text" name="names" />
-                                                    <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
-                                                    <button class="center-block">Submit casters</button>
-                                                </form>
-                                            }
+                                            <button id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster('@week.ScheduleId')">+</button>
+                                            <form asp-controller="Schedule" asp-action="AssignCastersAsync" method="post" id="{{'showCaster'@week.ScheduleId}}" style="display: none">
+                                                <input type="text" name="names" />
+                                                <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                                <button class="center-block">Submit casters</button>
+                                            </form>
+
                                         }
                                     </td>
                                 }
@@ -118,10 +109,10 @@
                                     <td>@week.CasterName</td>
                                 }
                             }
-                            @if (isAdmin)
+                            @if (isAdmin || isTribunal)
                             {
                                 <td>
-                                    <button id ="{{'showUpdateMatchScoreButton'@week.ScheduleId}}" onclick="updateMatchScore('@week.ScheduleId')">+</button>
+                                    <button id="{{'showUpdateMatchScoreButton'@week.ScheduleId}}" onclick="updateMatchScore('@week.ScheduleId')">+</button>
                                     <form asp-controller="Schedule" asp-action="UpdateMatchScores" method="post" id="{{'showUpdateMatchScore'@week.ScheduleId}}" style="display: none">
                                         <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
                                         <input type="hidden" name="homeTeam" value="@week.HomeTeam" />

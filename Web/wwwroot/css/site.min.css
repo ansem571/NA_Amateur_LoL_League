@@ -177,9 +177,13 @@ table, th, td {
 }
 
 .btn {
-    color: black !important;
+    color: black;
 }
 
 button {
-    color: black !important;
+    color: black;
+}
+
+select {
+    color: black;
 }

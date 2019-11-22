@@ -69,16 +69,16 @@ namespace Domain.Services.Implementations
         {
             var view = new SeasonInfoView();
             //TODO: Uncomment when testing
-            var seasonInfoTask = _seasonInfoRepository.GetAllSeasonsAsync();
+            //var seasonInfoTask = _seasonInfoRepository.GetAllSeasonsAsync();
 
-            var seasons = (await seasonInfoTask).OrderByDescending(x => x.SeasonStartDate).ToList();
-            var seasonInfo = seasons[1];
+            //var seasons = (await seasonInfoTask).OrderByDescending(x => x.SeasonStartDate).ToList();
+            //var seasonInfo = seasons[1];
+
+            //TODO: Uncomment when ready to push
+            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await seasonInfoTask;
 
             var rostersTask = GetAllRosters(seasonInfo);
-            //TODO: Uncomment when ready to push
-            //var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
-            //var seasonInfo = await seasonInfoTask;
-
 
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
             try
@@ -351,11 +351,11 @@ namespace Domain.Services.Implementations
             var updateList = new List<SummonerInfoEntity>();
             foreach (var summoner in summoners)
             {
-                var summonerDbRole = _roleMapper.Map(summoner.RoleId);
+                var summonerDbRole = _roleMapper.Map(summoner.TeamRoleId.GetValueOrDefault());
                 view.Lineup.TryGetValue(summoner.Id, out var viewSummoner);
-                if (viewSummoner != summonerDbRole)
+                if (viewSummoner.TeamRole != summonerDbRole)
                 {
-                    summoner.TeamRoleId = _roleMapper.Map(viewSummoner);
+                    summoner.TeamRoleId = _roleMapper.Map(viewSummoner.TeamRole);
                     updateList.Add(summoner);
                 }
             }

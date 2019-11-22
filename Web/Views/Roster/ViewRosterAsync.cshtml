@@ -11,7 +11,8 @@
 @{
     ViewBag.Title = Model.RosterView.TeamName;
     var user = await UserManager.GetUserAsync(User);
-    var userIsAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");   
+    var userIsAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var userIsTribunal = user != null && await UserManager.IsInRoleAsync(user, "Tribunal");
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -132,11 +133,11 @@
                             @{
                                 if (Model.IsCaptain && !string.IsNullOrEmpty(player.SummonerName))
                                 {
-                                    <form asp-controller="Roster" asp-action="SetPlayerAsSubAsync" method="post">
+                                    @*<form asp-controller="Roster" asp-action="SetPlayerAsSubAsync" method="post">
                                         <input type="hidden" name="summonerName" value="@player.SummonerName" />
                                         <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
                                         <button type="submit">SetAsSub</button>
-                                    </form>
+                                    </form>*@
                                 }
                             }
                         </td>
@@ -216,7 +217,7 @@
             <th>Start Time</th>
             <th>Casters</th>
             @{
-                if (Model.IsCaptain)
+                if (Model.IsCaptain || userIsTribunal)
                 {
                     <th>Captains Only</th>
                 }
@@ -254,7 +255,7 @@
                         }
                     }
                     @{
-                        if (Model.IsCaptain)
+                        if (Model.IsCaptain || userIsTribunal)
                         {
                             <td>
                                 <button onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam, week.ScheduleId}) + "'");"
