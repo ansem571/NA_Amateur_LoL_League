@@ -16,6 +16,7 @@ namespace Domain.Views
         [Required]
         public TierDivisionEnum TierDivision { get; set; }
         [Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Value must be positive")]
         public int CurrentLp { get; set; }
         [Required]
         public string OpGgUrl { get; set; }
