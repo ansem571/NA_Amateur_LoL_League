@@ -47,7 +47,7 @@ SummonerRoleEnum.Sup
                     TeamRole = player.Value.TeamRole
                 };
                 Model.Lineup.Add(player.Key, playerInDictionary);
-                <div class="col-sm-3">
+                <div class="col-sm-3 row">
                     <label>@Model.Lineup[player.Key].SummonerName</label>
                     <input type="hidden" asp-for="@Model.Lineup[player.Key].SummonerName" />
                     <select asp-items="checkboxListDropdown" asp-for="@Model.Lineup[player.Key].TeamRole"></select>

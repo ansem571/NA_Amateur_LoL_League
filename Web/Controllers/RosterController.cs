@@ -316,11 +316,6 @@ namespace Web.Controllers
             }
         }
 
-        public async Task<IActionResult> TestingCalls(string testCall)
-        {
-            return await Index(null);
-        }
-
         [HttpGet]
         public async Task<IActionResult> UpdateRosterLineup(Guid rosterId)
         {
