@@ -22,7 +22,7 @@ namespace Domain.Mappers.Implementations
                 CSperMin = Math.Round(entity.CS/(float)entity.GameTime.TotalMinutes, 2),
                 DamagePerMin = Math.Round(entity.Gold/(float)entity.GameTime.TotalMinutes, 2),
                 Kp = Math.Round((entity.Kills + entity.Assists) / (float)entity.TotalTeamKills * 100, 1),
-                VisionScore = Math.Round((entity.VisionScore/ (float)entity.Games * 100)/100, 1),
+                VisionScore = Math.Round(entity.VisionScore/ ((float)entity.Games * 100)/100, 1),
                 SeasonInfoId = entity.SeasonInfoId
             };
         }
@@ -44,11 +44,9 @@ namespace Domain.Mappers.Implementations
                     var entity = entityList[i];
                     first += entity;
                 }
-
                 view = Map(first);
             }
             
-
             return view;
         }
     }
