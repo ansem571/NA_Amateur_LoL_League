@@ -219,13 +219,18 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult SendMatchDataAsync(int weekNumber, string hometeam, string awayteam, Guid scheduleId)
+        public async Task<IActionResult> SendMatchDataAsync(int weekNumber, string hometeam, string awayteam, Guid scheduleId)
         {
-            var view = new MatchSubmissionView();
-            view.Week = $"Week {weekNumber}";
-            view.HomeTeamName = hometeam;
-            view.AwayTeamName = awayteam;
-            view.ScheduleId = scheduleId;
+            var playersList = await _accountService.GetAllValidPlayers(hometeam, awayteam);
+
+            var view = new MatchSubmissionView
+            {
+                Week = $"Week {weekNumber}",
+                HomeTeamName = hometeam,
+                AwayTeamName = awayteam,
+                ScheduleId = scheduleId,
+                ValidPlayers = playersList
+            };
             return View(view);
         }
 

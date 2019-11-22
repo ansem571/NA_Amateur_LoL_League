@@ -112,6 +112,7 @@ namespace Domain.Services.Implementations
                 summonerInfo.Id = readEntity.Id;
                 summonerInfo.UserId = readEntity.UserId;
                 summonerInfo.IsValidPlayer = readEntity.IsValidPlayer;
+                summonerInfo.UpdatedOn = TimeZoneExtensions.GetCurrentTime();
 
                 var altAccountTask = UpdateAlternateAccountsAsync(summonerInfo.Id, view.AlternateAccounts);
                 var updateSummonerInfoTask = _summonerInfoRepository.UpdateAsync(new List<SummonerInfoEntity> { summonerInfo });
@@ -538,6 +539,49 @@ namespace Domain.Services.Implementations
             }
 
             return tempTeams;
+        }
+
+        public async Task<List<string>> GetAllValidPlayers(string homeTeamName, string awayTeamName)
+        {
+            var homeTeamTask = _teamRosterRepository.GetByTeamNameAsync(homeTeamName);
+            var awayTeamTask = _teamRosterRepository.GetByTeamNameAsync(awayTeamName);
+            var players = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x=>x.Id, x=>x);
+            var homeTeam = await homeTeamTask;
+            var awayTeam = await awayTeamTask;
+
+            var homeTeamPlayers = await _teamPlayerRepository.ReadAllForRosterAsync(homeTeam.Id);
+            var awayTeamPlayers = await _teamPlayerRepository.ReadAllForRosterAsync(awayTeam.Id);
+
+            var returningList = new List<string>();
+            returningList.Add("Home Team Players: ");
+            foreach (var homePlayer in homeTeamPlayers)
+            {
+                if(players.TryGetValue(homePlayer.SummonerId, out var summoner))
+                {
+                    returningList.Add(summoner.SummonerName);
+                    players.Remove(homePlayer.SummonerId);
+                }
+            }
+            returningList.Add("Away Team Players: ");
+
+            foreach (var awayPlayer in awayTeamPlayers)
+            {
+                if (players.TryGetValue(awayPlayer.SummonerId, out var summoner))
+                {
+                    returningList.Add(summoner.SummonerName);
+                    players.Remove(awayPlayer.SummonerId);
+
+                }
+            }
+
+            returningList.Add("Valid e-subs");
+            foreach (var player in players)
+            {
+                returningList.Add(player.Value.SummonerName);
+            }
+
+            return returningList;
+
         }
 
         #region private helpers

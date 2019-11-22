@@ -70,7 +70,7 @@ namespace Domain.Services.Implementations
             var view = new SeasonInfoView();
             //TODO: Uncomment when testing
             //var seasonInfoTask = _seasonInfoRepository.GetAllSeasonsAsync();
-
+            
             //var seasons = (await seasonInfoTask).OrderByDescending(x => x.SeasonStartDate).ToList();
             //var seasonInfo = seasons[1];
 
@@ -353,7 +353,7 @@ namespace Domain.Services.Implementations
             {
                 var summonerDbRole = _roleMapper.Map(summoner.TeamRoleId.GetValueOrDefault());
                 view.Lineup.TryGetValue(summoner.Id, out var viewSummoner);
-                if (viewSummoner.TeamRole != summonerDbRole)
+                if (viewSummoner != null && viewSummoner.TeamRole != summonerDbRole)
                 {
                     summoner.TeamRoleId = _roleMapper.Map(viewSummoner.TeamRole);
                     updateList.Add(summoner);

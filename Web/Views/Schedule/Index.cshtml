@@ -73,11 +73,11 @@
                                         TBD
                                         @if (isAdmin || isTribunal || isModerator)
                                         {
-                                            <button id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule('@week.ScheduleId')">+</button>
+                                            <button style="color: black !important" class="btn" id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule('@week.ScheduleId')">+</button>
                                             <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showSchedule'@week.ScheduleId}}" style="display: none">
                                                 <input type="datetime-local" name="playTime" />
                                                 <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
-                                                <button class="center-block">Submit play time</button>
+                                                <button style="color: black !important" class="center-block btn">Submit play time</button>
                                             </form>
                                         }
                                     </td>
@@ -94,11 +94,11 @@
                                         TBD
                                         @if (isAdmin || isTribunal || isModerator)
                                         {
-                                            <button id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster('@week.ScheduleId')">+</button>
+                                            <button style="color: black !important" class="btn" id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster('@week.ScheduleId')">+</button>
                                             <form asp-controller="Schedule" asp-action="AssignCastersAsync" method="post" id="{{'showCaster'@week.ScheduleId}}" style="display: none">
                                                 <input type="text" name="names" />
                                                 <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
-                                                <button class="center-block">Submit casters</button>
+                                                <button class="center-block btn">Submit casters</button>
                                             </form>
 
                                         }
@@ -112,7 +112,7 @@
                             @if (isAdmin || isTribunal)
                             {
                                 <td>
-                                    <button id="{{'showUpdateMatchScoreButton'@week.ScheduleId}}" onclick="updateMatchScore('@week.ScheduleId')">+</button>
+                                    <button style="color: black !important" class="btn" id="{{'showUpdateMatchScoreButton'@week.ScheduleId}}" onclick="updateMatchScore('@week.ScheduleId')">+</button>
                                     <form asp-controller="Schedule" asp-action="UpdateMatchScores" method="post" id="{{'showUpdateMatchScore'@week.ScheduleId}}" style="display: none">
                                         <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
                                         <input type="hidden" name="homeTeam" value="@week.HomeTeam" />
@@ -121,7 +121,7 @@
                                         <input type="text" name="homeScore" />
                                         <label>AwayScore</label>
                                         <input type="text" name="awayScore" />
-                                        <button class="center-block">Submit scores</button>
+                                        <button style="color: black !important" class="center-block btn">Submit scores</button>
                                     </form>
                                 </td>
                             }

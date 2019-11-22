@@ -103,7 +103,13 @@ namespace Domain.Services.Implementations
         public async Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId)
         {
             var views = new List<ScheduleView>();
+            //TODO: Uncomment when testing
+            //var seasons = (await _seasonInfoRepository.GetAllSeasonsAsync()).OrderByDescending(x => x.SeasonStartDate).ToList();
+            //var seasonInfo = seasons[1];
+
+            //TODO: Uncomment when ready to push
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            
             var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
@@ -154,7 +160,6 @@ namespace Domain.Services.Implementations
             return await _scheduleRepository.UpdateAsync(new List<ScheduleEntity> { scheduleInfo });
         }
 
-        //TODO
         public async Task<bool> CreateFullScheduleAsync()
         {
             try

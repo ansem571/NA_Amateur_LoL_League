@@ -4,6 +4,15 @@
 
 @{
     ViewData["Title"] = "SendMatchDataAsync";
+    var checkboxListDropdown = new List<SelectListItem>();
+    foreach (var validPlayer in Model.ValidPlayers)
+    {
+        checkboxListDropdown.Add(new SelectListItem
+        {
+            Text = validPlayer,
+            Value = validPlayer
+        });
+    }
 }
 
 <h2>@Model.Week: @Model.FileName results</h2>
@@ -71,7 +80,7 @@
                         <div class="card col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].BlueTeam.PlayerTop" ></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -83,7 +92,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].BlueTeam.PlayerJungle" ></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -97,7 +106,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerMid"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerMid" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].BlueTeam.PlayerMid" ></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -109,7 +118,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerAdc"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerAdc" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].BlueTeam.PlayerAdc" ></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -123,7 +132,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].BlueTeam.PlayerSup"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].BlueTeam.PlayerSup" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].BlueTeam.PlayerSup"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -139,7 +148,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.PlayerTop"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerTop" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].RedTeam.PlayerTop"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -151,7 +160,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.PlayerJungle"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerJungle" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].RedTeam.PlayerJungle"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -165,7 +174,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.PlayerMid"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerMid" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].RedTeam.PlayerMid"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -177,7 +186,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.PlayerAdc"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerAdc" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].RedTeam.PlayerAdc"></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
@@ -191,7 +200,7 @@
                         <div class="card  col-md-3">
                             <div class="card-body">
                                 <label asp-for="@Model.GameInfos[i].RedTeam.PlayerSup"></label>
-                                <input type="text" asp-for="@Model.GameInfos[i].RedTeam.PlayerSup" />
+                                <select asp-items="@checkboxListDropdown" asp-for="@Model.GameInfos[i].RedTeam.PlayerSup" ></select>
                             </div>
                         </div>
                         <div class="card  col-md-3">
