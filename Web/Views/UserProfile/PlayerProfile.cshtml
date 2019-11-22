@@ -6,6 +6,32 @@
 
 <h2>@ViewData["Title"]</h2>
 
+<h3>Alternate Accounts</h3>
+@if (Model.AlternateAccountViews.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>Alternate Name</th>
+            <th>Op.gg url</th>
+        </tr>
+        @foreach (var alt in Model.AlternateAccountViews)
+        {
+        <tr>
+            <td>
+                @alt.AlternateName
+            </td>
+            <td>
+                <a href="@alt.OpGgUrlLink" target="_blank">@alt.OpGgUrlLink</a>
+            </td>
+        </tr>
+        }
+    </table>
+}
+else
+{
+    <label>No alternate accounts have been listed for this account. If you believe this is incorrect. Contract the Tribunal</label>
+}
+
 <h4>Current Team: @Model.TeamName</h4>
 <table class="table table-bordered">
     <tr>

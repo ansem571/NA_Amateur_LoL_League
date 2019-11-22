@@ -474,7 +474,7 @@ namespace Web.Controllers
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
                 await _emailSender.SendEmailAsync(model.Email,
-                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>",
+                   $"Please reset your password by clicking here: <a href='{callbackUrl}' target='_blank'>link</a>",
                     "Reset Password");
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));
             }

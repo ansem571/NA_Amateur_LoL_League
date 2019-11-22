@@ -8,7 +8,7 @@
 @if (Model.IndexViewModel.IsEmailConfirmed)
 {
     <p class="center-block" style="width: 50%">
-        Now that you have registered, please read our <a href="https://docs.google.com/document/d/1vNQLBbPZJyJdSX7Hl1bR-ciu6NZ-sxxMAkrtbe168wE/edit?usp=sharing">rules</a>
+        Now that you have registered, please read our <a href="https://docs.google.com/document/d/1vNQLBbPZJyJdSX7Hl1bR-ciu6NZ-sxxMAkrtbe168wE/edit?usp=sharing" target="_blank">rules</a>
         document. For links to our social media sites and support. Go to the <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a> section.
     </p>
     <br />
@@ -54,8 +54,8 @@ else if (!Model.IndexViewModel.IsEmailConfirmed && !string.IsNullOrEmpty(Model.I
             <div class="card">
                 <div class="card-body">
                     <ul>
-                        <li><a href="https://discord.gg/ZXDdyAh"><img src="images/icons8-discord-new-logo-48.png">Join our Discord</a></li>
-                        <li><a href="https://www.twitch.tv/casualeal"><img src="images/icons8-twitch-48.png">Watch us live</a></li>
+                        <li><a href="https://discord.gg/ZXDdyAh" target="_blank"><img src="images/icons8-discord-new-logo-48.png">Join our Discord</a></li>
+                        <li><a href="https://www.twitch.tv/casualeal" target="_blank"><img src="images/icons8-twitch-48.png">Watch us live</a></li>
                     </ul>
                 </div>
             </div>
