@@ -6,6 +6,8 @@
 @inject RoleManager<UserRoleEntity> UserRoleManager
 @{
     var user = await UserManager.GetUserAsync(User);
+    var isAdmin = await UserManager.IsInRoleAsync(user, "Admin");
+    var isTribunal = await UserManager.IsInRoleAsync(user, "Tribunal");
 }
 
 @if (SignInManager.IsSignedIn(User))
@@ -27,7 +29,7 @@
                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Log out</button>
             </li>
             @{
-                if (await UserManager.IsInRoleAsync(user, "Admin"))
+                if (isAdmin || isTribunal)
                 {
                     <li>
                         <a asp-area="" asp-controller="Admin" asp-action="Index" title="Admin">Admin Console</a>
