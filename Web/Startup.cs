@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Enums;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using RiotSharp.Caching;
 using Web.Extensions;
 
@@ -62,8 +64,11 @@ namespace Web
         {
             var builder = services.BuildServiceProvider();
             var lookupRepo = builder.GetService<ILookupRepository>();
+            var logger = builder.GetService<ILogger>();
             GlobalVariables.ChampionCache = new Cache();
             await GlobalVariables.SetupChampionCache(lookupRepo);
+            var thread = new Thread(() => GlobalVariables.UpdateCache(lookupRepo, logger));
+            thread.Start();
         }
 
         private async Task CreateAdminRole(IServiceCollection services)

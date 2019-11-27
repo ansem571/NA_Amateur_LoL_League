@@ -115,9 +115,9 @@ namespace Domain.Services.Implementations
 
                                     "After inputting your Summoner Information, you may then navigate to the 'Register For Season' tab on the Nav bar.<br />" +
 
-                                    "This is a one time purchase for a player for the upcoming season. You must agree to our rules before making the purchase." +
-                                    "When you click on the payment link, the website will redirect you to Paypal to make the payment. The entry fee for any" +
-                                    "season is $10 USD. Once you have made the payment, be sure to click the 'Return to Merchant' button. This will return" +
+                                    "This is a one time purchase for a player for the upcoming season. You must agree to our rules before making the purchase. " +
+                                    "When you click on the payment link, the website will redirect you to Paypal to make the payment. The entry fee for any " +
+                                    "season is $10 USD. Once you have made the payment, be sure to click the 'Return to Merchant' button. This will return " +
                                     "you back to our website and auto-validate the player without further actions needed. If you wish to check that you have " +
                                     "been validated. Use the Nav bar to go to the 'Team Creation' tab, if you are there, you are registered for the season.<br />" +
 

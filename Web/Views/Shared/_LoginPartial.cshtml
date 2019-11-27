@@ -6,8 +6,8 @@
 @inject RoleManager<UserRoleEntity> UserRoleManager
 @{
     var user = await UserManager.GetUserAsync(User);
-    var isAdmin = await UserManager.IsInRoleAsync(user, "Admin");
-    var isTribunal = await UserManager.IsInRoleAsync(user, "Tribunal");
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var isTribunal = user != null && await UserManager.IsInRoleAsync(user, "Tribunal");
 }
 
 @if (SignInManager.IsSignedIn(User))
