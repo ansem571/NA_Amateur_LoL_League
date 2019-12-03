@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
+using Domain.Enums;
 using Domain.Helpers;
 using Domain.Services.Interfaces;
 using Domain.Views;
@@ -218,13 +219,18 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult SendMatchDataAsync(int weekNumber, string hometeam, string awayteam, Guid scheduleId)
+        public async Task<IActionResult> SendMatchDataAsync(int weekNumber, string hometeam, string awayteam, Guid scheduleId)
         {
-            var view = new MatchSubmissionView();
-            view.Week = $"Week {weekNumber}";
-            view.HomeTeamName = hometeam;
-            view.AwayTeamName = awayteam;
-            view.ScheduleId = scheduleId;
+            var playersList = await _accountService.GetAllValidPlayers(hometeam, awayteam);
+
+            var view = new MatchSubmissionView
+            {
+                Week = $"Week {weekNumber}",
+                HomeTeamName = hometeam,
+                AwayTeamName = awayteam,
+                ScheduleId = scheduleId,
+                ValidPlayers = playersList
+            };
             return View(view);
         }
 
@@ -310,33 +316,48 @@ namespace Web.Controllers
             }
         }
 
-        public async Task<IActionResult> TestingCalls(string testCall)
-        {
-            return await Index(null);
-        }
-
         [HttpGet]
         public async Task<IActionResult> UpdateRosterLineup(Guid rosterId)
         {
             var roster = await _rosterService.GetRosterAsync(rosterId);
-            return View(roster.Players);
+            var view = new UpdateRosterLineupView
+            {
+                RosterId = rosterId,
+                Lineup = new Dictionary<Guid, SummonerRoleTuple>()
+            };
+            foreach (var player in roster.Players)
+            {
+                view.Lineup.Add(player.Id, new SummonerRoleTuple
+                {
+                    SummonerName = player.SummonerName,
+                    TeamRole = player.TeamRole
+                });
+            }
+            return View(view);
         }
 
         [HttpPost]
         public async Task<IActionResult> UpdateRosterLineup(UpdateRosterLineupView view)
         {
-            //return View(model: players);
+            
             try
             {
                 var result = await _rosterService.UpdateRosterLineupAsync(view);
+                if (!result)
+                {
+                    throw new Exception("Error updating roster lineup, consult with WebDude");
+                }
+
+                StatusMessage = "Successfully updated RosterLineup";
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error updating RosterLineup");
+                StatusMessage = e.Message;
             }
-            var roster = await _rosterService.GetRosterAsync(view.RosterId);
 
-            return View(roster.Players);
+            view.StatusMessage = StatusMessage;
+            return View(view);
         }
     }
 }

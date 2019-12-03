@@ -7,9 +7,26 @@
 
 <h4>@ViewData["Title"]</h4>
 @Html.Partial("_StatusMessage", Model.StatusMessage)
+
+<div class="row">
+    <p>
+        In order to setup a team, you must do the following. First copy a player''s SummonerId into the input box at the bottom.
+        If you need to add more players to a team, add a comma between each SummonerId.
+        Once you have all the players for a roster in the text field, click the button at the bottom to add the team as an official roster.
+        If you don''t have 5 players in the input box, the website will tell you to add at minimum 5 players.
+    </p>
+    <br />
+    <p>
+        Once a player has been used to create a team, they will no longer show up in the list provided. If there are 2 players with the same name, 
+        then gather which email they are operating under, and Ansem will delete the bad user/summonerinfo. 
+        If a player that claims they paid is not shown in the list provided, check with them what email they used for paypal and verify by checking our email.
+        If you have received the payment, but they do not show up on the list, that means that they did not click the "Return to Merchant" button on Paypal.
+        Contact Ansem571 in order to force validation of a player by toggling the field in the DB by providing Ansem the SummonerName
+        IF a mistake is made when adding a player to the wrong team. Contract Ansem571, he will manually have to change the RosterId for the player
+    </p>
+</div>
 <div class="row">
     <div class="col-lg-3">
-
         <div>
             <table class="table table-bordered">
                 <tr>
@@ -30,7 +47,7 @@
 <div class="row">
     <div class="col-lg-6">
         <div asp-validation-summary="All" class="text-danger"></div>
-        <form method="post">            
+        <form method="post">
             <label asp-for="SelectedSummonersJoint"></label>
             <input type="text" asp-for="SelectedSummonersJoint" class="form-control" />
             <button type="submit" class="btn btn-default">Save team</button>

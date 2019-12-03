@@ -19,5 +19,7 @@ namespace Domain.Services.Interfaces
         Task<FpSummonerView> GetFpSummonerView();
 
         Task<SeasonInfoViewPartial> GetSeasonInfoAsync();
+
+        Task<List<string>> GetAllValidPlayers(string homeTeamName, string awayTeamName);
     }
 }

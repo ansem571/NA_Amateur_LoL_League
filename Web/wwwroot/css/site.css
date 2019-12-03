@@ -177,10 +177,16 @@ table, th, td {
     z-index: -1;
 }
 
-.btn {
+
+
+button .btn {
     color: black !important;
 }
 
-button {
+button .black {
     color: black !important;
+}
+
+select {
+    color: black;
 }

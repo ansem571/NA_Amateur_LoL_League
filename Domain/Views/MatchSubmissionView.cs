@@ -26,6 +26,7 @@ namespace Domain.Views
         public string StatusMessage { get; set; }
 
         public Guid ScheduleId { get; set; }
+        public List<string> ValidPlayers { get; set; }
     }
 
     public class TeamInfo

@@ -41,12 +41,20 @@
 
     </div>
 </div>
+
+<div class="row">
+    <br />
+    <div>
+        @Html.Partial("_InstructionsPartial")
+    </div>
+</div>
+
 @if (Model.ProfileInfo.IsEmailConfirmed)
 {
     <div class="row">
         <br />
         <div class="col-md-2">
-            <button onclick="@("window.location.href='" + Url.Action("Index", "Summoner") + "'");" class="btn">Update Summoner Info</button>
+            <button style="color: black !important" class="btn" onclick="@("window.location.href='" + Url.Action("Index", "Summoner") + "'");" >Update Summoner Info</button>
         </div>
     </div>
     <div class="row">
@@ -59,20 +67,6 @@
         }
 
         @Html.Partial("~/Views/Summoner/_RequestSummonerPartial.cshtml", Model.SummonerInfo)
-    </div>
-}
-else
-{
-    <div class="row">
-        <br />
-        <div>
-            <p>
-                You are almost done Registering. Please confirm your email and you will be able to Provide your Summoner information here.
-                If you have already confirmed your email, then refresh the page.
-                Once you have confirmed your Email and Registered your Summoner Information, you will be able to request to play with other players.
-                As well as other players will be enabled to request to play with you.
-            </p>
-        </div>
     </div>
 }
 

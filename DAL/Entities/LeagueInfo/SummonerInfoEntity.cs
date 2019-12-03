@@ -19,5 +19,6 @@ namespace DAL.Entities.LeagueInfo
         public Guid? OffRoleId { get; set; }
         public bool? IsSubOnly { get; set; }
         public Guid? TeamRoleId { get; set; }
+        public DateTime? UpdatedOn { get; set; }
     }
 }

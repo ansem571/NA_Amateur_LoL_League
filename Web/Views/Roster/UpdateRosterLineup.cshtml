@@ -1,29 +1,21 @@
 ﻿@using Domain.Enums
+@using Domain.Helpers
 @using Domain.Views
-@model IEnumerable<Domain.Views.DetailedSummonerInfoView>
+@model UpdateRosterLineupView
 
 @{
     ViewBag.Title = "Update Roster Lineup";
-    var lineup = new UpdateRosterLineupView
-    {
-        Lineup = new Dictionary<Guid, SummonerRoleEnum>()
-    };
-    
-    var modelList = Model.ToList();
+
     var checkboxList = new List<SummonerRoleEnum>
-    {
-        SummonerRoleEnum.None,
-        SummonerRoleEnum.Top,
-        SummonerRoleEnum.Jungle,
-        SummonerRoleEnum.Mid,
-        SummonerRoleEnum.Adc,
-        SummonerRoleEnum.Sup
-    };
+{
+SummonerRoleEnum.None,
+SummonerRoleEnum.Top,
+SummonerRoleEnum.Jungle,
+SummonerRoleEnum.Mid,
+SummonerRoleEnum.Adc,
+SummonerRoleEnum.Sup
+};
     var checkboxListDropdown = new List<SelectListItem>();
-    foreach (var view in modelList)
-    {
-        lineup.Lineup.Add(view.Id, view.TeamRole);
-    }
     foreach (var roleEnum in checkboxList)
     {
         checkboxListDropdown.Add(new SelectListItem
@@ -32,26 +24,35 @@
             Value = roleEnum.ToString()
         });
     }
+    var tempList = new Dictionary<Guid, SummonerRoleTuple>();
+    foreach (var player in Model.Lineup)
+    {
+        tempList.Add(player.Key, player.Value);
+    }
+    if (!Model.StatusMessage.IsNullOrEmpty())
+    {
+        <h4>@Model.StatusMessage</h4>
+    }
 }
 
-<form method="post" >
+<form method="post">
     <div class="row">
         @{
-            var enumerator = lineup.Lineup.GetEnumerator();
-        }
-        @for (var i = 0; i < modelList.Count(); i++)
-        {
-            var player = modelList[i];
-            var playerInLineup = enumerator.Current.Value;
-            <div class="col-sm-3">
-                <label>@player.SummonerName</label>
-                <input type="hidden" asp-for="@playerInLineup"/>
-                <select @Html.DropDownList("TeamRole", checkboxListDropdown) ) asp-for="@playerInLineup"></select>
-            </div>
-            enumerator.MoveNext();
-        }
-        @{
-            enumerator.Dispose();
+            Model.Lineup = new Dictionary<Guid, SummonerRoleTuple>();
+            foreach (var player in tempList)
+            {
+                var playerInDictionary = new SummonerRoleTuple
+                {
+                    SummonerName = player.Value.SummonerName,
+                    TeamRole = player.Value.TeamRole
+                };
+                Model.Lineup.Add(player.Key, playerInDictionary);
+                <div class="col-sm-3 row">
+                    <label>@Model.Lineup[player.Key].SummonerName</label>
+                    <input type="hidden" asp-for="@Model.Lineup[player.Key].SummonerName" />
+                    <select asp-items="checkboxListDropdown" asp-for="@Model.Lineup[player.Key].TeamRole"></select>
+                </div>
+            }
         }
     </div>
     <button type="submit" class="btn btn-default">Save</button>

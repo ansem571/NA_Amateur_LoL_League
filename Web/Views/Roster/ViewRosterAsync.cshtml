@@ -11,25 +11,34 @@
 @{
     ViewBag.Title = Model.RosterView.TeamName;
     var user = await UserManager.GetUserAsync(User);
-    var userIsAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");   
+    var userIsAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var userIsTribunal = user != null && await UserManager.IsInRoleAsync(user, "Tribunal");
 }
 
 <h2>@ViewData["Title"]</h2>
 @{
+
     if (Model.IsCaptain)
     {
-        <button onclick="renameTeam()">Rename team?</button>
+        <div class="row">
+            <button style="color: black !important" class="btn" onclick="renameTeam()">Rename team?</button>
 
-        <form asp-controller="Roster" asp-action="UpdateTeamNameAsync" method="post" id="updateRoster" style="display: none">
-            <input type="text" name="newTeamName" />
-            <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
-            <button type="submit">Submit name change</button>
-        </form>
+            <form asp-controller="Roster" asp-action="UpdateTeamNameAsync" method="post" id="updateRoster" style="display: none">
+                <input style="color: black !important" type="text" name="newTeamName" />
+                <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+                <button style="color: black !important" class="btn" type="submit">Submit name change</button>
+            </form>
+        </div>
+        <br/>
 
     }
     if (Model.IsCaptain || userIsAdmin)
     {
-        @Html.ActionLink("Update Roster Lineup", "UpdateRosterLineup", "Roster", new { rosterId = Model.RosterView.RosterId })
+        <div class="row">
+            <button class="btn">
+                @Html.ActionLink("Update Roster Lineup", "UpdateRosterLineup", "Roster", new { rosterId = Model.RosterView.RosterId })
+            </button>
+        </div>
     }
 }
 <div class="row">
@@ -64,7 +73,7 @@
             <form asp-controller="Roster" asp-action="UploadLogoAsync" method="post" enctype="multipart/form-data">
                 <input type="file" name="file" />
                 <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
-                <button type="submit">Upload File</button>
+                <button class="btn" style="color: black !important" type="submit">Upload File</button>
             </form>
         }
     </div>
@@ -132,11 +141,11 @@
                             @{
                                 if (Model.IsCaptain && !string.IsNullOrEmpty(player.SummonerName))
                                 {
-                                    <form asp-controller="Roster" asp-action="SetPlayerAsSubAsync" method="post">
-                                        <input type="hidden" name="summonerName" value="@player.SummonerName" />
-                                        <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
-                                        <button type="submit">SetAsSub</button>
-                                    </form>
+                                    @*<form asp-controller="Roster" asp-action="SetPlayerAsSubAsync" method="post">
+                                            <input type="hidden" name="summonerName" value="@player.SummonerName" />
+                                            <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+                                            <button type="submit">SetAsSub</button>
+                                        </form>*@
                                 }
                             }
                         </td>
@@ -216,7 +225,7 @@
             <th>Start Time</th>
             <th>Casters</th>
             @{
-                if (Model.IsCaptain)
+                if (Model.IsCaptain || userIsTribunal)
                 {
                     <th>Captains Only</th>
                 }
@@ -254,10 +263,10 @@
                         }
                     }
                     @{
-                        if (Model.IsCaptain)
+                        if (Model.IsCaptain || userIsTribunal)
                         {
                             <td>
-                                <button onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam, week.ScheduleId}) + "'");"
+                                <button style="color: black !important" onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam, week.ScheduleId}) + "'");"
                                         class="btn">
                                     Send Match Detail Data
                                 </button>

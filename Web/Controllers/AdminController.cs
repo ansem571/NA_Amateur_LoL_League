@@ -27,12 +27,15 @@ namespace Web.Controllers
         [TempData]
         public string StatusMessage { get; set; }
 
+        [Authorize(Roles = "Admin, Tribunal")]
         public IActionResult Index()
         {
             return View(model: StatusMessage);
         }
 
+
         [HttpGet]
+        [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> CreateTeamAsync()
         {
             var model = await _adminService.GetSummonersToCreateTeamAsync();
@@ -47,6 +50,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> CreateTeamAsync(TeamCreationViewModel viewModel)
         {
             try
@@ -75,6 +79,7 @@ namespace Web.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> CreateCaptainAsync()
         {
             var rosters = await _adminService.GetAllRosters();
@@ -87,6 +92,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> CreateCaptainAsync(RosterCaptainViewModel viewModel)
         {
             try
@@ -114,6 +120,7 @@ namespace Web.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> UpdateTeamTierScoresAsync()
         {
             try
@@ -136,6 +143,7 @@ namespace Web.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin, Tribunal")]
         public ViewResult UploadStatsAsync()
         {
             return View(model: StatusMessage);
@@ -143,6 +151,7 @@ namespace Web.Controllers
 
         [Obsolete]
         [HttpPost]
+        [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> UploadStatsAsync(IEnumerable<IFormFile> files)
         {
             try

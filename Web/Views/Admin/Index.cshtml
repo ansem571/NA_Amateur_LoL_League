@@ -7,8 +7,27 @@
     @Html.Partial("_StatusMessage", @Model)
 </div>
 <div class="row">
-    <button onclick="@("window.location.href='" + Url.Action("CreateTeamAsync", "Admin") + "'");" class="btn">Create New Team</button>
-    <button onclick="@("window.location.href='" + Url.Action("CreateCaptainAsync", "Admin") + "'");" class="btn">Assign Captain</button>
-    <button onclick="@("window.location.href='" + Url.Action("UpdateTeamTierScoresAsync", "Admin") + "' ");" class="btn">Update Roster scores</button>
-    @*<button onclick="@("window.location.href='" + Url.Action("UploadStatsAsync", "Admin") + "'");" class="btn">Upload stats</button>*@
+    <p>
+        By clicking the Button below, you will be able to create a team by using their unique identifiers (SummonerId).
+        Further instructions will be displayed on the page after clicking the button.
+    </p>
+    <button style="color: black;" onclick="@("window.location.href='" + Url.Action("CreateTeamAsync", "Admin") + "'");" class="btn">Create New Team</button>
+</div>
+<br/>
+<div class="row">
+    <p>
+        By clicking the Button below, you will be able to assign a captain to a team by their Summoner Name and Team Name.
+        Team Captains and Tribunal are able to update their team info at any time.
+        Further instructions will be displayed on the page after clicking the button.
+    </p>
+    <button style="color: black;" onclick="@("window.location.href='" + Url.Action("CreateCaptainAsync", "Admin") + "'");" class="btn">Assign Captain</button>
+</div>
+<br />
+<div class="row">
+    <p>
+        By clicking the Button below, you will update all team tier scores. WARNING!!! This must only be clicked before the divisions are added.
+        Otherwise, this will mess up where teams are in divisions once placed. Teams are set to divisions based on team scores. If their scores are updated,
+        they may not be in the same division which will screw up their schedules and such. IF THIS IS PRESSED POST SEASON START, IMMEDIATELY CONTACT ANSEM571
+    </p>
+    <button style="color: black;" onclick="@("window.location.href='" + Url.Action("UpdateTeamTierScoresAsync", "Admin") + "' ");" class="btn">Update Roster scores</button>
 </div>

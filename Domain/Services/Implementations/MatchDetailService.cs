@@ -63,7 +63,6 @@ namespace Domain.Services.Implementations
 
             var csvDataFile = CreateCsvDataFile(view);
 
-            //TODO: Will send file out to email as a personal record / to put on our Record of Games doc
             await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", "Match result for subject", view.FileName, new List<Attachment>
             {
                 new Attachment(csvDataFile)
@@ -141,7 +140,6 @@ namespace Domain.Services.Implementations
                         continue;
                     }
 
-                    //TODO: what should we do here?
                     if (dbTeam1 != null && dbTeam2 != null)
                     {
                         var teamPlayer = teamPlayers.FirstOrDefault(x =>
@@ -149,6 +147,7 @@ namespace Domain.Services.Implementations
 
                         if (teamPlayer == null)
                         {
+                            //TODO: what should we do here?
                             //Player was not on team, so we will not create the record
                             continue;
                         }

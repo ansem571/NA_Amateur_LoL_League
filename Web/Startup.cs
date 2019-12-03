@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Enums;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using RiotSharp.Caching;
 using Web.Extensions;
 
@@ -48,6 +50,8 @@ namespace Web
                 new PhysicalFileProvider(path));
 
             Task.Run(() => CreateAdminRole(services)).Wait();
+            Task.Run(() => CreateTribunalRole(services)).Wait();
+            Task.Run(() => CreateModeratorRole(services)).Wait();
 
             DeleteBadImages();
 
@@ -60,8 +64,11 @@ namespace Web
         {
             var builder = services.BuildServiceProvider();
             var lookupRepo = builder.GetService<ILookupRepository>();
+            var logger = builder.GetService<ILogger>();
             GlobalVariables.ChampionCache = new Cache();
             await GlobalVariables.SetupChampionCache(lookupRepo);
+            var thread = new Thread(() => GlobalVariables.UpdateCache(lookupRepo, logger));
+            thread.Start();
         }
 
         private async Task CreateAdminRole(IServiceCollection services)
@@ -83,6 +90,81 @@ namespace Web
             if (!await userManager.IsInRoleAsync(user, "Admin"))
             {
                 await userManager.AddToRoleAsync(user, "Admin");
+            }
+        }
+
+        private async Task CreateTribunalRole(IServiceCollection services)
+        {
+            var builder = services.BuildServiceProvider();
+            var roleManager = builder.GetService<RoleManager<UserRoleEntity>>();
+            var userManager = builder.GetService<UserManager<UserEntity>>();
+
+            if (!await roleManager.RoleExistsAsync("Tribunal"))
+            {
+                var role = new UserRoleEntity
+                {
+                    Name = "Tribunal"
+                };
+                await roleManager.CreateAsync(role);
+            }
+            //Add any other user who will NEED Admin privileges 
+            var user1 = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
+            var user2 = await userManager.FindByEmailAsync("ansem571@gmail.com");
+            var user3 = await userManager.FindByEmailAsync("josiahrosendahl@gmail.com");
+            var user4 = await userManager.FindByEmailAsync("gwrobinson2@gmail.com");
+            var user5 = await userManager.FindByEmailAsync("michael.spindel05@gmail.com");
+            var user6 = await userManager.FindByEmailAsync("scatter.catt@gmail.com");
+            var user7 = await userManager.FindByEmailAsync("shadow2097@gmail.com");
+            var user8 = await userManager.FindByEmailAsync("morrisonsviewpoint@gmail.com");
+            var users = new List<UserEntity>
+            {
+                user1,
+                user2,
+                user3,
+                user4,
+                user5,
+                user6,
+                user7,
+                user8,
+            };
+            foreach (var user in users)
+            {
+                if (!await userManager.IsInRoleAsync(user, "Tribunal"))
+                {
+                    await userManager.AddToRoleAsync(user, "Tribunal");
+                }
+            }
+        }
+
+
+        private async Task CreateModeratorRole(IServiceCollection services)
+        {
+            var builder = services.BuildServiceProvider();
+            var roleManager = builder.GetService<RoleManager<UserRoleEntity>>();
+            var userManager = builder.GetService<UserManager<UserEntity>>();
+
+            if (!await roleManager.RoleExistsAsync("Moderator"))
+            {
+                var role = new UserRoleEntity
+                {
+                    Name = "Moderator"
+                };
+                await roleManager.CreateAsync(role);
+            }
+
+            var user1 = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
+            var user2 = await userManager.FindByEmailAsync("ansem571@gmail.com");
+            var users = new List<UserEntity>
+            {
+                user1,
+                user2
+            };
+            foreach (var user in users)
+            {
+                if (!await userManager.IsInRoleAsync(user, "Moderator"))
+                {
+                    await userManager.AddToRoleAsync(user, "Moderator");
+                }
             }
         }
 
