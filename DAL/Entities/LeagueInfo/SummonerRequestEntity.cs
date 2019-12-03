@@ -11,5 +11,6 @@ namespace DAL.Entities.LeagueInfo
         public Guid SummonerId { get; set; }
         public Guid SummonerRequestedId { get; set; }
         public bool IsSub { get; set; }
+        public Guid? SeasonInfoId { get; set; }
     }
 }

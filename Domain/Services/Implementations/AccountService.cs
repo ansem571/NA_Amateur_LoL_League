@@ -218,11 +218,12 @@ namespace Domain.Services.Implementations
 
         public async Task<SummonerRequestView> GetRequestedSummonersAsync(UserEntity user)
         {
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Now);
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToList();
             var summonerEntity = summoners.First(x => x.UserId == user.Id);
             summoners.Remove(summonerEntity);
 
-            var requestedSummonerEntities = (await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerEntity.Id)).ToList();
+            var requestedSummonerEntities = (await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerEntity.Id, seasonInfo.Id)).ToList();
             var view = new SummonerRequestView
             {
                 SummonerName = summonerEntity.SummonerName,
@@ -258,12 +259,13 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> UpdateSummonerRequestsAsync(UserEntity user, SummonerRequestView view)
         {
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Now);
             SetIsSubToElements(view);
             var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var summonerEntity = summoners.First(x => x.Value.UserId == user.Id);
             summoners.Remove(summonerEntity.Key);
 
-            var requestedSummonerEntities = (await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerEntity.Key)).ToList();
+            var requestedSummonerEntities = (await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerEntity.Key, seasonInfo.Id)).ToList();
 
             //pulled from db
             var kvp = new Dictionary<string, SummonerRequestEntity>();
@@ -295,7 +297,8 @@ namespace Domain.Services.Implementations
                         Id = Guid.NewGuid(),
                         SummonerId = summonerEntity.Key,
                         SummonerRequestedId = summoners.First(x => x.Value.SummonerName == requestedSummoner.SummonerName).Key,
-                        IsSub = requestedSummoner.IsSub
+                        IsSub = requestedSummoner.IsSub,
+                        SeasonInfoId = seasonInfo.Id
                     };
                     createList.Add(newEntity);
                 }
@@ -398,10 +401,12 @@ namespace Domain.Services.Implementations
 
         public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
         {
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Now);
+
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).Where(x => x.IsValidPlayer).ToDictionary(x => x.Id, x => x);
-            var requests = (await _requestedSummonerRepository.ReadAllAsync()).GroupBy(x => x.SummonerId)
+            var requests = (await _requestedSummonerRepository.ReadAllForSeasonAsync(seasonInfo.Id)).GroupBy(x => x.SummonerId)
                 .ToDictionary(y => y.Key, y => y.ToList());
-            var players = (await _teamPlayerRepository.ReadAllAsync()).ToList();
+            var players = (await _teamPlayerRepository.ReadAllForSeasonAsync(seasonInfo.Id)).ToList();
 
             var onRosters = new List<string>();
             var usedSummoners = new List<Guid>();

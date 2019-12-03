@@ -81,7 +81,7 @@ namespace Domain.Services.Implementations
             var teams = (await teamsTask).ToDictionary(x => x.TeamName, x => x);
             var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
             var matchDictionary = (await matchesTask);
-            var teamPlayers = (await _teamPlayerRepository.ReadAllAsync()).ToList();
+            var teamPlayers = (await _teamPlayerRepository.ReadAllForSeasonAsync(seasonInfo.Id)).ToList();
 
             teams.TryGetValue(view.HomeTeamName, out var dbTeam1);
             teams.TryGetValue(view.AwayTeamName, out var dbTeam2);

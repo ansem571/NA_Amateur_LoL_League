@@ -7,10 +7,10 @@ namespace Domain.Repositories.Interfaces
 {
     public interface ITeamPlayerRepository
     {
-        Task<IEnumerable<TeamPlayerEntity>> ReadAllAsync();
+        Task<IEnumerable<TeamPlayerEntity>> ReadAllForSeasonAsync(Guid seasonInfoId);
         Task<IEnumerable<TeamPlayerEntity>> ReadAllForRosterAsync(Guid rosterId);
         Task<Guid?> GetRosterIdForExistingGroupAsync(IEnumerable<Guid> summonerIds);
-        Task<TeamPlayerEntity> GetBySummonerIdAsync(Guid summonerId);
+        Task<TeamPlayerEntity> GetBySummonerIdAsync(Guid summonerId, Guid rosterId);
         Task<IEnumerable<TeamPlayerEntity>> GetAllRostersForPlayerAsync(Guid summonerId);
 
         Task<bool> InsertAsync(IEnumerable<TeamPlayerEntity> entities);
