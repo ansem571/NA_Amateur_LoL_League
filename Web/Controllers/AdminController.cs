@@ -10,7 +10,7 @@ using Web.Models.Admin;
 
 namespace Web.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, Tribunal")]
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
