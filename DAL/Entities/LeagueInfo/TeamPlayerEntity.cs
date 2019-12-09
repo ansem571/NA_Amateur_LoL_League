@@ -11,5 +11,6 @@ namespace DAL.Entities.LeagueInfo
         [Key]
         public Guid TeamRosterId { get; set; }
         public bool? IsSub { get; set; }
+        public Guid? SeasonInfoId { get; set; }
     }
 }

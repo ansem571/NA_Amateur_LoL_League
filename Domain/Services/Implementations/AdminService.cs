@@ -144,7 +144,8 @@ namespace Domain.Services.Implementations
                 {
                     teamPlayers.Add(new TeamPlayerEntity
                     {
-                        SummonerId = summoner.Id
+                        SummonerId = summoner.Id,
+                        SeasonInfoId = seasonInfo.Id
                     });
                     var tierScore = int.Parse((await _lookupRepository.GetLookupEntity(summoner.Tier_DivisionId)).Value);
                     teamTierScores.Add(tierScore + summoner.CurrentLp);
@@ -230,7 +231,7 @@ namespace Domain.Services.Implementations
             var registeredPlayersTask = _summonerInfoRepository.GetAllSummonersAsync();
             var playerStatsTask = _playerStatsRepository.GetAllStatsAsync(seasonInfo.Id);
             var teams = (await teamsTask).ToDictionary(x => x.TeamName, x => x);
-            var teamPlayers = (await _teamPlayerRepository.ReadAllAsync()).ToList();
+            var teamPlayers = (await _teamPlayerRepository.ReadAllForSeasonAsync(seasonInfo.Id)).ToList();
             var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
 
             foreach (var file in files)

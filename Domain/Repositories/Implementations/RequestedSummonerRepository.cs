@@ -17,15 +17,16 @@ namespace Domain.Repositories.Implementations
             _table = table ?? throw new ArgumentNullException(nameof(table));
         }
 
-        public async Task<IEnumerable<SummonerRequestEntity>> ReadAllForSummonerAsync(Guid summonerId)
+        public async Task<IEnumerable<SummonerRequestEntity>> ReadAllForSummonerAsync(Guid summonerId, Guid seasonInfoId)
         {
-            var entities = (await _table.ReadManyAsync("SummonerId = @summonerId", new { summonerId })).ToList();
+            var entities = (await _table.ReadManyAsync("SummonerId = @summonerId AND SeasonInfoId = @seasonInfoId", new { summonerId, seasonInfoId })).ToList();
             return entities;
         }
 
-        public async Task<IEnumerable<SummonerRequestEntity>> ReadAllAsync()
+        public async Task<IEnumerable<SummonerRequestEntity>> ReadAllForSeasonAsync(Guid seasonInfoId)
         {
-            return await _table.ReadAllAsync();
+            var entities = (await _table.ReadManyAsync("SeasonInfoId = @seasonInfoId", new { seasonInfoId })).ToList();
+            return entities;
         }
 
         public async Task<bool> CreateAsync(IEnumerable<SummonerRequestEntity> entities)

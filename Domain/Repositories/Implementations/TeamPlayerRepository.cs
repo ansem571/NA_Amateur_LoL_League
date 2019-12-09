@@ -17,9 +17,9 @@ namespace Domain.Repositories.Implementations
             _table = table ?? throw new ArgumentNullException(nameof(table));
         }
 
-        public async Task<IEnumerable<TeamPlayerEntity>> ReadAllAsync()
+        public async Task<IEnumerable<TeamPlayerEntity>> ReadAllForSeasonAsync(Guid seasonInfoId)
         {
-            return await _table.ReadAllAsync();
+            return await _table.ReadManyAsync("SeasonInfoId = @seasonInfoId", new {seasonInfoId});
         }
 
         public async Task<IEnumerable<TeamPlayerEntity>> ReadAllForRosterAsync(Guid rosterId)
@@ -33,9 +33,9 @@ namespace Domain.Repositories.Implementations
             return player?.TeamRosterId;
         }
 
-        public async Task<TeamPlayerEntity> GetBySummonerIdAsync(Guid summonerId)
+        public async Task<TeamPlayerEntity> GetBySummonerIdAsync(Guid summonerId, Guid rosterId)
         {
-            return (await _table.ReadManyAsync("SummonerId = @summonerId", new {summonerId})).FirstOrDefault();
+            return (await _table.ReadManyAsync("SummonerId = @summonerId AND TeamRosterId = @rosterId", new {summonerId, rosterId})).FirstOrDefault();
         }
 
         public async Task<IEnumerable<TeamPlayerEntity>> GetAllRostersForPlayerAsync(Guid summonerId)

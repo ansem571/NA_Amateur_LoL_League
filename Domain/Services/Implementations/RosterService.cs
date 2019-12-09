@@ -127,7 +127,7 @@ namespace Domain.Services.Implementations
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var captainsTask = _teamCaptainRepository.GetAllTeamCaptainsAsync();
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
-            var allPlayersTask = _teamPlayerRepository.ReadAllAsync();
+            var allPlayersTask = _teamPlayerRepository.ReadAllForSeasonAsync(seasonInfo.Id);
 
             var rosters = await rostersTask;
             var captains = (await captainsTask).ToList();
@@ -309,7 +309,7 @@ namespace Domain.Services.Implementations
             {
                 throw new Exception($"{summonerName} was not found");
             }
-            var player = await _teamPlayerRepository.GetBySummonerIdAsync(summoner.Id);
+            var player = await _teamPlayerRepository.GetBySummonerIdAsync(summoner.Id, rosterId);
             player.IsSub = true;
 
             var result = await _teamPlayerRepository.UpdateAsync(new List<TeamPlayerEntity>
