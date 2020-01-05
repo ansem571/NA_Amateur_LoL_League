@@ -152,6 +152,11 @@ namespace Domain.Services.Implementations
                 }
 
                 var teamsCount = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).Count();
+                if (teamsCount == 22)
+                {
+                    teamsCount++;
+                }
+
                 var teamTierScore = teamTierScores.OrderByDescending(x => x).Take(MinTeamCountRequirement).Sum();
                 var team = new TeamRosterEntity
                 {
