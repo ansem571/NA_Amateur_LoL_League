@@ -12,6 +12,7 @@ using DAL.Entities.LeagueInfo;
 using DAL.Entities.Logging;
 using Domain.Enums;
 using Domain.Helpers;
+using Domain.Repositories.Implementations;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
@@ -36,12 +37,13 @@ namespace Domain.Services.Implementations
         private readonly ITeamPlayerRepository _teamPlayerRepository;
         private readonly IPlayerStatsRepository _playerStatsRepository;
         private readonly IMatchDetailRepository _matchDetailRepository;
+        private readonly IMatchMvpRepository _matchMvpRepository;
 
         private readonly string _wwwRootDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
         public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository,
             ITeamPlayerRepository teamPlayerRepository, ISummonerInfoRepository summonerInfoRepository, ITeamRosterRepository teamRosterRepository,
-            ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository)
+            ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository, IMatchMvpRepository matchMvpRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
@@ -51,6 +53,7 @@ namespace Domain.Services.Implementations
             _teamRosterRepository = teamRosterRepository ?? throw new ArgumentNullException(nameof(teamRosterRepository));
             _seasonInfoRepository = seasonInfoRepository ?? throw new ArgumentNullException(nameof(seasonInfoRepository));
             _matchDetailRepository = matchDetailRepository ?? throw new ArgumentNullException(nameof(matchDetailRepository));
+            _matchMvpRepository = matchMvpRepository ?? throw new ArgumentNullException(nameof(matchMvpRepository));
         }
 
         public async Task<bool> SendFileData(MatchSubmissionView view)
@@ -76,22 +79,21 @@ namespace Domain.Services.Implementations
             var matchesTask = _matchDetailRepository.ReadForScheduleId(view.ScheduleId);
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
             var teamsTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
-            var registeredPlayersTask = _summonerInfoRepository.GetAllSummonersAsync();
+            var registeredPlayersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
+            var previousListedMvpsTask = _matchMvpRepository.ReadAllForTeamScheduleId(view.ScheduleId);
             var teams = (await teamsTask).ToDictionary(x => x.TeamName, x => x);
             var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
             var matchDictionary = (await matchesTask);
-            var teamPlayers = (await _teamPlayerRepository.ReadAllForSeasonAsync(seasonInfo.Id)).ToList();
-
-            teams.TryGetValue(view.HomeTeamName, out var dbTeam1);
-            teams.TryGetValue(view.AwayTeamName, out var dbTeam2);
-
-
+            var mvpDetails = (await previousListedMvpsTask).OrderBy(x => x.Game).ToDictionary(x => x.Game, x => x);
+            var insertMvpDetails = new List<MatchMvpEntity>();
+            var updateMvpDetails = new List<MatchMvpEntity>();
             var gameNum = 0;
             //Will always insert new records and never update, we will delete any old records first
             var insertDetailsList = new List<MatchDetailEntity>();
             var insertStatsList = new List<PlayerStatsEntity>();
             //List of Ids to hard delete
             var deleteList = new List<Guid>();
+
             foreach (var gameInfo in view.GameInfos)
             {
                 gameNum++;
@@ -101,13 +103,15 @@ namespace Domain.Services.Implementations
                     continue;
                 }
 
-
                 //matchhistory.na.leagueoflegends.com/en/#match-details/NA1/{match id}/{dont care}?tab=overview
                 var split = gameInfo.MatchHistoryLink.Split("/");
-                if (!uint.TryParse(split[4], out var matchId))
+                //If an invalid match was submitted, will fail the entire process
+                if (!uint.TryParse(split[6], out var matchId))
                 {
                     return false;
                 }
+
+
 
                 var version = (await GlobalVariables.ChampsApi.Versions.GetAllAsync()).First();
                 var championsTask = GlobalVariables.ChampsApi.Champions.GetAllAsync(version);
@@ -130,39 +134,27 @@ namespace Domain.Services.Implementations
                     var gameInfoPlayer = gameInfo.PlayerName(riotChampion);
 
                     //Adds to total kills for teams (this is used in team total kill calculation for % kill participation
-                    AddToTotalKills(gameInfoPlayer, ref blueTotalKills, participant, ref redTotalKills);
-
-                    //Check to make sure the player is officially registered, if not, this will send a red flag
-                    registeredPlayers.TryGetValue(gameInfoPlayer.playerName.ToLowerInvariant(), out var registeredPlayer);
-                    if (registeredPlayer == null)
+                    AddToTotalKills(ref blueTotalKills, participant, ref redTotalKills);
+                    //If the player listed doesn't match a champion, then we ignore it for purposes of stat tracking
+                    if (gameInfoPlayer == null)
                     {
-                        _logger.LogCritical($"This player is not legal: {gameInfoPlayer.playerName}");
                         continue;
                     }
 
-                    if (dbTeam1 != null && dbTeam2 != null)
+                    //Check to make sure the player is officially registered, if not, this will send a red flag
+                    registeredPlayers.TryGetValue(gameInfoPlayer.PlayerName.ToLowerInvariant(), out var registeredPlayer);
+                    if (registeredPlayer == null)
                     {
-                        var teamPlayer = teamPlayers.FirstOrDefault(x =>
-                            x.SummonerId == registeredPlayer.Id && (x.TeamRosterId == dbTeam1.Id || x.TeamRosterId == dbTeam2.Id));
-
-                        if (teamPlayer == null)
-                        {
-                            //TODO: what should we do here?
-                            //Player was not on team, so we will not create the record
-                            continue;
-                        }
-
+                        var message = $"This player is not legal for a match: {gameInfoPlayer.PlayerName}";
+                        _logger.LogCritical(message);
+                        const string to = "casualesportsamateurleague@gmail.com";
+                        await _emailService.SendEmailAsync(to, message, $"Illegal player in match: {view.HomeTeamName} vs {view.AwayTeamName}");
+                        continue;
                     }
-                    //
+
                     var matchStat = CreatePlayerMatchStat(registeredPlayer, participant, gameDuration, seasonInfo);
 
                     var matchDetailKey = new MatchDetailKey(view.ScheduleId, gameNum, registeredPlayer.Id);
-
-                    //If the match detail exists, we delete the record so it will not be used in calculations later
-                    if (matchDictionary.TryGetValue(matchDetailKey, out var oldMatchDetail))
-                    {
-                        deleteList.Add(oldMatchDetail.Id);
-                    }
 
                     //will always create a new match detail
                     var matchDetail = new MatchDetailEntity
@@ -175,7 +167,45 @@ namespace Domain.Services.Implementations
                         TeamScheduleId = view.ScheduleId
                     };
 
-                    matchList.Add((gameInfoPlayer.isBlue, matchDetail, matchStat));
+                    //If the match detail exists, we delete the record so it will not be used in calculations later
+                    if (matchDictionary.TryGetValue(matchDetailKey, out var oldMatchDetail))
+                    {
+                        deleteList.Add(oldMatchDetail.Id);
+                    }
+
+
+                    matchList.Add((gameInfoPlayer.IsBlue, matchDetail, matchStat));
+                }
+
+                var validMvpPlayers = new List<Guid>();
+                validMvpPlayers.AddRange(matchList.Select(x=>x.matchDetail.PlayerId));
+
+                registeredPlayers.TryGetValue(gameInfo.BlueMvp, out var blueMvp);
+                registeredPlayers.TryGetValue(gameInfo.RedMvp, out var redMvp);
+
+                if (mvpDetails.TryGetValue(gameNum, out var mvpEntity))
+                {
+                    if (!string.IsNullOrEmpty(gameInfo.BlueMvp) && blueMvp != null && blueMvp.Id != mvpEntity.BlueMvp && validMvpPlayers.Contains(blueMvp.Id))
+                    {
+                        mvpEntity.BlueMvp = blueMvp.Id;
+                    }
+                    if (!string.IsNullOrEmpty(gameInfo.RedMvp) && redMvp != null && redMvp.Id != mvpEntity.RedMvp && validMvpPlayers.Contains(redMvp.Id))
+                    {
+                        mvpEntity.RedMvp = redMvp.Id;
+                    }
+                    updateMvpDetails.Add(mvpEntity);
+                }
+                else
+                {
+                    mvpEntity = new MatchMvpEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        BlueMvp = blueMvp?.Id,
+                        RedMvp = redMvp?.Id,
+                        Game = gameNum,
+                        TeamScheduleId = view.ScheduleId
+                    };
+                    insertMvpDetails.Add(mvpEntity);
                 }
 
                 foreach (var tuple in matchList)
@@ -201,10 +231,12 @@ namespace Domain.Services.Implementations
                 return false;
             }
 
+            var insertMvpResult = await _matchMvpRepository.CreateAsync(insertMvpDetails);
+            var updateMvpResult = await _matchMvpRepository.UpdateAsync(updateMvpDetails);
             var insertStatsResult = await _playerStatsRepository.InsertAsync(insertStatsList);
             var insertDetailsResult = await _matchDetailRepository.InsertAsync(insertDetailsList);
 
-            return insertStatsResult && insertDetailsResult;
+            return insertStatsResult && insertDetailsResult && insertMvpResult && updateMvpResult;
         }
 
         private static PlayerStatsEntity CreatePlayerMatchStat(SummonerInfoEntity registeredPlayer, Participant participant,
@@ -227,10 +259,9 @@ namespace Domain.Services.Implementations
             return matchStat;
         }
 
-        private void AddToTotalKills((bool isBlue, string playerName) gameInfoPlayer, ref int blueTotalKills,
-            Participant participant, ref int redTotalKills)
+        private void AddToTotalKills(ref int blueTotalKills, Participant participant, ref int redTotalKills)
         {
-            if (gameInfoPlayer.isBlue)
+            if (participant.TeamId == 100)
             {
                 blueTotalKills += (int)participant.Stats.Kills;
             }

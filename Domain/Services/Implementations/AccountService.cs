@@ -579,8 +579,8 @@ namespace Domain.Services.Implementations
                 }
             }
 
-            returningList.Add("Valid e-subs");
-            foreach (var player in players)
+            returningList.Add("Valid e-subs: ");
+            foreach (var player in players.OrderBy(x=>x.Value.SummonerName))
             {
                 returningList.Add(player.Value.SummonerName);
             }

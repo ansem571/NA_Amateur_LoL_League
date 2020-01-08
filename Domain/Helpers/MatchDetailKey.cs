@@ -37,4 +37,17 @@ namespace Domain.Helpers
             SeasonId = seasonId;
         }
     }
+
+    public class MatchMvpKey
+    {
+        public Guid TeamScheduleId { get; set; }
+        public int Game { get; set; }
+
+        public MatchMvpKey() { }
+        public MatchMvpKey(Guid teamScheduleId, int game)
+        {
+            TeamScheduleId = teamScheduleId;
+            Game = game;
+        }
+    }
 }
