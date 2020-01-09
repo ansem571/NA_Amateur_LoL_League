@@ -54,11 +54,11 @@ namespace Domain.Views
         [Required]
         public ChampionsEnum ChampionSup { get; set; }
 
-        internal LookupEntity LocalChampionTop => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionTop.ToString());
-        internal LookupEntity LocalChampionJungle => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionJungle.ToString());
-        internal LookupEntity LocalChampionMid => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionMid.ToString());
-        internal LookupEntity LocalChampionAdc => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionAdc.ToString());
-        internal LookupEntity LocalChampionSupport => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionSup.ToString());
+        public LookupEntity LocalChampionTop => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionTop.ToString().ToLowerInvariant());
+        public LookupEntity LocalChampionJungle => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionJungle.ToString().ToLowerInvariant());
+        public LookupEntity LocalChampionMid => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionMid.ToString().ToLowerInvariant());
+        public LookupEntity LocalChampionAdc => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionAdc.ToString().ToLowerInvariant());
+        public LookupEntity LocalChampionSupport => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionSup.ToString().ToLowerInvariant());
     }
 
     public class GameInfoPlayer
@@ -108,48 +108,48 @@ namespace Domain.Views
         public bool HomeTeamForfeit { get; set; } = false;
         public bool AwayTeamForfeit { get; set; } = false;
 
-        internal GameInfoPlayer PlayerName(string riotChampionName)
+        public GameInfoPlayer PlayerName(string riotChampionName)
         {
             //Blue team check
-            if (BlueTeam.LocalChampionTop.Value == riotChampionName)
+            if (BlueTeam.LocalChampionTop.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerTop);
             }
-            if (BlueTeam.LocalChampionJungle.Value == riotChampionName)
+            if (BlueTeam.LocalChampionJungle.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerJungle);
             }
-            if (BlueTeam.LocalChampionMid.Value == riotChampionName)
+            if (BlueTeam.LocalChampionMid.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerMid);
             }
-            if (BlueTeam.LocalChampionAdc.Value == riotChampionName)
+            if (BlueTeam.LocalChampionAdc.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerAdc);
             }
-            if (BlueTeam.LocalChampionSupport.Value == riotChampionName)
+            if (BlueTeam.LocalChampionSupport.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerSup);
             }
 
             //Red team check
-            if (RedTeam.LocalChampionTop.Value == riotChampionName)
+            if (RedTeam.LocalChampionTop.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerTop);
             }
-            if (RedTeam.LocalChampionJungle.Value == riotChampionName)
+            if (RedTeam.LocalChampionJungle.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerJungle);
             }
-            if (RedTeam.LocalChampionMid.Value == riotChampionName)
+            if (RedTeam.LocalChampionMid.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerMid);
             }
-            if (RedTeam.LocalChampionAdc.Value == riotChampionName)
+            if (RedTeam.LocalChampionAdc.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerAdc);
             }
-            if (RedTeam.LocalChampionSupport.Value == riotChampionName)
+            if (RedTeam.LocalChampionSupport.Value.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerSup);
             }

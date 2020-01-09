@@ -65,7 +65,7 @@ namespace Web
             var builder = services.BuildServiceProvider();
             var lookupRepo = builder.GetService<ILookupRepository>();
             var logger = builder.GetService<ILogger>();
-            GlobalVariables.ChampionCache = new Cache();
+            GlobalVariables.ChampionEnumCache = new Cache();
             await GlobalVariables.SetupChampionCache(lookupRepo);
             var thread = new Thread(() => GlobalVariables.UpdateCache(lookupRepo, logger));
             thread.Start();

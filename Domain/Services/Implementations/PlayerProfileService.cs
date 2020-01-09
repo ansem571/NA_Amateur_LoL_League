@@ -60,7 +60,7 @@ namespace Domain.Services.Implementations
                 AchievedTeam = form.TeamName
             };
 
-            return await _achievementRepository.InsertAsync(achievement);
+            return await _achievementRepository.InsertAsync(new List<AchievementEntity> { achievement });
         }
 
         public async Task<PlayerProfileView> GetPlayerProfileAsync(Guid userId)

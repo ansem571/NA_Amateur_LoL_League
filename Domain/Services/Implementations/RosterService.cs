@@ -197,7 +197,7 @@ namespace Domain.Services.Implementations
             var summonersTask = _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummoner.Select(x => x.SummonerId));
             var matchDetails = await _matchDetailRepository.GetMatchDetailsForPlayerAsync(playersSummoner.Select(x => x.SummonerId));
 
-            matchDetails = matchDetails.Where(x => x.Key.SummonerId == seasonInfo.Id).ToDictionary(x => x.Key, x => x.Value);
+            matchDetails = matchDetails.Where(x => x.Key.SeasonId == seasonInfo.Id).ToDictionary(x => x.Key, x => x.Value);
 
             var playerStats = await _playerStatsRepository.GetStatsAsync(matchDetails.Keys);
             var mappedStats = new List<PlayerStatsView>();
@@ -272,7 +272,7 @@ namespace Domain.Services.Implementations
             }
             catch (Exception e)
             {
-                return (false, "This file extension is not supported is not supported");
+                return (false, "This file extension is not supported");
             }
 
             var directory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");

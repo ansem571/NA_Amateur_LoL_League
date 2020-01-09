@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
@@ -23,9 +24,15 @@ namespace Domain.Repositories.Implementations
             return await _table.ReadManyAsync("UserId = @userId", new {userId});
         }
 
-        public async Task<bool> InsertAsync(AchievementEntity entity)
+        public async Task<bool> InsertAsync(IEnumerable<AchievementEntity> entities)
         {
-            return await _table.InsertAsync(entity) == 1;
+            entities = entities.ToList();
+            if (entities.Any())
+            {
+                return await _table.InsertAsync(entities) == entities.Count();
+            }
+
+            return true;
         }
     }
 }

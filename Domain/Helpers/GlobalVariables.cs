@@ -15,7 +15,7 @@ namespace Domain.Helpers
 {
     public static class GlobalVariables
     {
-        public static ICache ChampionCache { get; set; }
+        public static ICache ChampionEnumCache { get; set; }
         public static readonly TimeSpan ClearCacheTime = TimeSpan.FromDays(30);
         public static readonly TimeSpan CheckTime = TimeSpan.FromDays(1);
         public static readonly string Apikey = "RGAPI-fc7bbbec-da3c-4513-9f79-68ea94de2990";
@@ -26,27 +26,45 @@ namespace Domain.Helpers
 
         public static async Task SetupChampionCache(ILookupRepository lookupRepo)
         {
-            if (ChampionCache.IsEmpty())
+            var retry = 0;
+            var maxRetry = 4;
+            while (retry < maxRetry)
             {
-                var champions = (await lookupRepo.GetLookupEntitiesByCategory("Champion")).ToList();
-                foreach (var championLookup in champions)
+                try
                 {
-                    var enumValue = championLookup.Enum;
-                    var trueValue = championLookup;
-                    GlobalVariables.ChampionCache.Add(enumValue, trueValue, GlobalVariables.ClearCacheTime);
-                }
+                    if (ChampionEnumCache.IsEmpty())
+                    {
+                        var champions = (await lookupRepo.GetLookupEntitiesByCategory("Champion")).ToList();
+                        foreach (var championLookup in champions.OrderBy(x=>x.Enum))
+                        {
+                            var enumValue = championLookup.Enum;
+                            var trueValue = championLookup;
+                            GlobalVariables.ChampionEnumCache.Add(enumValue.ToLowerInvariant(), trueValue, GlobalVariables.ClearCacheTime);
+                        }
 
-                if (ChampionCache.IsEmpty())
+                        if (ChampionEnumCache.IsEmpty())
+                        {
+                            throw new NotImplementedException(nameof(GlobalVariables.ChampionEnumCache));
+                        }
+
+                        _nextCheck = DateTime.Now.AddDays(1);
+                        _nextUpdate = DateTime.Now.Add(ClearCacheTime);
+                    }
+                    else
+                    {
+                        _nextCheck = DateTime.Now.Add(CheckTime);
+                    }
+
+                    break;
+                }
+                catch (Exception)
                 {
-                    throw new NotImplementedException(nameof(GlobalVariables.ChampionCache));
+                    retry++;
+                    if (retry >= maxRetry)
+                    {
+                        //somethings wrong I can feel it
+                    }
                 }
-
-                _nextCheck = DateTime.Now.AddDays(1);
-                _nextUpdate = DateTime.Now.Add(ClearCacheTime);
-            }
-            else
-            {
-                _nextCheck = DateTime.Now.Add(CheckTime);
             }
         }
 

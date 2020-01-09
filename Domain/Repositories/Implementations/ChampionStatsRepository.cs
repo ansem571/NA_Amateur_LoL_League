@@ -15,6 +15,7 @@ namespace Domain.Repositories.Implementations
         Task<IEnumerable<ChampionStatsEntity>> GetChampionStatsForPlayerAsync(Guid playerId, Guid championId);
         Task<bool> CreateAsync(IEnumerable<ChampionStatsEntity> entities);
         Task<bool> DeleteForMatchDetailsAsync(IEnumerable<Guid> matchDetailIds);
+        Task<bool> DeleteBansByScheduleAsync(Guid teamScheduleId);
     }
     public class ChampionStatsRepository : IChampionStatsRepository
     {
@@ -68,6 +69,11 @@ namespace Domain.Repositories.Implementations
             }
 
             return true;
+        }
+
+        public async Task<bool> DeleteBansByScheduleAsync(Guid teamScheduleId)
+        {
+            return await _table.DeleteWhereAsync("TeamScheduleId = @teamScheduleId AND Banned = 1", new {teamScheduleId});
         }
     }
 }

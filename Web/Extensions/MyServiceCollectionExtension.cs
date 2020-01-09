@@ -78,6 +78,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<AchievementEntity>, AchievementStore>();
             services.TryAddSingleton<ITableStorageRepository<MatchDetailEntity>, MatchDetailStore>();
             services.TryAddSingleton<ITableStorageRepository<MatchMvpEntity>, MatchMvpStore>();
+            services.TryAddSingleton<ITableStorageRepository<ChampionStatsEntity>, ChampionStatsStore>();
             return services;
         }
 
@@ -112,6 +113,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IAchievementRepository, AchievementRepository>();
             services.TryAddSingleton<IMatchDetailRepository, MatchDetailRepository>();
             services.TryAddSingleton<IMatchMvpRepository, MatchMvpRepository>();
+            services.TryAddSingleton<IChampionStatsRepository, ChampionStatsRepository>();
             return services;
         }
 

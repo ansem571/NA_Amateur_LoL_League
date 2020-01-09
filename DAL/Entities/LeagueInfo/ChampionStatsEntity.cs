@@ -5,6 +5,7 @@ using Dapper.Contrib.Extensions;
 
 namespace DAL.Entities.LeagueInfo
 {
+    [Table("ChampionStats")]
     public class ChampionStatsEntity
     {
         [ExplicitKey]
@@ -30,13 +31,19 @@ namespace DAL.Entities.LeagueInfo
         public Guid ChampionId { get; set; }
 
         /// <summary>
-        /// Will be the Match Detail
+        /// Will be the Match Detail, can be null such as for bans
         /// </summary>
-        public Guid MatchDetailId { get; set; }
+        public Guid? MatchDetailId { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public Guid TeamScheduleId { get; set; }
         public int Kills { get; set; }
         public int Deaths { get; set; }
         public int Assists { get; set; }
         public bool Picked { get; set; }
         public bool Banned { get; set; }
+        public bool Win { get; set; }
+        public bool Loss { get; set; }
     }
 }

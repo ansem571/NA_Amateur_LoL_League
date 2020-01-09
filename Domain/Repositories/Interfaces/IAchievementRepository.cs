@@ -10,6 +10,6 @@ namespace Domain.Repositories.Interfaces
     public interface IAchievementRepository
     {
         Task<IEnumerable<AchievementEntity>> GetAchievementsForUserAsync(Guid userId);
-        Task<bool> InsertAsync(AchievementEntity entity);
+        Task<bool> InsertAsync(IEnumerable<AchievementEntity> entities);
     }
 }

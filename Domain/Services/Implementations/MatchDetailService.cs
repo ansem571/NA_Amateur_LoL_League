@@ -10,6 +10,7 @@ using CsvHelper;
 using DAL.Contracts;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.Logging;
+using DAL.Entities.UserData;
 using Domain.Enums;
 using Domain.Helpers;
 using Domain.Repositories.Implementations;
@@ -24,7 +25,7 @@ using Google.Apis.Util.Store;
 using Microsoft.Extensions.Logging;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Endpoints.StaticDataEndpoint;
-using Match = Domain.Views.Match;
+using RiotSharp.Endpoints.StaticDataEndpoint.Champion;
 
 namespace Domain.Services.Implementations
 {
@@ -39,13 +40,15 @@ namespace Domain.Services.Implementations
         private readonly IMatchMvpRepository _matchMvpRepository;
         private readonly IChampionStatsRepository _championStatsRepository;
         private readonly IScheduleService _scheduleService;
-        private readonly ILookupRepository _lookupRepository;
+        private readonly ITeamPlayerRepository _teamPlayerRepository;
+        private readonly ITeamRosterRepository _teamRosterRepository;
+        private readonly IAchievementRepository _achievementRepository;
 
         private readonly string _wwwRootDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
-        public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository,ISummonerInfoRepository summonerInfoRepository, 
+        public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository, ISummonerInfoRepository summonerInfoRepository,
             ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository, IMatchMvpRepository matchMvpRepository,
-            IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ILookupRepository lookupRepository)
+            IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository, IAchievementRepository achievementRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
@@ -56,7 +59,9 @@ namespace Domain.Services.Implementations
             _matchMvpRepository = matchMvpRepository ?? throw new ArgumentNullException(nameof(matchMvpRepository));
             _championStatsRepository = championStatsRepository ?? throw new ArgumentNullException(nameof(championStatsRepository));
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
-            _lookupRepository = lookupRepository ?? throw new ArgumentNullException(nameof(lookupRepository));
+            _teamPlayerRepository = teamPlayerRepository ?? throw new ArgumentNullException(nameof(teamPlayerRepository));
+            _teamRosterRepository = teamRosterRepository ?? throw new ArgumentNullException(nameof(teamRosterRepository));
+            _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));
         }
 
         public async Task<bool> SendFileData(MatchSubmissionView view)
@@ -96,6 +101,7 @@ namespace Domain.Services.Implementations
             var insertDetailsList = new List<MatchDetailEntity>();
             var insertStatsList = new List<PlayerStatsEntity>();
             var championDetails = new List<ChampionStatsEntity>();
+            var insertAchievementsList = new List<AchievementEntity>();
             //List of Ids to hard delete
             var deleteList = new List<Guid>();
 
@@ -123,132 +129,249 @@ namespace Domain.Services.Implementations
                 var riotMatch = await riotMatchTask;
                 var champions = await championsTask;
 
-                //
-                var bannedChampionStat = CreateChampionStat(seasonInfo, divisionId);
-                championDetails.Add(bannedChampionStat);
+                CollectBans(view, riotMatch, champions, seasonInfo, divisionId, championDetails);
 
                 var gameDuration = riotMatch.GameDuration;
 
-                var redTotalKills = 0;
-                var blueTotalKills = 0;
 
-                var matchList = new List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats)>();
-                foreach (var participant in riotMatch.Participants)
-                {
-                    //Get champion by Riot Api
-                    var riotChampion = champions.Keys[participant.ChampionId];
-                    //Get who played said champion and if they were blue side or not
-                    var gameInfoPlayer = gameInfo.PlayerName(riotChampion);
+                var matchList = new List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)>();
 
-                    //Adds to total kills for teams (this is used in team total kill calculation for % kill participation
-                    AddToTotalKills(ref blueTotalKills, participant, ref redTotalKills);
-                    //If the player listed doesn't match a champion, then we ignore it for purposes of stat tracking
-                    if (gameInfoPlayer == null)
-                    {
-                        continue;
-                    }
+                await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, gameNum, matchDictionary, deleteList, matchList, divisionId, championDetails);
 
-                    //Check to make sure the player is officially registered, if not, this will send a red flag
-                    registeredPlayers.TryGetValue(gameInfoPlayer.PlayerName.ToLowerInvariant(), out var registeredPlayer);
-                    if (registeredPlayer == null)
-                    {
-                        var message = $"This player is not legal for a match: {gameInfoPlayer.PlayerName}";
-                        _logger.LogCritical(message);
-                        const string to = "casualesportsamateurleague@gmail.com";
-                        await _emailService.SendEmailAsync(to, message, $"Illegal player in match: {view.HomeTeamName} vs {view.AwayTeamName}");
-                        continue;
-                    }
-
-                    var matchStat = CreatePlayerMatchStat(registeredPlayer, participant, gameDuration, seasonInfo);
-
-                    var matchDetailKey = new MatchDetailKey(view.ScheduleId, gameNum, registeredPlayer.Id);
-
-                    //will always create a new match detail
-                    var matchDetail = new MatchDetailEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        Game = gameNum,
-                        PlayerId = registeredPlayer.Id,
-                        PlayerStatsId = matchStat.Id,
-                        SeasonInfoId = seasonInfo.Id,
-                        TeamScheduleId = view.ScheduleId
-                    };
-
-                    //If the match detail exists, we delete the record so it will not be used in calculations later
-                    if (matchDictionary.TryGetValue(matchDetailKey, out var oldMatchDetail))
-                    {
-                        deleteList.Add(oldMatchDetail.Id);
-                    }
-
-                    matchList.Add((gameInfoPlayer.IsBlue, matchDetail, matchStat));
-
-                    //per player
-                    var pickedChampionStat = CreateChampionStat(matchStat, seasonInfo, divisionId);
-                    championDetails.Add(pickedChampionStat);
-                }
-
-                var validMvpPlayers = new List<Guid>();
-                validMvpPlayers.AddRange(matchList.Select(x=>x.matchDetail.PlayerId));
-
-                registeredPlayers.TryGetValue(gameInfo.BlueMvp, out var blueMvp);
-                registeredPlayers.TryGetValue(gameInfo.RedMvp, out var redMvp);
-
-                if (mvpDetails.TryGetValue(gameNum, out var mvpEntity))
-                {
-                    if (!string.IsNullOrEmpty(gameInfo.BlueMvp) && blueMvp != null && blueMvp.Id != mvpEntity.BlueMvp && validMvpPlayers.Contains(blueMvp.Id))
-                    {
-                        mvpEntity.BlueMvp = blueMvp.Id;
-                    }
-                    if (!string.IsNullOrEmpty(gameInfo.RedMvp) && redMvp != null && redMvp.Id != mvpEntity.RedMvp && validMvpPlayers.Contains(redMvp.Id))
-                    {
-                        mvpEntity.RedMvp = redMvp.Id;
-                    }
-                    updateMvpDetails.Add(mvpEntity);
-                }
-                else
-                {
-                    mvpEntity = new MatchMvpEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        BlueMvp = blueMvp?.Id,
-                        RedMvp = redMvp?.Id,
-                        Game = gameNum,
-                        TeamScheduleId = view.ScheduleId
-                    };
-                    insertMvpDetails.Add(mvpEntity);
-                }
-
-                foreach (var tuple in matchList)
-                {
-                    if (tuple.isBlue)
-                    {
-                        tuple.playerStats.TotalTeamKills = blueTotalKills;
-                    }
-                    else
-                    {
-                        tuple.playerStats.TotalTeamKills = redTotalKills;
-                    }
-                }
+                CollectMatchMvpData(view, matchList, registeredPlayers, gameInfo, mvpDetails, gameNum, updateMvpDetails, insertMvpDetails);
 
                 insertDetailsList.AddRange(matchList.Select(x => x.matchDetail));
                 insertStatsList.AddRange(matchList.Select(x => x.playerStats));
+                insertAchievementsList.AddRange(matchList.SelectMany(x => x.achievements));
             }
 
-            var deleteChampionStatsResult = await _championStatsRepository.DeleteForMatchDetailsAsync(deleteList);
-            var deleteMatchDetailsResult = await _matchDetailRepository.DeleteAsync(deleteList);
-            if (!deleteMatchDetailsResult || !deleteChampionStatsResult)
+            if (!await DeleteOldRecords(view, deleteList))
             {
-                _logger.LogError("Unable to delete old MatchDetails");
                 return false;
             }
 
+            var insertAchievementsResult = await _achievementRepository.InsertAsync(insertAchievementsList);
             var insertMvpResult = await _matchMvpRepository.CreateAsync(insertMvpDetails);
             var updateMvpResult = await _matchMvpRepository.UpdateAsync(updateMvpDetails);
             var insertStatsResult = await _playerStatsRepository.InsertAsync(insertStatsList);
             var insertDetailsResult = await _matchDetailRepository.InsertAsync(insertDetailsList);
             var insertChampionStatsResult = await _championStatsRepository.CreateAsync(championDetails);
 
-            return insertStatsResult && insertDetailsResult && insertMvpResult && updateMvpResult && insertChampionStatsResult;
+            return insertStatsResult && insertDetailsResult && insertMvpResult && updateMvpResult && insertChampionStatsResult && insertAchievementsResult;
+        }
+
+        public void CollectBans(MatchSubmissionView view, Match riotMatch, ChampionListStatic champions,
+            SeasonInfoEntity seasonInfo, Guid divisionId, List<ChampionStatsEntity> championDetails)
+        {
+            foreach (var ban in riotMatch.Teams.SelectMany(x => x.Bans))
+            {
+                var riotChampion = champions.Keys[ban.ChampionId].ToLowerInvariant();
+                var ourChampion = GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(riotChampion);
+                var bannedChampionStat = CreateChampionStat(seasonInfo, divisionId, ourChampion.Id, view.ScheduleId);
+                championDetails.Add(bannedChampionStat);
+            }
+        }
+
+        public async Task<bool> DeleteOldRecords(MatchSubmissionView view, List<Guid> deleteList)
+        {
+            var deleteChampionStatsResult = await _championStatsRepository.DeleteForMatchDetailsAsync(deleteList);
+            var deleteMatchDetailsResult = await _matchDetailRepository.DeleteAsync(deleteList);
+            var deleteByScheduleResult = await _championStatsRepository.DeleteBansByScheduleAsync(view.ScheduleId);
+            if (!deleteMatchDetailsResult || !deleteChampionStatsResult || deleteByScheduleResult)
+            {
+                _logger.LogError("Unable to delete old MatchDetails");
+                return false;
+            }
+
+            return true;
+        }
+
+        public void CollectMatchMvpData(MatchSubmissionView view, List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)> matchList, Dictionary<string, SummonerInfoEntity> registeredPlayers,
+            GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, int gameNum, List<MatchMvpEntity> updateMvpDetails, List<MatchMvpEntity> insertMvpDetails)
+        {
+            var validMvpPlayers = new List<Guid>();
+            validMvpPlayers.AddRange(matchList.Select(x => x.matchDetail.PlayerId));
+
+            registeredPlayers.TryGetValue(gameInfo.BlueMvp, out var blueMvp);
+            registeredPlayers.TryGetValue(gameInfo.RedMvp, out var redMvp);
+
+            if (mvpDetails.TryGetValue(gameNum, out var mvpEntity))
+            {
+                if (!string.IsNullOrEmpty(gameInfo.BlueMvp) && blueMvp != null && blueMvp.Id != mvpEntity.BlueMvp &&
+                    validMvpPlayers.Contains(blueMvp.Id))
+                {
+                    mvpEntity.BlueMvp = blueMvp.Id;
+                }
+
+                if (!string.IsNullOrEmpty(gameInfo.RedMvp) && redMvp != null && redMvp.Id != mvpEntity.RedMvp &&
+                    validMvpPlayers.Contains(redMvp.Id))
+                {
+                    mvpEntity.RedMvp = redMvp.Id;
+                }
+
+                updateMvpDetails.Add(mvpEntity);
+            }
+            else
+            {
+                mvpEntity = new MatchMvpEntity
+                {
+                    Id = Guid.NewGuid(),
+                    BlueMvp = blueMvp != null && validMvpPlayers.Contains(blueMvp.Id) ? blueMvp.Id : new Guid?(),
+                    RedMvp = redMvp != null && validMvpPlayers.Contains(redMvp.Id) ? redMvp.Id : new Guid?(),
+                    Game = gameNum,
+                    TeamScheduleId = view.ScheduleId
+                };
+                insertMvpDetails.Add(mvpEntity);
+            }
+        }
+
+        public async Task CollectPlayerMatchDetailsAsync(MatchSubmissionView view, Match riotMatch, ChampionListStatic champions, GameInfo gameInfo, Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration,
+            SeasonInfoEntity seasonInfo, int gameNum, Dictionary<MatchDetailKey, MatchDetailEntity> matchDictionary, List<Guid> deleteList, List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)> matchList,
+            Guid divisionId, List<ChampionStatsEntity> championDetails)
+        {
+            var blueTotalKills = riotMatch.Participants.Where(x => x.TeamId == 100).Sum(y => y.Stats.Kills);
+            var redTotalKills = riotMatch.Participants.Where(x => x.TeamId == 200).Sum(y => y.Stats.Kills);
+
+            foreach (var participant in riotMatch.Participants)
+            {
+                //Get champion by Riot Api
+                var riotChampion = champions.Keys[participant.ChampionId].ToLowerInvariant();
+                //Get who played said champion and if they were blue side or not
+                var gameInfoPlayer = gameInfo.PlayerName(riotChampion);
+
+                //If the player listed doesn't match a champion, then we ignore it for purposes of stat tracking
+                if (gameInfoPlayer == null)
+                {
+                    continue;
+                }
+
+                //Check to make sure the player is officially registered, if not, this will send a red flag
+                registeredPlayers.TryGetValue(gameInfoPlayer.PlayerName.ToLowerInvariant(), out var registeredPlayer);
+                if (registeredPlayer == null)
+                {
+                    var message = $"This player is not legal for a match: {gameInfoPlayer.PlayerName}";
+                    _logger.LogCritical(message);
+                    const string to = "casualesportsamateurleague@gmail.com";
+                    await _emailService.SendEmailAsync(to, message,
+                        $"Illegal player in match: {view.HomeTeamName} vs {view.AwayTeamName}");
+                    continue;
+                }
+
+                var matchStat = CreatePlayerMatchStat(registeredPlayer, participant, gameDuration, seasonInfo);
+                switch (participant.TeamId)
+                {
+                    case 100:
+                        matchStat.TotalTeamKills = (int)blueTotalKills;
+                        break;
+                    case 200:
+                        matchStat.TotalTeamKills = (int)redTotalKills;
+                        break;
+                }
+                var matchDetailKey = new MatchDetailKey(view.ScheduleId, gameNum, registeredPlayer.Id);
+
+                //will always create a new match detail
+                var matchDetail = new MatchDetailEntity
+                {
+                    Id = Guid.NewGuid(),
+                    Game = gameNum,
+                    PlayerId = registeredPlayer.Id,
+                    PlayerStatsId = matchStat.Id,
+                    SeasonInfoId = seasonInfo.Id,
+                    TeamScheduleId = view.ScheduleId
+                };
+
+                //If the match detail exists, we delete the record so it will not be used in calculations later
+                if (matchDictionary.TryGetValue(matchDetailKey, out var oldMatchDetail))
+                {
+                    deleteList.Add(oldMatchDetail.Id);
+                }
+
+                //per player
+                var win = participant.Stats.Winner;
+                var loss = !win;
+                var ourChampion = GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(riotChampion);
+
+                var pickedChampionStat = CreateChampionStat(matchStat, seasonInfo, divisionId, win, loss, ourChampion.Id, matchDetail.Id, view.ScheduleId);
+                championDetails.Add(pickedChampionStat);
+
+                //Add special achievements here
+                var achievements = await AddSpecialAchievements(participant, ourChampion, registeredPlayer, seasonInfo.Id, riotMatch, view, gameNum);
+                matchList.Add((gameInfoPlayer.IsBlue, matchDetail, matchStat, achievements));
+            }
+        }
+
+        public async Task<List<AchievementEntity>> AddSpecialAchievements(Participant player, LookupEntity ourChampion, SummonerInfoEntity summonerInfo, Guid seasonInfoId, Match riotMatch, MatchSubmissionView view, int currentGame)
+        {
+            var achievements = new List<AchievementEntity>();
+            var teamName = "N/a";
+            var currentTeamId = (await _teamPlayerRepository.GetBySummonerAndSeasonIdAsync(summonerInfo.Id, seasonInfoId))?.TeamRosterId;
+            if (currentTeamId != null)
+            {
+                var playerTeam = await _teamRosterRepository.GetByTeamIdAsync(currentTeamId.Value);
+                if (playerTeam.TeamName == view.HomeTeamName || playerTeam.TeamName == view.AwayTeamName)
+                {
+                    teamName = playerTeam.TeamName;
+                }
+            }
+
+            if (player.Stats.LargestMultiKill >= 5)
+            {
+                var achivement = new AchievementEntity
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = summonerInfo.UserId,
+                    AchievedDate = DateTime.Today,
+                    AchievedTeam = teamName,
+                    Achievement = $"Penta-kill on {ourChampion.Value} in game {currentGame}"
+                };
+                achievements.Add(achivement);
+            }
+
+            var blueTeamPlayers = riotMatch.Participants.Where(x => x.TeamId == 100);
+            var redTeamPlayers = riotMatch.Participants.Where(x => x.TeamId == 200);
+
+
+            var blueTotalKills = blueTeamPlayers.Sum(y => y.Stats.Kills);
+            var redTotalKills = redTeamPlayers.Sum(y => y.Stats.Kills);
+            var isBlue = player.TeamId == 100;
+            if (isBlue && redTotalKills == 0 || !isBlue && blueTotalKills == 0)
+            {
+                var blueTeam = riotMatch.Teams.First(x => x.TeamId == 100);
+                var redTeam = riotMatch.Teams.First(x => x.TeamId == 200);
+                if (blueTeam.DragonKills == 0 && blueTeam.BaronKills == 0 && blueTeam.TowerKills == 0 && !isBlue
+                    || redTeam.DragonKills == 0 && redTeam.BaronKills == 0 && redTeam.TowerKills == 0 && isBlue)
+                {
+                    var achivement = new AchievementEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = summonerInfo.UserId,
+                        AchievedDate = DateTime.Today,
+                        AchievedTeam = teamName,
+                        Achievement = $"Perfect Game on {ourChampion.Value} in game {currentGame}"
+                    };
+                    achievements.Add(achivement);
+                }
+            }
+
+            try
+            {
+                var oldAchievements = (await _achievementRepository.GetAchievementsForUserAsync(summonerInfo.UserId)).ToList();
+                var tempList = new List<AchievementEntity>(achievements);
+                foreach (var newAchievement in tempList)
+                {
+                    var match = oldAchievements.FirstOrDefault(x => x.Equals(newAchievement));
+                    if (match != null)
+                    {
+                        achievements.Remove(newAchievement);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                //ignore
+            }
+
+            return achievements;
         }
 
         private static PlayerStatsEntity CreatePlayerMatchStat(SummonerInfoEntity registeredPlayer, Participant participant,
@@ -271,7 +394,8 @@ namespace Domain.Services.Implementations
             return matchStat;
         }
 
-        private ChampionStatsEntity CreateChampionStat(PlayerStatsEntity playerStats, SeasonInfoEntity seasonInfo, Guid divisionId)
+        //per player
+        private ChampionStatsEntity CreateChampionStat(PlayerStatsEntity playerStats, SeasonInfoEntity seasonInfo, Guid divisionId, bool win, bool loss, Guid championId, Guid matchDetailId, Guid teamScheduleId)
         {
             var championStat = new ChampionStatsEntity
             {
@@ -283,12 +407,18 @@ namespace Domain.Services.Implementations
                 Deaths = playerStats.Deaths,
                 Assists = playerStats.Assists,
                 Picked = true,
-                Banned = false
+                Banned = false,
+                Win = win,
+                Loss = loss,
+                ChampionId = championId,
+                MatchDetailId = matchDetailId,
+                TeamScheduleId = teamScheduleId
             };
             return championStat;
         }
 
-        private ChampionStatsEntity CreateChampionStat(SeasonInfoEntity seasonInfo, Guid divisionId)
+        //per game
+        private ChampionStatsEntity CreateChampionStat(SeasonInfoEntity seasonInfo, Guid divisionId, Guid championId, Guid teamScheduleId)
         {
             var championStat = new ChampionStatsEntity
             {
@@ -300,21 +430,13 @@ namespace Domain.Services.Implementations
                 Assists = 0,
                 Deaths = 0,
                 Picked = false,
-                Banned = true
+                Banned = true,
+                Win = false,
+                Loss = false,
+                ChampionId = championId,
+                TeamScheduleId = teamScheduleId
             };
             return championStat;
-        }
-
-        private void AddToTotalKills(ref int blueTotalKills, Participant participant, ref int redTotalKills)
-        {
-            if (participant.TeamId == 100)
-            {
-                blueTotalKills += (int)participant.Stats.Kills;
-            }
-            else
-            {
-                redTotalKills += (int)participant.Stats.Kills;
-            }
         }
 
         private string CreateCsvDataFile(MatchSubmissionView view)

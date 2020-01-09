@@ -38,6 +38,11 @@ namespace Domain.Repositories.Implementations
             return (await _table.ReadManyAsync("SummonerId = @summonerId AND TeamRosterId = @rosterId", new {summonerId, rosterId})).FirstOrDefault();
         }
 
+        public async Task<TeamPlayerEntity> GetBySummonerAndSeasonIdAsync(Guid summonerId, Guid seasonInfoId)
+        {
+            return (await _table.ReadManyAsync("SummonerId = @summonerId AND SeasonInfoId = @seasonInfoId", new { summonerId, seasonInfoId })).FirstOrDefault();
+        }
+
         public async Task<IEnumerable<TeamPlayerEntity>> GetAllRostersForPlayerAsync(Guid summonerId)
         {
             return await _table.ReadManyAsync("SummonerId = @summonerId", new {summonerId});
