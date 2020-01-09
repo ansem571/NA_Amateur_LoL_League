@@ -61,7 +61,7 @@ namespace Domain.Repositories.Implementations
 
         public async Task<bool> DeleteByScheduleAsync(Guid teamScheduleId)
         {
-            return await _table.DeleteWhereAsync("TeamScheduleId = @teamScheduleId AND Banned = 1", new {teamScheduleId});
+            return await _table.DeleteWhereAsync("TeamScheduleId = @teamScheduleId", new {teamScheduleId});
         }
     }
 }
