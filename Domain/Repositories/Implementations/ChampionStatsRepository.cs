@@ -14,8 +14,7 @@ namespace Domain.Repositories.Implementations
         Task<IEnumerable<ChampionStatsEntity>> GetStatsForPlayerAsync(Guid playerId);
         Task<IEnumerable<ChampionStatsEntity>> GetChampionStatsForPlayerAsync(Guid playerId, Guid championId);
         Task<bool> CreateAsync(IEnumerable<ChampionStatsEntity> entities);
-        Task<bool> DeleteForMatchDetailsAsync(IEnumerable<Guid> matchDetailIds);
-        Task<bool> DeleteBansByScheduleAsync(Guid teamScheduleId);
+        Task<bool> DeleteByScheduleAsync(Guid teamScheduleId);
     }
     public class ChampionStatsRepository : IChampionStatsRepository
     {
@@ -59,19 +58,8 @@ namespace Domain.Repositories.Implementations
             return true;
         }
 
-        public async Task<bool> DeleteForMatchDetailsAsync(IEnumerable<Guid> matchDetailIds)
-        {
-            matchDetailIds = matchDetailIds.ToList();
-            if (matchDetailIds.Any())
-            {
-                var result = await _table.DeleteWhereAsync("MatchDetailId in @matchDetailIds", new {matchDetailIds});
-                return result;
-            }
 
-            return true;
-        }
-
-        public async Task<bool> DeleteBansByScheduleAsync(Guid teamScheduleId)
+        public async Task<bool> DeleteByScheduleAsync(Guid teamScheduleId)
         {
             return await _table.DeleteWhereAsync("TeamScheduleId = @teamScheduleId AND Banned = 1", new {teamScheduleId});
         }

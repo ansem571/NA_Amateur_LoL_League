@@ -57,15 +57,9 @@ namespace Domain.Repositories.Implementations
             return await _table.InsertAsync(entities) == entities.Count();
         }
 
-        public async Task<bool> DeleteAsync(IEnumerable<Guid> ids)
+        public async Task<bool> DeleteAsync(Guid teamScheduleId)
         {
-            ids = ids.ToList();
-            if (!ids.Any())
-            {
-                return true;
-            }
-
-            var result = await _table.DeleteWhereAsync("Id in @ids", new {ids});
+            var result = await _table.DeleteWhereAsync("TeamScheduleId = @teamScheduleId", new { teamScheduleId });
             return result;
         }
     }

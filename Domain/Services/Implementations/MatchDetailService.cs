@@ -103,7 +103,6 @@ namespace Domain.Services.Implementations
             var championDetails = new List<ChampionStatsEntity>();
             var insertAchievementsList = new List<AchievementEntity>();
             //List of Ids to hard delete
-            var deleteList = new List<Guid>();
 
             foreach (var gameInfo in view.GameInfos)
             {
@@ -136,7 +135,7 @@ namespace Domain.Services.Implementations
 
                 var matchList = new List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)>();
 
-                await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, gameNum, matchDictionary, deleteList, matchList, divisionId, championDetails);
+                await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, gameNum, matchDictionary, matchList, divisionId, championDetails);
 
                 CollectMatchMvpData(view, matchList, registeredPlayers, gameInfo, mvpDetails, gameNum, updateMvpDetails, insertMvpDetails);
 
@@ -145,7 +144,7 @@ namespace Domain.Services.Implementations
                 insertAchievementsList.AddRange(matchList.SelectMany(x => x.achievements));
             }
 
-            if (!await DeleteOldRecords(view, deleteList))
+            if (!await DeleteOldRecords(view))
             {
                 return false;
             }
@@ -172,12 +171,11 @@ namespace Domain.Services.Implementations
             }
         }
 
-        public async Task<bool> DeleteOldRecords(MatchSubmissionView view, List<Guid> deleteList)
+        public async Task<bool> DeleteOldRecords(MatchSubmissionView view)
         {
-            var deleteChampionStatsResult = await _championStatsRepository.DeleteForMatchDetailsAsync(deleteList);
-            var deleteMatchDetailsResult = await _matchDetailRepository.DeleteAsync(deleteList);
-            var deleteByScheduleResult = await _championStatsRepository.DeleteBansByScheduleAsync(view.ScheduleId);
-            if (!deleteMatchDetailsResult || !deleteChampionStatsResult || deleteByScheduleResult)
+            var deleteMatchDetailsResult = await _matchDetailRepository.DeleteAsync(view.ScheduleId);
+            var deleteByScheduleResult = await _championStatsRepository.DeleteByScheduleAsync(view.ScheduleId);
+            if (!deleteMatchDetailsResult || deleteByScheduleResult)
             {
                 _logger.LogError("Unable to delete old MatchDetails");
                 return false;
@@ -192,8 +190,8 @@ namespace Domain.Services.Implementations
             var validMvpPlayers = new List<Guid>();
             validMvpPlayers.AddRange(matchList.Select(x => x.matchDetail.PlayerId));
 
-            registeredPlayers.TryGetValue(gameInfo.BlueMvp, out var blueMvp);
-            registeredPlayers.TryGetValue(gameInfo.RedMvp, out var redMvp);
+            registeredPlayers.TryGetValue(gameInfo.BlueMvp.ToLowerInvariant(), out var blueMvp);
+            registeredPlayers.TryGetValue(gameInfo.RedMvp.ToLowerInvariant(), out var redMvp);
 
             if (mvpDetails.TryGetValue(gameNum, out var mvpEntity))
             {
@@ -226,7 +224,7 @@ namespace Domain.Services.Implementations
         }
 
         public async Task CollectPlayerMatchDetailsAsync(MatchSubmissionView view, Match riotMatch, ChampionListStatic champions, GameInfo gameInfo, Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration,
-            SeasonInfoEntity seasonInfo, int gameNum, Dictionary<MatchDetailKey, MatchDetailEntity> matchDictionary, List<Guid> deleteList, List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)> matchList,
+            SeasonInfoEntity seasonInfo, int gameNum, Dictionary<MatchDetailKey, MatchDetailEntity> matchDictionary, List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)> matchList,
             Guid divisionId, List<ChampionStatsEntity> championDetails)
         {
             var blueTotalKills = riotMatch.Participants.Where(x => x.TeamId == 100).Sum(y => y.Stats.Kills);
@@ -267,7 +265,6 @@ namespace Domain.Services.Implementations
                         matchStat.TotalTeamKills = (int)redTotalKills;
                         break;
                 }
-                var matchDetailKey = new MatchDetailKey(view.ScheduleId, gameNum, registeredPlayer.Id);
 
                 //will always create a new match detail
                 var matchDetail = new MatchDetailEntity
@@ -279,12 +276,6 @@ namespace Domain.Services.Implementations
                     SeasonInfoId = seasonInfo.Id,
                     TeamScheduleId = view.ScheduleId
                 };
-
-                //If the match detail exists, we delete the record so it will not be used in calculations later
-                if (matchDictionary.TryGetValue(matchDetailKey, out var oldMatchDetail))
-                {
-                    deleteList.Add(oldMatchDetail.Id);
-                }
 
                 //per player
                 var win = participant.Stats.Winner;

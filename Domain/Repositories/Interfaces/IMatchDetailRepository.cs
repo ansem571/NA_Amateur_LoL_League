@@ -13,6 +13,6 @@ namespace Domain.Repositories.Interfaces
         Task<Dictionary<StatsKey, List<MatchDetailEntity>>> GetMatchDetailsForPlayerAsync(IEnumerable<Guid> summonerIds);
 
         Task<bool> InsertAsync(IEnumerable<MatchDetailEntity> entities);
-        Task<bool> DeleteAsync(IEnumerable<Guid> ids);
+        Task<bool> DeleteAsync(Guid teamScheduleId);
     }
 }
