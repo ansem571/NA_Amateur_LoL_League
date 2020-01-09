@@ -116,6 +116,8 @@ namespace Web
             var user6 = await userManager.FindByEmailAsync("scatter.catt@gmail.com");
             var user7 = await userManager.FindByEmailAsync("shadow2097@gmail.com");
             var user8 = await userManager.FindByEmailAsync("morrisonsviewpoint@gmail.com");
+            var user9 = await userManager.FindByEmailAsync("gman.mcgee@gmail.com");
+            var user10 = await userManager.FindByEmailAsync("Mike_Salinas112@hotmail.com");
             var users = new List<UserEntity>
             {
                 user1,
@@ -126,6 +128,8 @@ namespace Web
                 user6,
                 user7,
                 user8,
+                user9,
+                user10
             };
             foreach (var user in users)
             {
