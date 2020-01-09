@@ -32,7 +32,7 @@ namespace Domain.Helpers
                 foreach (var championLookup in champions)
                 {
                     var enumValue = championLookup.Enum;
-                    var trueValue = championLookup.Value;
+                    var trueValue = championLookup;
                     GlobalVariables.ChampionCache.Add(enumValue, trueValue, GlobalVariables.ClearCacheTime);
                 }
 

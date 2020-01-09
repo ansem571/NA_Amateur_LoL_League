@@ -24,6 +24,7 @@ using Google.Apis.Util.Store;
 using Microsoft.Extensions.Logging;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Endpoints.StaticDataEndpoint;
+using Match = Domain.Views.Match;
 
 namespace Domain.Services.Implementations
 {
@@ -32,28 +33,30 @@ namespace Domain.Services.Implementations
         private readonly ILogger _logger;
         private readonly IEmailService _emailService;
         private readonly ISeasonInfoRepository _seasonInfoRepository;
-        private readonly ITeamRosterRepository _teamRosterRepository;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
-        private readonly ITeamPlayerRepository _teamPlayerRepository;
         private readonly IPlayerStatsRepository _playerStatsRepository;
         private readonly IMatchDetailRepository _matchDetailRepository;
         private readonly IMatchMvpRepository _matchMvpRepository;
+        private readonly IChampionStatsRepository _championStatsRepository;
+        private readonly IScheduleService _scheduleService;
+        private readonly ILookupRepository _lookupRepository;
 
         private readonly string _wwwRootDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
-        public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository,
-            ITeamPlayerRepository teamPlayerRepository, ISummonerInfoRepository summonerInfoRepository, ITeamRosterRepository teamRosterRepository,
-            ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository, IMatchMvpRepository matchMvpRepository)
+        public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository,ISummonerInfoRepository summonerInfoRepository, 
+            ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository, IMatchMvpRepository matchMvpRepository,
+            IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ILookupRepository lookupRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             _playerStatsRepository = playerStatsRepository ?? throw new ArgumentNullException(nameof(playerStatsRepository));
-            _teamPlayerRepository = teamPlayerRepository ?? throw new ArgumentNullException(nameof(teamPlayerRepository));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
-            _teamRosterRepository = teamRosterRepository ?? throw new ArgumentNullException(nameof(teamRosterRepository));
             _seasonInfoRepository = seasonInfoRepository ?? throw new ArgumentNullException(nameof(seasonInfoRepository));
             _matchDetailRepository = matchDetailRepository ?? throw new ArgumentNullException(nameof(matchDetailRepository));
             _matchMvpRepository = matchMvpRepository ?? throw new ArgumentNullException(nameof(matchMvpRepository));
+            _championStatsRepository = championStatsRepository ?? throw new ArgumentNullException(nameof(championStatsRepository));
+            _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
+            _lookupRepository = lookupRepository ?? throw new ArgumentNullException(nameof(lookupRepository));
         }
 
         public async Task<bool> SendFileData(MatchSubmissionView view)
@@ -76,21 +79,23 @@ namespace Domain.Services.Implementations
 
         private async Task<bool> UpdateStatsAsync(MatchSubmissionView view)
         {
+            var divisionTask = _scheduleService.GetDivisionIdByScheduleAsync(view.ScheduleId);
             var matchesTask = _matchDetailRepository.ReadForScheduleId(view.ScheduleId);
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
-            var teamsTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var registeredPlayersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
             var previousListedMvpsTask = _matchMvpRepository.ReadAllForTeamScheduleId(view.ScheduleId);
-            var teams = (await teamsTask).ToDictionary(x => x.TeamName, x => x);
             var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
             var matchDictionary = (await matchesTask);
             var mvpDetails = (await previousListedMvpsTask).OrderBy(x => x.Game).ToDictionary(x => x.Game, x => x);
+
+            var divisionId = await divisionTask;
             var insertMvpDetails = new List<MatchMvpEntity>();
             var updateMvpDetails = new List<MatchMvpEntity>();
             var gameNum = 0;
             //Will always insert new records and never update, we will delete any old records first
             var insertDetailsList = new List<MatchDetailEntity>();
             var insertStatsList = new List<PlayerStatsEntity>();
+            var championDetails = new List<ChampionStatsEntity>();
             //List of Ids to hard delete
             var deleteList = new List<Guid>();
 
@@ -111,14 +116,16 @@ namespace Domain.Services.Implementations
                     return false;
                 }
 
-
-
                 var version = (await GlobalVariables.ChampsApi.Versions.GetAllAsync()).First();
                 var championsTask = GlobalVariables.ChampsApi.Champions.GetAllAsync(version);
                 var riotMatchTask = GlobalVariables.Api.Match.GetMatchAsync(RiotSharp.Misc.Region.Na, matchId);
 
                 var riotMatch = await riotMatchTask;
                 var champions = await championsTask;
+
+                //
+                var bannedChampionStat = CreateChampionStat(seasonInfo, divisionId);
+                championDetails.Add(bannedChampionStat);
 
                 var gameDuration = riotMatch.GameDuration;
 
@@ -173,8 +180,11 @@ namespace Domain.Services.Implementations
                         deleteList.Add(oldMatchDetail.Id);
                     }
 
-
                     matchList.Add((gameInfoPlayer.IsBlue, matchDetail, matchStat));
+
+                    //per player
+                    var pickedChampionStat = CreateChampionStat(matchStat, seasonInfo, divisionId);
+                    championDetails.Add(pickedChampionStat);
                 }
 
                 var validMvpPlayers = new List<Guid>();
@@ -224,8 +234,9 @@ namespace Domain.Services.Implementations
                 insertStatsList.AddRange(matchList.Select(x => x.playerStats));
             }
 
-            var deleteResult = await _matchDetailRepository.DeleteAsync(deleteList);
-            if (!deleteResult)
+            var deleteChampionStatsResult = await _championStatsRepository.DeleteForMatchDetailsAsync(deleteList);
+            var deleteMatchDetailsResult = await _matchDetailRepository.DeleteAsync(deleteList);
+            if (!deleteMatchDetailsResult || !deleteChampionStatsResult)
             {
                 _logger.LogError("Unable to delete old MatchDetails");
                 return false;
@@ -235,8 +246,9 @@ namespace Domain.Services.Implementations
             var updateMvpResult = await _matchMvpRepository.UpdateAsync(updateMvpDetails);
             var insertStatsResult = await _playerStatsRepository.InsertAsync(insertStatsList);
             var insertDetailsResult = await _matchDetailRepository.InsertAsync(insertDetailsList);
+            var insertChampionStatsResult = await _championStatsRepository.CreateAsync(championDetails);
 
-            return insertStatsResult && insertDetailsResult && insertMvpResult && updateMvpResult;
+            return insertStatsResult && insertDetailsResult && insertMvpResult && updateMvpResult && insertChampionStatsResult;
         }
 
         private static PlayerStatsEntity CreatePlayerMatchStat(SummonerInfoEntity registeredPlayer, Participant participant,
@@ -257,6 +269,40 @@ namespace Domain.Services.Implementations
                 SeasonInfoId = seasonInfo.Id
             };
             return matchStat;
+        }
+
+        private ChampionStatsEntity CreateChampionStat(PlayerStatsEntity playerStats, SeasonInfoEntity seasonInfo, Guid divisionId)
+        {
+            var championStat = new ChampionStatsEntity
+            {
+                Id = Guid.NewGuid(),
+                PlayerId = playerStats.SummonerId,
+                SeasonInfoId = seasonInfo.Id,
+                DivisionId = divisionId,
+                Kills = playerStats.Kills,
+                Deaths = playerStats.Deaths,
+                Assists = playerStats.Assists,
+                Picked = true,
+                Banned = false
+            };
+            return championStat;
+        }
+
+        private ChampionStatsEntity CreateChampionStat(SeasonInfoEntity seasonInfo, Guid divisionId)
+        {
+            var championStat = new ChampionStatsEntity
+            {
+                Id = Guid.NewGuid(),
+                PlayerId = null,
+                SeasonInfoId = seasonInfo.Id,
+                DivisionId = divisionId,
+                Kills = 0,
+                Assists = 0,
+                Deaths = 0,
+                Picked = false,
+                Banned = true
+            };
+            return championStat;
         }
 
         private void AddToTotalKills(ref int blueTotalKills, Participant participant, ref int redTotalKills)

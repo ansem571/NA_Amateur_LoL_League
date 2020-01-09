@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
 using DAL.Entities.UserData;
@@ -26,6 +27,12 @@ namespace Domain.Repositories.Implementations
         {
             var entities = await _table.ReadManyAsync("Category = @category", new {category});
             return entities;
+        }
+
+        public async Task<LookupEntity> GetLookupByCategoryAndEnumAsync(string category, string enumValue)
+        {
+            var entity = (await _table.ReadManyAsync("Category = @category AND Enum = @enumValue", new {category, enumValue})).FirstOrDefault();
+            return entity;
         }
     }
 }

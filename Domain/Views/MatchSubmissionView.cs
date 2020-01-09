@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using DAL.Entities.UserData;
 using Domain.Enums;
 using Domain.Helpers;
 
@@ -53,11 +54,11 @@ namespace Domain.Views
         [Required]
         public ChampionsEnum ChampionSup { get; set; }
 
-        internal string LocalChampionTop => GlobalVariables.ChampionCache.Get<string, string>(ChampionTop.ToString());
-        internal string LocalChampionJungle => GlobalVariables.ChampionCache.Get<string, string>(ChampionJungle.ToString());
-        internal string LocalChampionMid => GlobalVariables.ChampionCache.Get<string, string>(ChampionMid.ToString());
-        internal string LocalChampionAdc => GlobalVariables.ChampionCache.Get<string, string>(ChampionAdc.ToString());
-        internal string LocalChampionSupport => GlobalVariables.ChampionCache.Get<string, string>(ChampionSup.ToString());
+        internal LookupEntity LocalChampionTop => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionTop.ToString());
+        internal LookupEntity LocalChampionJungle => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionJungle.ToString());
+        internal LookupEntity LocalChampionMid => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionMid.ToString());
+        internal LookupEntity LocalChampionAdc => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionAdc.ToString());
+        internal LookupEntity LocalChampionSupport => GlobalVariables.ChampionCache.Get<string, LookupEntity>(ChampionSup.ToString());
     }
 
     public class GameInfoPlayer
@@ -110,45 +111,45 @@ namespace Domain.Views
         internal GameInfoPlayer PlayerName(string riotChampionName)
         {
             //Blue team check
-            if (BlueTeam.LocalChampionTop == riotChampionName)
+            if (BlueTeam.LocalChampionTop.Value == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerTop);
             }
-            if (BlueTeam.LocalChampionJungle == riotChampionName)
+            if (BlueTeam.LocalChampionJungle.Value == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerJungle);
             }
-            if (BlueTeam.LocalChampionMid == riotChampionName)
+            if (BlueTeam.LocalChampionMid.Value == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerMid);
             }
-            if (BlueTeam.LocalChampionAdc == riotChampionName)
+            if (BlueTeam.LocalChampionAdc.Value == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerAdc);
             }
-            if (BlueTeam.LocalChampionSupport == riotChampionName)
+            if (BlueTeam.LocalChampionSupport.Value == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerSup);
             }
 
             //Red team check
-            if (RedTeam.LocalChampionTop == riotChampionName)
+            if (RedTeam.LocalChampionTop.Value == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerTop);
             }
-            if (RedTeam.LocalChampionJungle == riotChampionName)
+            if (RedTeam.LocalChampionJungle.Value == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerJungle);
             }
-            if (RedTeam.LocalChampionMid == riotChampionName)
+            if (RedTeam.LocalChampionMid.Value == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerMid);
             }
-            if (RedTeam.LocalChampionAdc == riotChampionName)
+            if (RedTeam.LocalChampionAdc.Value == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerAdc);
             }
-            if (RedTeam.LocalChampionSupport == riotChampionName)
+            if (RedTeam.LocalChampionSupport.Value == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerSup);
             }

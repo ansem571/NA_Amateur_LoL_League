@@ -198,6 +198,14 @@ namespace Domain.Services.Implementations
             }
         }
 
+        public async Task<Guid> GetDivisionIdByScheduleAsync(Guid scheduleId)
+        {
+            var schedule = await _scheduleRepository.GetScheduleAsync(scheduleId);
+            var homeTeam = await _teamRosterRepository.GetByTeamIdAsync(schedule.HomeRosterTeamId);
+            var division = await _divisionRepository.GetDivisionByTeamScoreAsync(homeTeam.TeamTierScore.GetValueOrDefault(), homeTeam.SeasonInfoId.GetValueOrDefault());
+            return division.Id;
+        }
+
         public async Task<Dictionary<string, IEnumerable<RosterView>>> SetupStandings()
         {
             var standings = new Dictionary<string, IEnumerable<RosterView>>();

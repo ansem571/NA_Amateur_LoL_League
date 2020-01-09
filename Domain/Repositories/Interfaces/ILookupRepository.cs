@@ -10,5 +10,6 @@ namespace Domain.Repositories.Interfaces
     {
         Task<LookupEntity> GetLookupEntity(Guid id);
         Task<IEnumerable<LookupEntity>> GetLookupEntitiesByCategory(string category);
+        Task<LookupEntity> GetLookupByCategoryAndEnumAsync(string category, string enumValue);
     }
 }
