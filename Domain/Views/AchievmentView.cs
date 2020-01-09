@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DAL.Entities.LeagueInfo;
+﻿using DAL.Entities.LeagueInfo;
 
 namespace Domain.Views
 {

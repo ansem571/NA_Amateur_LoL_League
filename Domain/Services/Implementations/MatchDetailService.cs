@@ -4,27 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
-using DAL.Contracts;
 using DAL.Entities.LeagueInfo;
-using DAL.Entities.Logging;
 using DAL.Entities.UserData;
-using Domain.Enums;
 using Domain.Helpers;
 using Domain.Repositories.Implementations;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Drive.v3;
-using Google.Apis.Services;
-using Google.Apis.Upload;
-using Google.Apis.Util.Store;
 using Microsoft.Extensions.Logging;
 using RiotSharp.Endpoints.MatchEndpoint;
-using RiotSharp.Endpoints.StaticDataEndpoint;
 using RiotSharp.Endpoints.StaticDataEndpoint.Champion;
 
 namespace Domain.Services.Implementations
@@ -132,16 +122,16 @@ namespace Domain.Services.Implementations
 
                 var gameDuration = riotMatch.GameDuration;
 
+                var matchList = new List<MatchDetailContract>();
 
-                var matchList = new List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)>();
-
-                await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, gameNum, matchDictionary, matchList, divisionId, championDetails);
+                await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, gameNum, matchDictionary,
+                    matchList, divisionId, championDetails);
 
                 CollectMatchMvpData(view, matchList, registeredPlayers, gameInfo, mvpDetails, gameNum, updateMvpDetails, insertMvpDetails);
 
-                insertDetailsList.AddRange(matchList.Select(x => x.matchDetail));
-                insertStatsList.AddRange(matchList.Select(x => x.playerStats));
-                insertAchievementsList.AddRange(matchList.SelectMany(x => x.achievements));
+                insertDetailsList.AddRange(matchList.Select(x => x.MatchDetail));
+                insertStatsList.AddRange(matchList.Select(x => x.PlayerStats));
+                insertAchievementsList.AddRange(matchList.SelectMany(x => x.Achievements));
             }
 
             if (!await DeleteOldRecords(view))
@@ -165,9 +155,17 @@ namespace Domain.Services.Implementations
             foreach (var ban in riotMatch.Teams.SelectMany(x => x.Bans))
             {
                 var riotChampion = champions.Keys[ban.ChampionId].ToLowerInvariant();
-                var ourChampion = GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(riotChampion);
-                var bannedChampionStat = CreateChampionStat(seasonInfo, divisionId, ourChampion.Id, view.ScheduleId);
-                championDetails.Add(bannedChampionStat);
+                try
+                {
+                    var ourChampion = GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(riotChampion);
+                    var bannedChampionStat =
+                        CreateChampionStat(seasonInfo, divisionId, ourChampion.Id, view.ScheduleId);
+                    championDetails.Add(bannedChampionStat);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"Error getting banned champion: {riotChampion}");
+                }
             }
         }
 
@@ -184,11 +182,12 @@ namespace Domain.Services.Implementations
             return true;
         }
 
-        public void CollectMatchMvpData(MatchSubmissionView view, List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)> matchList, Dictionary<string, SummonerInfoEntity> registeredPlayers,
-            GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, int gameNum, List<MatchMvpEntity> updateMvpDetails, List<MatchMvpEntity> insertMvpDetails)
+        public void CollectMatchMvpData(MatchSubmissionView view, List<MatchDetailContract> matchList, Dictionary<string, SummonerInfoEntity> registeredPlayers,
+            GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, int gameNum, List<MatchMvpEntity> updateMvpDetails, 
+            List<MatchMvpEntity> insertMvpDetails)
         {
             var validMvpPlayers = new List<Guid>();
-            validMvpPlayers.AddRange(matchList.Select(x => x.matchDetail.PlayerId));
+            validMvpPlayers.AddRange(matchList.Select(x => x.MatchDetail.PlayerId));
 
             registeredPlayers.TryGetValue(gameInfo.BlueMvp.ToLowerInvariant(), out var blueMvp);
             registeredPlayers.TryGetValue(gameInfo.RedMvp.ToLowerInvariant(), out var redMvp);
@@ -223,9 +222,10 @@ namespace Domain.Services.Implementations
             }
         }
 
-        public async Task CollectPlayerMatchDetailsAsync(MatchSubmissionView view, Match riotMatch, ChampionListStatic champions, GameInfo gameInfo, Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration,
-            SeasonInfoEntity seasonInfo, int gameNum, Dictionary<MatchDetailKey, MatchDetailEntity> matchDictionary, List<(bool isBlue, MatchDetailEntity matchDetail, PlayerStatsEntity playerStats, List<AchievementEntity> achievements)> matchList,
-            Guid divisionId, List<ChampionStatsEntity> championDetails)
+        public async Task CollectPlayerMatchDetailsAsync(MatchSubmissionView view, Match riotMatch, ChampionListStatic champions, GameInfo gameInfo,
+            Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration, SeasonInfoEntity seasonInfo, int gameNum, 
+            Dictionary<MatchDetailKey, MatchDetailEntity> matchDictionary, List<MatchDetailContract> matchList, Guid divisionId,
+            List<ChampionStatsEntity> championDetails)
         {
             var blueTotalKills = riotMatch.Participants.Where(x => x.TeamId == 100).Sum(y => y.Stats.Kills);
             var redTotalKills = riotMatch.Participants.Where(x => x.TeamId == 200).Sum(y => y.Stats.Kills);
@@ -287,7 +287,7 @@ namespace Domain.Services.Implementations
 
                 //Add special achievements here
                 var achievements = await AddSpecialAchievements(participant, ourChampion, registeredPlayer, seasonInfo.Id, riotMatch, view, gameNum);
-                matchList.Add((gameInfoPlayer.IsBlue, matchDetail, matchStat, achievements));
+                matchList.Add(new MatchDetailContract(gameInfoPlayer.IsBlue, matchDetail, matchStat, achievements));
             }
         }
 

@@ -69,7 +69,6 @@ namespace RiotSharp.Interfaces
         ///     Update the pick type, map, spectator type, or allowed summoners for a code.
         /// </summary>
         /// <param name="tournamentCode">The tournament code to update</param>
-        /// <param name="allowedSummonerIds">Optional list of encrypted summonerIds in order to validate the players eligible to join the lobby.</param>
         /// <param name="spectatorType">The spectator type (Legal values: NONE, LOBBYONLY, ALL).</param>
         /// <param name="pickType">The pick type (Legal values: BLIND_PICK, DRAFT_MODE, ALL_RANDOM, TOURNAMENT_DRAFT).</param>
         /// <param name="mapType">The map type (Legal values: SUMMONERS_RIFT, TWISTED_TREELINE, HOWLING_ABYSS).</param>

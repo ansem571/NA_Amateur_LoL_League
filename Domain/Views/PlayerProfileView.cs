@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DAL.Entities.LeagueInfo;
+﻿using System.Collections.Generic;
 using Domain.Enums;
 
 namespace Domain.Views

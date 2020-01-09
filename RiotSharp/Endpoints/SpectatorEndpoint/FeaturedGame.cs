@@ -3,7 +3,6 @@ using RiotSharp.Misc;
 using RiotSharp.Misc.Converters;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace RiotSharp.Endpoints.SpectatorEndpoint
 {

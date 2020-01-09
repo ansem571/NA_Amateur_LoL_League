@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
 using DAL.Entities.LeagueInfo;
-using DAL.Stores.TSR;
 
 namespace Domain.Repositories.Implementations
 {

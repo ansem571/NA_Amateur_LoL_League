@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
-using RiotSharp.Http;
 using RiotSharp.Http.Interfaces;
-using RiotSharp.Interfaces;
 using System.Threading.Tasks;
 using RiotSharp.Misc;
-using System;
-using RiotSharp.Endpoints.StatusEndpoint;
 using RiotSharp.Endpoints.Interfaces;
 
 namespace RiotSharp.Endpoints.StatusEndpoint
@@ -13,7 +9,6 @@ namespace RiotSharp.Endpoints.StatusEndpoint
     /// <summary>
     /// Implementation of <see cref="IStatusEndpoint"/>
     /// </summary>
-    /// <seealso cref="RiotSharp.Interfaces.IStatusEndpoint" />
     public class StatusEndpoint : IStatusEndpoint
     {
         private const string StatusRootUrl = "/lol/status/v3/shard-data";
