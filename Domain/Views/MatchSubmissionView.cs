@@ -60,6 +60,20 @@ namespace Domain.Views
         internal string LocalChampionSupport => GlobalVariables.ChampionCache.Get<string, string>(ChampionSup.ToString());
     }
 
+    public class GameInfoPlayer
+    {
+        public bool IsBlue { get; }
+        public string PlayerName { get; set; }
+
+        public GameInfoPlayer() { }
+
+        public GameInfoPlayer(bool isBlue, string playerName)
+        {
+            IsBlue = isBlue;
+            PlayerName = playerName;
+        }
+    }
+
     public class GameInfo
     {
         [Required]
@@ -81,6 +95,9 @@ namespace Domain.Views
         [Required]
         public TeamInfo RedTeam { get; set; }
 
+        public string BlueMvp { get; set; }
+        public string RedMvp { get; set; }
+
         /// <summary>
         /// Will only be used for games 3,4,5 of series
         /// </summary>
@@ -90,54 +107,53 @@ namespace Domain.Views
         public bool HomeTeamForfeit { get; set; } = false;
         public bool AwayTeamForfeit { get; set; } = false;
 
-        internal (bool isBlue, string playerName) PlayerName(string riotChampionName)
+        internal GameInfoPlayer PlayerName(string riotChampionName)
         {
             //Blue team check
             if (BlueTeam.LocalChampionTop == riotChampionName)
             {
-                return (true, BlueTeam.PlayerTop);
+                return new GameInfoPlayer(true, BlueTeam.PlayerTop);
             }
             if (BlueTeam.LocalChampionJungle == riotChampionName)
             {
-                return (true, BlueTeam.PlayerJungle);
+                return new GameInfoPlayer(true, BlueTeam.PlayerJungle);
             }
             if (BlueTeam.LocalChampionMid == riotChampionName)
             {
-                return (true, BlueTeam.PlayerMid);
+                return new GameInfoPlayer(true, BlueTeam.PlayerMid);
             }
             if (BlueTeam.LocalChampionAdc == riotChampionName)
             {
-                return (true, BlueTeam.PlayerAdc);
+                return new GameInfoPlayer(true, BlueTeam.PlayerAdc);
             }
             if (BlueTeam.LocalChampionSupport == riotChampionName)
             {
-                return (true, BlueTeam.PlayerSup);
+                return new GameInfoPlayer(true, BlueTeam.PlayerSup);
             }
 
             //Red team check
             if (RedTeam.LocalChampionTop == riotChampionName)
             {
-                return (false, RedTeam.PlayerTop);
+                return new GameInfoPlayer(false, RedTeam.PlayerTop);
             }
             if (RedTeam.LocalChampionJungle == riotChampionName)
             {
-                return (false, RedTeam.PlayerJungle);
+                return new GameInfoPlayer(false, RedTeam.PlayerJungle);
             }
             if (RedTeam.LocalChampionMid == riotChampionName)
             {
-                return (false, RedTeam.PlayerMid);
+                return new GameInfoPlayer(false, RedTeam.PlayerMid);
             }
             if (RedTeam.LocalChampionAdc == riotChampionName)
             {
-                return (false, RedTeam.PlayerAdc);
+                return new GameInfoPlayer(false, RedTeam.PlayerAdc);
             }
             if (RedTeam.LocalChampionSupport == riotChampionName)
             {
-                return (false, RedTeam.PlayerSup);
+                return new GameInfoPlayer(false, RedTeam.PlayerSup);
             }
 
-
-            return (false, null);
+            return null;
         }
     }
 }

@@ -296,6 +296,8 @@ namespace Web.Controllers
                 _logger.LogError(e, StatusMessage);
             }
 
+            var playersList = await _accountService.GetAllValidPlayers(view.HomeTeamName, view.AwayTeamName);
+            view.ValidPlayers = playersList;
             view.StatusMessage = StatusMessage;
             return View(view);
         }
