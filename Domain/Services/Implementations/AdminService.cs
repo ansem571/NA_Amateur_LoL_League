@@ -121,7 +121,8 @@ namespace Domain.Services.Implementations
                         new List<Guid>
                         {
                             summonerId
-                        });
+                        },
+                        seasonInfo.Id);
 
                     if (playerRecord != null)
                     {
@@ -152,7 +153,7 @@ namespace Domain.Services.Implementations
                 }
 
                 var teamsCount = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).Count();
-                if (teamsCount == 22)
+                if (teamsCount >= 23)
                 {
                     teamsCount++;
                 }

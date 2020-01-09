@@ -70,7 +70,7 @@ namespace Domain.Services.Implementations
             var view = new SeasonInfoView();
             //TODO: Uncomment when testing
             //var seasonInfoTask = _seasonInfoRepository.GetAllSeasonsAsync();
-            
+
             //var seasons = (await seasonInfoTask).OrderByDescending(x => x.SeasonStartDate).ToList();
             //var seasonInfo = seasons[1];
 

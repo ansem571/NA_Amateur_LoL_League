@@ -329,6 +329,8 @@ namespace Web.Controllers
             };
             foreach (var player in roster.Players)
             {
+                if (player.Id == Guid.Empty)
+                    continue;
                 view.Lineup.Add(player.Id, new SummonerRoleTuple
                 {
                     SummonerName = player.SummonerName,
