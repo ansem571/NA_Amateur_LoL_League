@@ -94,7 +94,8 @@ namespace Domain.Services.Implementations
                 }
             }
 
-            views = views.OrderBy(x => x.Key).ThenBy(x => x.Value.Select(y => y.WeekOf)).ToDictionary(x => x.Key, x => x.Value);
+            var divisionOrder = divisions.OrderBy(x => x.UpperLimit).Select(x=>x.Name).ToList();
+            views = views.OrderByDescending(x => divisionOrder.IndexOf(x.Key)).ThenBy(x => x.Value.Select(y => y.WeekOf)).ToDictionary(x => x.Key, x => x.Value);
 
             return views;
         }

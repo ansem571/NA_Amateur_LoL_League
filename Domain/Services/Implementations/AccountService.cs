@@ -330,7 +330,7 @@ namespace Domain.Services.Implementations
         public async Task<FpSummonerView> GetFpSummonerView()
         {
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
-            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
+            var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var teams = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).ToDictionary(x => x.Id, x => x);
 
             var usedSummoners = new Dictionary<Guid, SummonerInfoEntity>();
@@ -355,6 +355,7 @@ namespace Domain.Services.Implementations
                             TierDivision = mapped.TierDivision,
                             OpGgUrl = summoner.OpGGUrlLink,
                             TeamName = team.Value.TeamName,
+                            IsRegistered = summoner.IsValidPlayer,
                             IsEsubOnly = mapped.IsSubOnly
                         });
                     }
@@ -379,7 +380,8 @@ namespace Domain.Services.Implementations
                     TierDivision = mapped.TierDivision,
                     OpGgUrl = mapped.OpGgUrl,
                     TeamName = "Unassigned",
-                    IsEsubOnly = mapped.IsSubOnly
+                    IsEsubOnly = mapped.IsSubOnly,
+                    IsRegistered = mapped.IsValid
                 });
             }
 
