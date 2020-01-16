@@ -44,7 +44,7 @@
         <th>@Html.ActionLink(string.Concat("Team Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.TeamName })</th>
         <th>@Html.ActionLink(string.Concat("E-Sub only ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.ESub })</th>
     </tr>
-    @foreach (var item in registeredPlayers)
+    @foreach (var item in Model.SummonerInfos)
     {
         <tr>
             <td>
