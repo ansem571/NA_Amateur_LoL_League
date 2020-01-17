@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using RiotSharp;
 using Web.Models.Roster;
 
 namespace Web.Controllers
@@ -239,7 +240,8 @@ namespace Web.Controllers
         {
             try
             {
-                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed || x.AwayTeamForfeit || x.HomeTeamForfeit).ToList();
+                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed || x.AwayTeamForfeit || x.HomeTeamForfeit)
+                    .ToList();
                 var isNullCheck = false;
                 foreach (var gameInfo in view.GameInfos)
                 {
@@ -251,6 +253,7 @@ namespace Web.Controllers
                             isNullCheck = false;
                             continue;
                         }
+
                         break;
                     }
 
@@ -262,6 +265,7 @@ namespace Web.Controllers
                             isNullCheck = false;
                             continue;
                         }
+
                         break;
                     }
 
@@ -273,9 +277,11 @@ namespace Web.Controllers
                             isNullCheck = false;
                             continue;
                         }
+
                         break;
                     }
                 }
+
                 if (!view.GameInfos.Any() || view.GameInfos.Count < 2 || isNullCheck)
                 {
                     throw new Exception("Form was not setup right");
@@ -289,6 +295,11 @@ namespace Web.Controllers
                 }
 
                 StatusMessage = "Successfully submitted match data. Stats will be reflected soon.";
+            }
+            catch (RiotSharpException e)
+            {
+                StatusMessage = $"{e.Message} Note. This is an error with Riot's Api. Please contact Ansem571 to let him know";
+                _logger.LogError(e, StatusMessage);
             }
             catch (Exception e)
             {

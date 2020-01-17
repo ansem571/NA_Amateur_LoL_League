@@ -175,8 +175,9 @@ namespace Domain.Services.Implementations
             var deleteByScheduleResult = await _championStatsRepository.DeleteByScheduleAsync(view.ScheduleId);
             if (!deleteMatchDetailsResult || !deleteByScheduleResult)
             {
-                _logger.LogError("Unable to delete old MatchDetails");
-                return false;
+                var message = "Unable to delete old MatchDetails";
+                _logger.LogError(message);
+                throw new Exception(message);
             }
 
             return true;
