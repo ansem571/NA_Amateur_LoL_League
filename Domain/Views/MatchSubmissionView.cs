@@ -110,45 +110,45 @@ namespace Domain.Views
         public GameInfoPlayer PlayerName(string riotChampionName)
         {
             //Blue team check
-            if (BlueTeam.LocalChampionTop.Value.ToLowerInvariant() == riotChampionName)
+            if (BlueTeam.LocalChampionTop.Value.ToLowerInvariant() == riotChampionName || BlueTeam.LocalChampionTop.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerTop);
             }
-            if (BlueTeam.LocalChampionJungle.Value.ToLowerInvariant() == riotChampionName)
+            if (BlueTeam.LocalChampionJungle.Value.ToLowerInvariant() == riotChampionName || BlueTeam.LocalChampionJungle.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerJungle);
             }
-            if (BlueTeam.LocalChampionMid.Value.ToLowerInvariant() == riotChampionName)
+            if (BlueTeam.LocalChampionMid.Value.ToLowerInvariant() == riotChampionName || BlueTeam.LocalChampionMid.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerMid);
             }
-            if (BlueTeam.LocalChampionAdc.Value.ToLowerInvariant() == riotChampionName)
+            if (BlueTeam.LocalChampionAdc.Value.ToLowerInvariant() == riotChampionName || BlueTeam.LocalChampionAdc.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerAdc);
             }
-            if (BlueTeam.LocalChampionSupport.Value.ToLowerInvariant() == riotChampionName)
+            if (BlueTeam.LocalChampionSupport.Value.ToLowerInvariant() == riotChampionName || BlueTeam.LocalChampionSupport.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(true, BlueTeam.PlayerSup);
             }
 
             //Red team check
-            if (RedTeam.LocalChampionTop.Value.ToLowerInvariant() == riotChampionName)
+            if (RedTeam.LocalChampionTop.Value.ToLowerInvariant() == riotChampionName || RedTeam.LocalChampionTop.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerTop);
             }
-            if (RedTeam.LocalChampionJungle.Value.ToLowerInvariant() == riotChampionName)
+            if (RedTeam.LocalChampionJungle.Value.ToLowerInvariant() == riotChampionName || RedTeam.LocalChampionJungle.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerJungle);
             }
-            if (RedTeam.LocalChampionMid.Value.ToLowerInvariant() == riotChampionName)
+            if (RedTeam.LocalChampionMid.Value.ToLowerInvariant() == riotChampionName || RedTeam.LocalChampionMid.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerMid);
             }
-            if (RedTeam.LocalChampionAdc.Value.ToLowerInvariant() == riotChampionName)
+            if (RedTeam.LocalChampionAdc.Value.ToLowerInvariant() == riotChampionName || RedTeam.LocalChampionAdc.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerAdc);
             }
-            if (RedTeam.LocalChampionSupport.Value.ToLowerInvariant() == riotChampionName)
+            if (RedTeam.LocalChampionSupport.Value.ToLowerInvariant() == riotChampionName || RedTeam.LocalChampionSupport.Enum.ToLowerInvariant() == riotChampionName)
             {
                 return new GameInfoPlayer(false, RedTeam.PlayerSup);
             }

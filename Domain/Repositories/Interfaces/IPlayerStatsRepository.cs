@@ -8,7 +8,9 @@ namespace Domain.Repositories.Interfaces
 {
     public interface IPlayerStatsRepository
     {
+        [Obsolete("Use ids")]
         Task<Dictionary<StatsKey, List<PlayerStatsEntity>>> GetStatsAsync(IEnumerable<StatsKey> keys);
+        Task<Dictionary<StatsKey, List<PlayerStatsEntity>>> GetStatsAsync(IEnumerable<Guid> ids);
 
         [Obsolete("Use GetStatsAsync", true)]
         Task<PlayerStatsEntity> GetStatsForSummonerAsync(Guid summonerId, Guid? seasonInfoId);

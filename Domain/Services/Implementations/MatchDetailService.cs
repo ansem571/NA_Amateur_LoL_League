@@ -173,7 +173,7 @@ namespace Domain.Services.Implementations
         {
             var deleteMatchDetailsResult = await _matchDetailRepository.DeleteAsync(view.ScheduleId);
             var deleteByScheduleResult = await _championStatsRepository.DeleteByScheduleAsync(view.ScheduleId);
-            if (!deleteMatchDetailsResult || deleteByScheduleResult)
+            if (!deleteMatchDetailsResult || !deleteByScheduleResult)
             {
                 _logger.LogError("Unable to delete old MatchDetails");
                 return false;

@@ -29,8 +29,15 @@ namespace Domain.Repositories.Implementations
 
 
             var dictionary = entities.Where(x => x.SeasonInfoId.HasValue).GroupBy(x => (x.SummonerId, x.SeasonInfoId))
-                .ToDictionary(x =>
-                    new StatsKey(x.Key.Item1, x.Key.Item2.Value), x => x.ToList());
+                .ToDictionary(x => new StatsKey(x.Key.Item1, x.Key.Item2.GetValueOrDefault()), x => x.ToList());
+            return dictionary;
+        }
+
+        public async Task<Dictionary<StatsKey, List<PlayerStatsEntity>>> GetStatsAsync(IEnumerable<Guid> ids)
+        {
+            var entities = await _table.ReadManyAsync("Id in @ids", new { ids });
+            var dictionary = entities.Where(x => x.SeasonInfoId.HasValue).GroupBy(x => (x.SummonerId, x.SeasonInfoId))
+                .ToDictionary(x => new StatsKey(x.Key.Item1, x.Key.Item2.GetValueOrDefault()), x => x.ToList());
             return dictionary;
         }
 

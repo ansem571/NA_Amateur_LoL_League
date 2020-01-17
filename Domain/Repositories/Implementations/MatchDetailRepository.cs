@@ -58,6 +58,11 @@ namespace Domain.Repositories.Implementations
 
         public async Task<bool> DeleteAsync(Guid teamScheduleId)
         {
+            var entities = await ReadForScheduleId(teamScheduleId);
+            if (!entities.Any())
+            {
+                return true;
+            }
             var result = await _table.DeleteWhereAsync("TeamScheduleId = @teamScheduleId", new { teamScheduleId });
             return result;
         }

@@ -197,8 +197,9 @@ namespace Domain.Services.Implementations
             var matchDetails = await _matchDetailRepository.GetMatchDetailsForPlayerAsync(playersSummoner.Select(x => x.SummonerId));
 
             matchDetails = matchDetails.Where(x => x.Key.SeasonId == seasonInfo.Id).ToDictionary(x => x.Key, x => x.Value);
+            var statIds = matchDetails.Values.SelectMany(x => x.Select(y => y.PlayerStatsId));
 
-            var playerStats = await _playerStatsRepository.GetStatsAsync(matchDetails.Keys);
+            var playerStats = await _playerStatsRepository.GetStatsAsync(statIds);
             var mappedStats = new List<PlayerStatsView>();
             foreach (var playerStat in playerStats)
             {
