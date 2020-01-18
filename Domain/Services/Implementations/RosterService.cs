@@ -322,7 +322,8 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> AddToTeamScoreAsync(string teamName, int wins, int loses)
         {
-            var roster = await _teamRosterRepository.GetByTeamNameAsync(teamName);
+            var seasonInfo = (await _seasonInfoRepository.GetAllSeasonsAsync()).OrderBy(x => x.SeasonStartDate).Last();
+            var roster = await _teamRosterRepository.GetByTeamNameAsync(teamName, seasonInfo.Id);
             if (roster.Wins == null)
             {
                 roster.Wins = 0;

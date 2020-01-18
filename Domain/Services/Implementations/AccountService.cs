@@ -549,8 +549,9 @@ namespace Domain.Services.Implementations
 
         public async Task<List<string>> GetAllValidPlayers(string homeTeamName, string awayTeamName)
         {
-            var homeTeamTask = _teamRosterRepository.GetByTeamNameAsync(homeTeamName);
-            var awayTeamTask = _teamRosterRepository.GetByTeamNameAsync(awayTeamName);
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Today);
+            var homeTeamTask = _teamRosterRepository.GetByTeamNameAsync(homeTeamName, seasonInfo.Id);
+            var awayTeamTask = _teamRosterRepository.GetByTeamNameAsync(awayTeamName, seasonInfo.Id);
             var players = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x=>x.Id, x=>x);
             var homeTeam = await homeTeamTask;
             var awayTeam = await awayTeamTask;

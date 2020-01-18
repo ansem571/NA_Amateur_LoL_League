@@ -17,9 +17,10 @@ namespace Domain.Repositories.Implementations
             _table = table ?? throw new ArgumentNullException(nameof(table));
         }
 
-        public async Task<TeamRosterEntity> GetByTeamNameAsync(string teamName)
+        public async Task<TeamRosterEntity> GetByTeamNameAsync(string teamName, Guid? seasonInfoId)
         {
-            return (await _table.ReadManyAsync("TeamName = @teamName", new { teamName })).FirstOrDefault();
+            var seasonInfoNotNull = seasonInfoId == null ? "AND SeasonInfoId is null" : "AND SeasonInfoId = @seasonInfoId";
+            return (await _table.ReadManyAsync($"TeamName = @teamName {seasonInfoNotNull}", new { teamName, seasonInfoId })).FirstOrDefault();
         }
 
         public async Task<TeamRosterEntity> GetByTeamIdAsync(Guid id)

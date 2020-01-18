@@ -7,7 +7,7 @@ namespace Domain.Repositories.Interfaces
 {
     public interface ITeamRosterRepository
     {
-        Task<TeamRosterEntity> GetByTeamNameAsync(string teamName);
+        Task<TeamRosterEntity> GetByTeamNameAsync(string teamName, Guid? seasonInfoId);
         Task<TeamRosterEntity> GetByTeamIdAsync(Guid id);
         Task<IEnumerable<TeamRosterEntity>> GetAllTeamsAsync(Guid? seasonInfoId);
         Task<TeamRosterEntity> GetTeamAsync(Guid seasonId, IEnumerable<Guid> summonerId);

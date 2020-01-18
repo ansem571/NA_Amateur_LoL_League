@@ -209,8 +209,10 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> AssignTeamCaptain(TeamCaptainView view)
         {
+            var seasonInfo = (await _seasonInfoRepository.GetAllSeasonsAsync()).OrderBy(x=>x.SeasonStartDate).Last();
+
             var summoner = (await _summonerInfoRepository.GetAllForSummonerNamesAsync(new List<string> { view.SummonerName })).FirstOrDefault();
-            var roster = await _teamRosterRepository.GetByTeamNameAsync(view.RosterName);
+            var roster = await _teamRosterRepository.GetByTeamNameAsync(view.RosterName, seasonInfo.Id);
 
             if (summoner == null || roster == null)
             {
