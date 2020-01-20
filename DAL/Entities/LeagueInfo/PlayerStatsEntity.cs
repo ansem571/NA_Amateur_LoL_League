@@ -71,7 +71,7 @@ namespace DAL.Entities.LeagueInfo
                 TotalTeamKills = current.TotalTeamKills + other.TotalTeamKills,
                 VisionScore = current.VisionScore + other.VisionScore,
                 GameTime = current.GameTime + other.GameTime,
-                Games = current.Games++,
+                Games = current.Games + 1,
                 SeasonInfoId = current.SeasonInfoId
             };
         }
