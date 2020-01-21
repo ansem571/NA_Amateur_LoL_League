@@ -88,7 +88,9 @@ namespace Domain.Services.Implementations
             }
             var playerStatsDictionary = new Dictionary<int, PlayerStatsView>();
             var matchDetails = await _matchDetailRepository.GetMatchDetailsForPlayerAsync(new List<Guid> { summoner.Id });
-            var allPlayerStats = await _playerStatsRepository.GetStatsAsync(matchDetails.Keys);
+            var statIds = matchDetails.Values.SelectMany(x => x.Select(y => y.PlayerStatsId));
+
+            var allPlayerStats = await _playerStatsRepository.GetStatsAsync(statIds);
             var seasonNum = 0;
             var teamname = "None";
             if (teamPlayer.Any())

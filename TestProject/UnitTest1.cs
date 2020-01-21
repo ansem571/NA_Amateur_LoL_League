@@ -22,11 +22,11 @@ namespace TestProject
 
             var riotMatch = await riotMatchTask;
             var champions = await championsTask;
-            var championJungle = ChampionsEnum.NunuWillump;
+            var championJungle = ChampionsEnum.Nunu;
             var localChampionJungle = new LookupEntity
             {
                 Id = Guid.NewGuid(),
-                Enum = ChampionsEnum.NunuWillump.ToString(),
+                Enum = ChampionsEnum.Nunu.ToString(),
                 Category = "Champion",
                 Description = "",
                 Value = "Nunu & Willump"
