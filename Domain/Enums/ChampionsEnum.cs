@@ -83,7 +83,7 @@
         Neeko,
         Nidalee,
         Nocturne,
-        NunuWillump,
+        Nunu,
         Olaf,
         Orianna,
         Ornn,
