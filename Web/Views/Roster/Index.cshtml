@@ -48,7 +48,7 @@
     {
         <tr>
             <td>
-                <form asp-controller="UserProfile" asp-action="PlayerProfile" method="post">
+                <form asp-controller="UserProfile" asp-action="PlayerProfile" method="get">
                     <input type="hidden" name="userId" value="@item.UserId" />
                     <button class="btn-link" type="submit">@item.SummonerName</button>
                 </form>

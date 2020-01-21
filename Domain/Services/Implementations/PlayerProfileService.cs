@@ -91,7 +91,6 @@ namespace Domain.Services.Implementations
             var statIds = matchDetails.Values.SelectMany(x => x.Select(y => y.PlayerStatsId));
 
             var allPlayerStats = await _playerStatsRepository.GetStatsAsync(statIds);
-            var seasonNum = 0;
             var teamname = "None";
             if (teamPlayer.Any())
             {
@@ -100,12 +99,15 @@ namespace Domain.Services.Implementations
                 if (team != null)
                     teamname = team.TeamName;
             }
-            foreach (var season in allPlayerStats)
+            foreach (var seasonKvp in allPlayerStats)
             {
-                var mappedStats = _playerStatsMapper.MapForSeason(season.Value);
+                var season = seasons.First(x => x.Id == seasonKvp.Key.SeasonId);
 
-                playerStatsDictionary.Add(seasonNum, mappedStats);
-                seasonNum++;
+                var mappedStats = _playerStatsMapper.MapForSeason(seasonKvp.Value);
+                if (int.TryParse(season.SeasonName.Split(" ").Last(), out var seasonNum))
+                {
+                    playerStatsDictionary.Add(seasonNum, mappedStats);
+                }
             }
             var view = new PlayerProfileView
             {

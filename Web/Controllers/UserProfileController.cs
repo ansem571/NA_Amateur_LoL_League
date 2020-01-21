@@ -20,7 +20,7 @@ namespace Web.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> PlayerProfile(Guid userId)
         {
             try
