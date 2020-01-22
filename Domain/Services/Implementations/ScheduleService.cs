@@ -100,39 +100,7 @@ namespace Domain.Services.Implementations
             return views;
         }
 
-        public async Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId)
-        {
-            var views = new List<ScheduleView>();
-            //TODO: Uncomment when testing
-            //var seasons = (await _seasonInfoRepository.GetAllSeasonsAsync()).OrderByDescending(x => x.SeasonStartDate).ToList();
-            //var seasonInfo = seasons[1];
-
-            //TODO: Uncomment when ready to push
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
-            
-            var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
-            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
-
-            var rosters = (await rostersTask).ToDictionary(x => x.Id, x => x);
-            var schedules = (await schedulesTask).ToList();
-            foreach (var schedule in schedules)
-            {
-                if (schedule.HomeRosterTeamId != rosterId && schedule.AwayRosterTeamId != rosterId)
-                {
-                    continue;
-                }
-
-                rosters.TryGetValue(schedule.HomeRosterTeamId, out var homeTeam);
-                rosters.TryGetValue(schedule.AwayRosterTeamId, out var awayTeam);
-
-                if (homeTeam != null && awayTeam != null)
-                {
-                    views.Add(_scheduleMapper.Map(schedule, homeTeam.TeamName, awayTeam.TeamName));
-                }
-            }
-
-            return views;
-        }
+        
 
         public async Task<bool> UpdateScheduleAsync(ScheduleView view)
         {

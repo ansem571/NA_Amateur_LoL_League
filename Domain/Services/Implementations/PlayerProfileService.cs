@@ -102,8 +102,8 @@ namespace Domain.Services.Implementations
             foreach (var seasonKvp in allPlayerStats)
             {
                 var season = seasons.First(x => x.Id == seasonKvp.Key.SeasonId);
-
-                var mappedStats = _playerStatsMapper.MapForSeason(seasonKvp.Value);
+                var seasonStats = allPlayerStats.SelectMany(x => x.Value.Where(y => y.SeasonInfoId == season.Id));
+                var mappedStats = _playerStatsMapper.MapForSeason(seasonStats, 0);
                 if (int.TryParse(season.SeasonName.Split(" ").Last(), out var seasonNum))
                 {
                     playerStatsDictionary.Add(seasonNum, mappedStats);

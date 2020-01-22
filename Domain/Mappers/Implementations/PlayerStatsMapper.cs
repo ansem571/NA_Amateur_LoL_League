@@ -9,7 +9,7 @@ namespace Domain.Mappers.Implementations
 {
     public class PlayerStatsMapper : IPlayerStatsMapper
     {
-        public PlayerStatsView Map(PlayerStatsEntity entity)
+        public PlayerStatsView Map(PlayerStatsEntity entity, double points)
         {
             return new PlayerStatsView
             {
@@ -22,16 +22,11 @@ namespace Domain.Mappers.Implementations
                 DamagePerMin = Math.Round(entity.Gold/(float)entity.GameTime.TotalMinutes, 2),
                 Kp = Math.Round((entity.Kills + entity.Assists) / (float)entity.TotalTeamKills * 100, 1),
                 VisionScore = Math.Round(entity.VisionScore / ((float)entity.Games * 100) * 100, 1),
-                SeasonInfoId = entity.SeasonInfoId
+                SeasonInfoId = entity.SeasonInfoId,
+                MvpVotes = points
             };
         }
-
-        public IEnumerable<PlayerStatsView> Map(IEnumerable<PlayerStatsEntity> entities)
-        {
-            return entities.Select(Map);
-        }
-
-        public PlayerStatsView MapForSeason(IEnumerable<PlayerStatsEntity> entities)
+        public PlayerStatsView MapForSeason(IEnumerable<PlayerStatsEntity> entities, double points)
         {
             var view = new PlayerStatsView();
             var entityList = entities.ToList();
@@ -43,7 +38,7 @@ namespace Domain.Mappers.Implementations
                     var entity = entityList[i];
                     first += entity;
                 }
-                view = Map(first);
+                view = Map(first, points);
             }
             
             return view;

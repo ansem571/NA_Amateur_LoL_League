@@ -125,13 +125,13 @@ namespace Web.Controllers
         {
             try
             {
-                var result = await _adminService.UpdateRosterTierScoreAsync();
-                if (!result)
-                {
-                    throw new Exception("Failed to update roster tier scores");
-                }
+                //var result = await _adminService.UpdateRosterTierScoreAsync();
+                //if (!result)
+                //{
+                //    throw new Exception("Failed to update roster tier scores");
+                //}
 
-                StatusMessage = "Updated Official Rosters tier scores";
+                StatusMessage = "Fuck you Karen";
                 return RedirectToAction("Index");
             }
             catch (Exception e)

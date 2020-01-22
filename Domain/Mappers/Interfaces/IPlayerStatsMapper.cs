@@ -7,10 +7,7 @@ namespace Domain.Mappers.Interfaces
 {
     public interface IPlayerStatsMapper
     {
-        PlayerStatsView Map(PlayerStatsEntity entity);
-        [Obsolete("Use MapForSeason", true)]
-        IEnumerable<PlayerStatsView> Map(IEnumerable<PlayerStatsEntity> entities);
-        PlayerStatsView MapForSeason(IEnumerable<PlayerStatsEntity> entities);
-
+        PlayerStatsView Map(PlayerStatsEntity entity, double points);
+        PlayerStatsView MapForSeason(IEnumerable<PlayerStatsEntity> entities, double points);
     }
 }

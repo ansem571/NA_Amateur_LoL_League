@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
 using Domain.Helpers;
 using Domain.Mappers.Interfaces;
+using Domain.Repositories.Implementations;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
@@ -29,12 +30,16 @@ namespace Domain.Services.Implementations
         private readonly IAlternateAccountRepository _alternateAccountRepository;
         private readonly IMatchDetailRepository _matchDetailRepository;
         private readonly ISummonerRoleMapper _roleMapper;
+        private readonly IMatchMvpRepository _matchMvpRepository;
+        private readonly IScheduleRepository _scheduleRepository;
+        private readonly IScheduleMapper _scheduleMapper;
 
         public RosterService(ILogger logger, ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, ISeasonInfoRepository seasonInfoRepository,
             IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper,
-            IAlternateAccountRepository alternateAccountRepository, IMatchDetailRepository matchDetailRepository, ISummonerRoleMapper roleMapper)
+            IAlternateAccountRepository alternateAccountRepository, IMatchDetailRepository matchDetailRepository, ISummonerRoleMapper roleMapper,
+            IMatchMvpRepository matchMvpRepository, IScheduleRepository scheduleRepository, IScheduleMapper scheduleMapper)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -62,6 +67,12 @@ namespace Domain.Services.Implementations
                                     throw new ArgumentNullException(nameof(matchDetailRepository));
             _roleMapper = roleMapper ??
                           throw new ArgumentNullException(nameof(roleMapper));
+            _matchMvpRepository = matchMvpRepository ??
+                                  throw new ArgumentNullException(nameof(matchMvpRepository));
+            _scheduleRepository = scheduleRepository ??
+                                  throw new ArgumentNullException(nameof(scheduleRepository));
+            _scheduleMapper = scheduleMapper ??
+                              throw new ArgumentNullException(nameof(scheduleMapper));
         }
 
         public async Task<SeasonInfoView> GetSeasonInfoView()
@@ -195,17 +206,14 @@ namespace Domain.Services.Implementations
             var playersSummoner = (await _teamPlayerRepository.ReadAllForRosterAsync(rosterId)).ToList();
             var summonersTask = _summonerInfoRepository.GetAllForSummonerIdsAsync(playersSummoner.Select(x => x.SummonerId));
             var matchDetails = await _matchDetailRepository.GetMatchDetailsForPlayerAsync(playersSummoner.Select(x => x.SummonerId));
+            var schedule = (await GetTeamSchedule(rosterId)).ToList();
 
             matchDetails = matchDetails.Where(x => x.Key.SeasonId == seasonInfo.Id).ToDictionary(x => x.Key, x => x.Value);
-            var statIds = matchDetails.Values.SelectMany(x => x.Select(y => y.PlayerStatsId));
+            var scheduleIds = schedule.Select(x => x.ScheduleId).ToList();
 
-            var playerStats = await _playerStatsRepository.GetStatsAsync(statIds);
-            var mappedStats = new List<PlayerStatsView>();
-            foreach (var playerStat in playerStats)
-            {
-                var mappedStat = _playerStatsMapper.MapForSeason(playerStat.Value);
-                mappedStats.Add(mappedStat);
-            }
+            var statIds = matchDetails.Values.SelectMany(x => x.Where(z => z.SeasonInfoId == seasonInfo.Id && scheduleIds.Contains(z.TeamScheduleId)).Select(y => y.PlayerStatsId));
+
+            var mappedStats = await SetupPlayerStatsViews(statIds, schedule, matchDetails);
 
             var alternateAccounts = (await alternateAccountsTask).ToList();
             var summoners = (await summonersTask).ToList();
@@ -239,7 +247,8 @@ namespace Domain.Services.Implementations
                 {
                     DivisionName = division.Name,
                     DivisionMinScore = division.LowerLimit
-                }
+                },
+                Schedule = schedule
             };
 
             var directory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
@@ -250,13 +259,102 @@ namespace Domain.Services.Implementations
                 var byteData = await File.ReadAllBytesAsync(path);
                 var base64 = Convert.ToBase64String(byteData);
                 var type = GetContentType(path);
-                var imgSrc = String.Format($"data:{type};base64,{base64}");
+                var imgSrc = string.Format($"data:{type};base64,{base64}");
                 rosterView.FileSource = imgSrc;
 
             }
             rosterView.Cleanup();
 
             return rosterView;
+        }
+
+        public async Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId)
+        {
+            var views = new List<ScheduleView>();
+            //TODO: Uncomment when testing
+            //var seasons = (await _seasonInfoRepository.GetAllSeasonsAsync()).OrderByDescending(x => x.SeasonStartDate).ToList();
+            //var seasonInfo = seasons[1];
+
+            //TODO: Uncomment when ready to push
+            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+
+            var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
+            var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
+
+            var rosters = (await rostersTask).ToDictionary(x => x.Id, x => x);
+            var schedules = (await schedulesTask).ToList();
+            foreach (var schedule in schedules)
+            {
+                if (schedule.HomeRosterTeamId != rosterId && schedule.AwayRosterTeamId != rosterId)
+                {
+                    continue;
+                }
+
+                rosters.TryGetValue(schedule.HomeRosterTeamId, out var homeTeam);
+                rosters.TryGetValue(schedule.AwayRosterTeamId, out var awayTeam);
+
+                if (homeTeam != null && awayTeam != null)
+                {
+                    views.Add(_scheduleMapper.Map(schedule, homeTeam.TeamName, awayTeam.TeamName));
+                }
+            }
+
+            return views;
+        }
+
+        private async Task<List<PlayerStatsView>> SetupPlayerStatsViews(IEnumerable<Guid> statIds, List<ScheduleView> schedule, Dictionary<StatsKey, List<MatchDetailEntity>> matchDetails)
+        {
+            var playerStats = await _playerStatsRepository.GetStatsAsync(statIds);
+            var mappedStats = new List<PlayerStatsView>();
+
+            var scheduleIds = schedule.Select(x => x.ScheduleId).ToList();
+            var mvpStats = await _matchMvpRepository.ReadAllForTeamScheduleIds(scheduleIds);
+            foreach (var playerStat in playerStats)
+            {
+                var playerId = playerStat.Key.SummonerId;
+                var playerMvps =
+                    (mvpStats.SelectMany(x => x.Value).Where(x => x.BlueMvp == playerId || x.RedMvp == playerId)).GroupBy(x => (x.TeamScheduleId, x.Game)).ToDictionary(
+                        x => x.Key, x => x.FirstOrDefault());
+                var mvpPoints = 0d;
+                if (playerMvps.Any())
+                {
+                    var matches =
+                        (matchDetails.SelectMany(x => x.Value).Where(x => x.PlayerId == playerId)).GroupBy(x => (x.TeamScheduleId, x.Game)).ToDictionary(
+                            x => x.Key, x => x.FirstOrDefault());
+                    mvpPoints = CalculateMvpPoints(playerMvps, matches, scheduleIds);
+                }
+
+                var mappedStat = _playerStatsMapper.MapForSeason(playerStat.Value, mvpPoints);
+                mappedStats.Add(mappedStat);
+            }
+
+            return mappedStats;
+        }
+
+        private double CalculateMvpPoints(IReadOnlyDictionary<(Guid, int), MatchMvpEntity> playerMvps, IReadOnlyDictionary<(Guid, int), MatchDetailEntity> matches, IEnumerable<Guid> teamScheduleIds)
+        {
+            var mvpPoints = 0d;
+            foreach (var teamScheduleId in teamScheduleIds)
+            {
+                for (int game = 1; game <= 2; game++)
+                {
+                    playerMvps.TryGetValue((teamScheduleId, game), out var mvpEntity);
+                    matches.TryGetValue((teamScheduleId, game), out var matchEntity);
+
+                    if (mvpEntity != null && matchEntity != null)
+                    {
+                        if (matchEntity.Winner)
+                        {
+                            mvpPoints += 1;
+                        }
+                        else
+                        {
+                            mvpPoints += 0.5d;
+                        }
+                    }
+                }
+            }
+            return mvpPoints;
         }
 
         public async Task<(bool result, string message)> SaveFileAsync(IFormFile file, Guid rosterId)

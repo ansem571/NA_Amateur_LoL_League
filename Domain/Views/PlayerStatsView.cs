@@ -14,6 +14,7 @@ namespace Domain.Views
         public double Kp { get; set; }
         public double VisionScore { get; set; }
         public Guid? SeasonInfoId { get; set; }
+        public double MvpVotes { get; set; }
 
 
         public PlayerStatsView()

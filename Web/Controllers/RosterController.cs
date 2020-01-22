@@ -126,14 +126,13 @@ namespace Web.Controllers
         {
             var rosterTask = _rosterService.GetRosterAsync(rosterId);
             var userTask = _userManager.GetUserAsync(User);
-            var scheduleTask = _scheduleService.GetTeamSchedule(rosterId);
 
             var roster = await rosterTask;
             var user = await userTask;
             var viewModel = new RosterViewModel
             {
                 RosterView = roster,
-                ScheduleLineup = await scheduleTask
+                ScheduleLineup = roster.Schedule
             };
             if (user == null)
             {
@@ -287,7 +286,8 @@ namespace Web.Controllers
                     throw new Exception("Form was not setup right");
                 }
 
-                var result = await _googleDriveService.SendFileData(view);
+                var user = await _userManager.GetUserAsync(User);
+                var result = await _googleDriveService.SendFileData(view, user);
 
                 if (!result)
                 {

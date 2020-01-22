@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using Dapper.Contrib.Extensions;
+using DAL.Contracts;
 
 namespace DAL.Entities.LeagueInfo
 {
     [Table("MatchMvp")]
-    public class MatchMvpEntity
+    public class MatchMvpEntity : BaseInfo
     {
         [ExplicitKey]
         public Guid Id { get; set; }

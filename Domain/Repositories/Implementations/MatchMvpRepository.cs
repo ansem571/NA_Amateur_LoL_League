@@ -10,6 +10,7 @@ namespace Domain.Repositories.Implementations
     public interface IMatchMvpRepository
     {
         Task<IEnumerable<MatchMvpEntity>> ReadAllForTeamScheduleId(Guid teamScheduleId);
+        Task< Dictionary<Guid, IEnumerable<MatchMvpEntity>>> ReadAllForTeamScheduleIds(IEnumerable<Guid> teamScheduleIds);
 
         Task<bool> CreateAsync(IEnumerable<MatchMvpEntity> entities);
         Task<bool> UpdateAsync(IEnumerable<MatchMvpEntity> entities);
@@ -28,6 +29,14 @@ namespace Domain.Repositories.Implementations
             var entities = await _table.ReadManyAsync("TeamScheduleId = @teamScheduleId", new {teamScheduleId});
 
             return entities;
+        }
+
+        public async Task<Dictionary<Guid, IEnumerable<MatchMvpEntity>>> ReadAllForTeamScheduleIds(IEnumerable<Guid> teamScheduleIds)
+        {
+            teamScheduleIds = teamScheduleIds.ToList();
+            var entities = (await _table.ReadManyAsync("TeamScheduleId in @teamScheduleIds", new { teamScheduleIds })).ToList();
+
+            return teamScheduleIds.ToDictionary(x => x, y => entities.Where(x => x.TeamScheduleId == y));
         }
 
         public async Task<bool> CreateAsync(IEnumerable<MatchMvpEntity> entities)

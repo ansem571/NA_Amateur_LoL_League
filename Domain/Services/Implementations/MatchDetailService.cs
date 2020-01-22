@@ -54,9 +54,9 @@ namespace Domain.Services.Implementations
             _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));
         }
 
-        public async Task<bool> SendFileData(MatchSubmissionView view)
+        public async Task<bool> SendFileData(MatchSubmissionView view, UserEntity user)
         {
-            var addMatchStats = await UpdateStatsAsync(view);
+            var addMatchStats = await UpdateStatsAsync(view, user);
             if (!addMatchStats)
             {
                 return false;
@@ -72,8 +72,9 @@ namespace Domain.Services.Implementations
             return true;
         }
 
-        private async Task<bool> UpdateStatsAsync(MatchSubmissionView view)
+        private async Task<bool> UpdateStatsAsync(MatchSubmissionView view, UserEntity user)
         {
+            var userPlayer = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
             var divisionTask = _scheduleService.GetDivisionIdByScheduleAsync(view.ScheduleId);
             var matchesTask = _matchDetailRepository.ReadForScheduleId(view.ScheduleId);
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
@@ -127,7 +128,7 @@ namespace Domain.Services.Implementations
                 await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, gameNum, matchDictionary,
                     matchList, divisionId, championDetails);
 
-                CollectMatchMvpData(view, matchList, registeredPlayers, gameInfo, mvpDetails, gameNum, updateMvpDetails, insertMvpDetails);
+                CollectMatchMvpData(view, matchList, registeredPlayers, gameInfo, mvpDetails, gameNum, updateMvpDetails, insertMvpDetails, userPlayer);
 
                 insertDetailsList.AddRange(matchList.Select(x => x.MatchDetail));
                 insertStatsList.AddRange(matchList.Select(x => x.PlayerStats));
@@ -185,7 +186,7 @@ namespace Domain.Services.Implementations
 
         public void CollectMatchMvpData(MatchSubmissionView view, List<MatchDetailContract> matchList, Dictionary<string, SummonerInfoEntity> registeredPlayers,
             GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, int gameNum, List<MatchMvpEntity> updateMvpDetails, 
-            List<MatchMvpEntity> insertMvpDetails)
+            List<MatchMvpEntity> insertMvpDetails, SummonerInfoEntity userPlayer)
         {
             var validMvpPlayers = new List<Guid>();
             validMvpPlayers.AddRange(matchList.Select(x => x.MatchDetail.PlayerId));
@@ -207,6 +208,8 @@ namespace Domain.Services.Implementations
                     mvpEntity.RedMvp = redMvp.Id;
                 }
 
+                mvpEntity.UpdatedBy = userPlayer.SummonerName;
+                mvpEntity.UpdatedOn = DateTime.Now;
                 updateMvpDetails.Add(mvpEntity);
             }
             else
@@ -217,7 +220,9 @@ namespace Domain.Services.Implementations
                     BlueMvp = blueMvp != null && validMvpPlayers.Contains(blueMvp.Id) ? blueMvp.Id : new Guid?(),
                     RedMvp = redMvp != null && validMvpPlayers.Contains(redMvp.Id) ? redMvp.Id : new Guid?(),
                     Game = gameNum,
-                    TeamScheduleId = view.ScheduleId
+                    TeamScheduleId = view.ScheduleId,
+                    CreatedBy = userPlayer.SummonerName,
+                    CreatedOn = DateTime.Now
                 };
                 insertMvpDetails.Add(mvpEntity);
             }
@@ -275,7 +280,8 @@ namespace Domain.Services.Implementations
                     PlayerId = registeredPlayer.Id,
                     PlayerStatsId = matchStat.Id,
                     SeasonInfoId = seasonInfo.Id,
-                    TeamScheduleId = view.ScheduleId
+                    TeamScheduleId = view.ScheduleId,
+                    Winner = participant.Stats.Winner
                 };
 
                 //per player

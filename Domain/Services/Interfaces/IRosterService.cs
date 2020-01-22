@@ -18,5 +18,6 @@ namespace Domain.Services.Interfaces
         Task<bool> AddToTeamScoreAsync(string teamName, int wins, int loses);
 
         Task<bool> UpdateRosterLineupAsync(UpdateRosterLineupView view);
+        Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId);
     }
 }
