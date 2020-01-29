@@ -54,9 +54,9 @@ namespace Domain.Services.Implementations
             _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));
         }
 
-        public async Task<bool> SendFileData(MatchSubmissionView view, UserEntity user)
+        public async Task<bool> SendFileData(MatchSubmissionView view, SummonerInfoEntity userPlayer)
         {
-            var addMatchStats = await UpdateStatsAsync(view, user);
+            var addMatchStats = await UpdateStatsAsync(view, userPlayer);
             if (!addMatchStats)
             {
                 return false;
@@ -72,9 +72,8 @@ namespace Domain.Services.Implementations
             return true;
         }
 
-        private async Task<bool> UpdateStatsAsync(MatchSubmissionView view, UserEntity user)
+        private async Task<bool> UpdateStatsAsync(MatchSubmissionView view, SummonerInfoEntity userPlayer)
         {
-            var userPlayer = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
             var divisionTask = _scheduleService.GetDivisionIdByScheduleAsync(view.ScheduleId);
             var matchesTask = _matchDetailRepository.ReadForScheduleId(view.ScheduleId);
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
@@ -253,12 +252,12 @@ namespace Domain.Services.Implementations
                 registeredPlayers.TryGetValue(gameInfoPlayer.PlayerName.ToLowerInvariant(), out var registeredPlayer);
                 if (registeredPlayer == null)
                 {
-                    var message = $"This player is not legal for a match: {gameInfoPlayer.PlayerName}";
+                    var message = $"This player is not legal for a match as a player: {gameInfoPlayer.PlayerName}";
                     _logger.LogCritical(message);
                     const string to = "casualesportsamateurleague@gmail.com";
                     await _emailService.SendEmailAsync(to, message,
                         $"Illegal player in match: {view.HomeTeamName} vs {view.AwayTeamName}");
-                    continue;
+                    throw new Exception(message);
                 }
 
                 var matchStat = CreatePlayerMatchStat(registeredPlayer, participant, gameDuration, seasonInfo);

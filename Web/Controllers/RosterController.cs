@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Enums;
 using Domain.Helpers;
+using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
 using Microsoft.AspNetCore.Http;
@@ -24,9 +25,10 @@ namespace Web.Controllers
         private readonly ILogger _logger;
         private readonly IScheduleService _scheduleService;
         private readonly IMatchDetailService _googleDriveService;
+        private readonly ISummonerInfoRepository _summonerInfoRepository;
 
         public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
-            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService)
+            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService, ISummonerInfoRepository summonerInfoRepository)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
@@ -34,6 +36,7 @@ namespace Web.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
             _googleDriveService = googleDriveService ?? throw new ArgumentNullException(nameof(googleDriveService));
+            _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
         }
 
         [TempData]
@@ -239,9 +242,15 @@ namespace Web.Controllers
         {
             try
             {
+                var user = await _userManager.GetUserAsync(User);
                 view.GameInfos = view.GameInfos.Where(x => x.GamePlayed || x.AwayTeamForfeit || x.HomeTeamForfeit)
                     .ToList();
                 var isNullCheck = false;
+                if (user == null)
+                {
+                    throw new Exception("You were logged out unexpectedly. Im sorry.");
+                }
+                var userPlayer = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
                 foreach (var gameInfo in view.GameInfos)
                 {
                     isNullCheck = Properties<GameInfo>.HasEmptyProperties(gameInfo);
@@ -286,8 +295,8 @@ namespace Web.Controllers
                     throw new Exception("Form was not setup right");
                 }
 
-                var user = await _userManager.GetUserAsync(User);
-                var result = await _googleDriveService.SendFileData(view, user);
+
+                var result = await _googleDriveService.SendFileData(view, userPlayer);
 
                 if (!result)
                 {
