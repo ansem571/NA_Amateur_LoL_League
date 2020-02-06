@@ -56,8 +56,8 @@ namespace Domain.Views
         public bool IsDefault()
         {
             var defaultValue = "Home Team Players";
-            return PlayerTop == defaultValue || PlayerJungle == defaultValue || PlayerMid == defaultValue ||
-                   PlayerAdc == defaultValue || PlayerSup == defaultValue;
+            return PlayerTop.Contains(defaultValue) || PlayerJungle.Contains(defaultValue) || PlayerMid.Contains(defaultValue) ||
+                   PlayerAdc.Contains(defaultValue) || PlayerSup.Contains(defaultValue);
         }
 
         public LookupEntity LocalChampionTop => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionTop.ToString().ToLowerInvariant());
