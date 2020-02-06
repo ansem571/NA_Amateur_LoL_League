@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
-using Domain.Enums;
 using Domain.Helpers;
 using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;

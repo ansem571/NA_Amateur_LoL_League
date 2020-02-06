@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
-using Domain.Enums;
 using Domain.Helpers;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;

@@ -28,5 +28,15 @@ namespace Domain.Repositories.Implementations
         {
             return await _table.ReadAllAsync();
         }
+
+        public async Task<bool> CreateSeasonAsync(SeasonInfoEntity season)
+        {
+            return await _table.InsertAsync(season) == 1;
+        }
+
+        public async Task<bool> UpdateSeasonAsync(SeasonInfoEntity season)
+        {
+            return await _table.UpdateAsync(season);
+        }
     }
 }

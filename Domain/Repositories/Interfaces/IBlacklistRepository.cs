@@ -7,5 +7,7 @@ namespace Domain.Repositories.Interfaces
     public interface IBlacklistRepository
     {
         Task<BlacklistEntity> GetByUserIdAsync(Guid userId);
+        Task<bool> CreateAsync(BlacklistEntity entity);
+        Task<bool> UpdateAsync(BlacklistEntity entity);
     }
 }

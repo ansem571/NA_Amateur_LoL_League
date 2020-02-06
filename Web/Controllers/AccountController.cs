@@ -2,9 +2,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
-using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
-using Domain.Views;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;

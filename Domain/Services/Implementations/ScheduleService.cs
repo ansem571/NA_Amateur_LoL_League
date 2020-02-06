@@ -177,7 +177,8 @@ namespace Domain.Services.Implementations
         public async Task<Dictionary<string, IEnumerable<RosterView>>> SetupStandings()
         {
             var standings = new Dictionary<string, IEnumerable<RosterView>>();
-            var schedulesTask = _scheduleRepository.GetAllUpdatedMatchesAsync();
+            var currentSeason = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Now);
+            var schedulesTask = _scheduleRepository.GetAllUpdatedMatchesAsync(currentSeason.Id);
             var rostersTask = _rosterService.GetSeasonInfoView();
 
             var rostersGrouped = (await rostersTask).Rosters.GroupBy(x => x.Division.DivisionName)

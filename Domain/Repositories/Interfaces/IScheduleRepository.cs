@@ -9,7 +9,7 @@ namespace Domain.Repositories.Interfaces
     {
         Task<ScheduleEntity> GetScheduleAsync(Guid id);
         Task<IEnumerable<ScheduleEntity>> GetAllAsync(Guid? seasonInfoId);
-        Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync();
+        Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync(Guid seasonInfoId);
         Task<bool> InsertAsync(IEnumerable<ScheduleEntity> entities);
         Task<bool> UpdateAsync(IEnumerable<ScheduleEntity> entities);
     }

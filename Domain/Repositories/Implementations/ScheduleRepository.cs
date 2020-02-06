@@ -28,10 +28,10 @@ namespace Domain.Repositories.Implementations
             return await _table.ReadManyAsync("SeasonInfoId = @seasonInfoId", new { seasonInfoId });
         }
 
-        public async Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync()
+        public async Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync(Guid seasonInfoId)
         {
             return await _table.ReadManyAsync(
-                "(HomeTeamWins is not null AND HomeTeamWins > 0) or (AwayTeamWins is not null AND AwayTeamWins > 0)");
+                "(HomeTeamWins is not null AND HomeTeamWins > 0) or (AwayTeamWins is not null AND AwayTeamWins > 0) AND SeasonInfoId = @seasonInfoId");
         }
 
         public async Task<bool> InsertAsync(IEnumerable<ScheduleEntity> entities)

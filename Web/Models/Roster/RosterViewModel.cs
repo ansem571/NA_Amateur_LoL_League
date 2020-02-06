@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Domain.Views;
-using Microsoft.AspNetCore.Mvc.ViewFeatures.Internal;
 
 namespace Web.Models.Roster
 {
