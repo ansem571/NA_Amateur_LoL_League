@@ -53,6 +53,13 @@ namespace Domain.Views
         [Required]
         public ChampionsEnum ChampionSup { get; set; }
 
+        public bool IsDefault()
+        {
+            var defaultValue = "Home Team Players";
+            return PlayerTop == defaultValue || PlayerJungle == defaultValue || PlayerMid == defaultValue ||
+                   PlayerAdc == defaultValue || PlayerSup == defaultValue;
+        }
+
         public LookupEntity LocalChampionTop => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionTop.ToString().ToLowerInvariant());
         public LookupEntity LocalChampionJungle => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionJungle.ToString().ToLowerInvariant());
         public LookupEntity LocalChampionMid => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionMid.ToString().ToLowerInvariant());

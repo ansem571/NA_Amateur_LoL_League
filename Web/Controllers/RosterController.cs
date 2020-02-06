@@ -288,6 +288,11 @@ namespace Web.Controllers
 
                         break;
                     }
+
+                    if (gameInfo.BlueTeam.IsDefault() || gameInfo.RedTeam.IsDefault())
+                    {
+                        throw new Exception("You did not assign a player to their champion");
+                    }
                 }
 
                 if (!view.GameInfos.Any() || view.GameInfos.Count < 2 || isNullCheck)
