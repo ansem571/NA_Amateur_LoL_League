@@ -102,7 +102,8 @@ namespace Domain.Services.Implementations
                     rosterView.Division = new DivisionView
                     {
                         DivisionName = division.Name,
-                        DivisionMinScore = division.LowerLimit
+                        DivisionMinScore = division.LowerLimit,
+                        DivisionId = division.Id
                     };
                 }
 
@@ -246,7 +247,8 @@ namespace Domain.Services.Implementations
                 Division = new DivisionView
                 {
                     DivisionName = division.Name,
-                    DivisionMinScore = division.LowerLimit
+                    DivisionMinScore = division.LowerLimit,
+                    DivisionId = division.Id
                 },
                 Schedule = schedule
             };

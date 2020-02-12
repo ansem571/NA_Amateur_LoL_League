@@ -12,5 +12,6 @@ namespace Domain.Repositories.Interfaces
         Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync(Guid seasonInfoId);
         Task<bool> InsertAsync(IEnumerable<ScheduleEntity> entities);
         Task<bool> UpdateAsync(IEnumerable<ScheduleEntity> entities);
+        Task<IEnumerable<ScheduleEntity>> GetAllPlayoffMatchesAsync(Guid seasonInfoId);
     }
 }

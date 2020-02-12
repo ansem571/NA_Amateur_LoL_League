@@ -104,6 +104,7 @@ namespace Domain.Views
 
         public string BlueMvp { get; set; }
         public string RedMvp { get; set; }
+        public int GameNum { get; set; }
 
         /// <summary>
         /// Will only be used for games 3,4,5 of series

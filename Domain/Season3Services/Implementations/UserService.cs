@@ -32,10 +32,14 @@ namespace Domain.Season3Services.Implementations
             return await _blacklistRepository.CreateAsync(blacklistEntity);
         }
 
-        public async Task<bool> UpdateBannedUserAsync(Guid userId, bool isBanned)
+        public async Task<bool> UpdateBannedUserAsync(Guid userId)
         {
             var blacklistEntity = await _blacklistRepository.GetByUserIdAsync(userId);
-            blacklistEntity.IsBanned = isBanned;
+            if (blacklistEntity == null)
+            {
+                return await BanUserAsync(userId);
+            }
+            blacklistEntity.IsBanned = !blacklistEntity.IsBanned;
 
 
             return await _blacklistRepository.UpdateAsync(blacklistEntity);

@@ -86,7 +86,6 @@ namespace Domain.Services.Implementations
             var divisionId = await divisionTask;
             var insertMvpDetails = new List<MatchMvpEntity>();
             var updateMvpDetails = new List<MatchMvpEntity>();
-            var gameNum = 0;
             //Will always insert new records and never update, we will delete any old records first
             var insertDetailsList = new List<MatchDetailEntity>();
             var insertStatsList = new List<PlayerStatsEntity>();
@@ -96,7 +95,7 @@ namespace Domain.Services.Implementations
 
             foreach (var gameInfo in view.GameInfos)
             {
-                gameNum++;
+                
 
                 if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
                 {
@@ -124,10 +123,10 @@ namespace Domain.Services.Implementations
 
                 var matchList = new List<MatchDetailContract>();
 
-                await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, gameNum, matchDictionary,
+                await CollectPlayerMatchDetailsAsync(view, riotMatch, champions, gameInfo, registeredPlayers, gameDuration, seasonInfo, matchDictionary,
                     matchList, divisionId, championDetails);
 
-                CollectMatchMvpData(view, matchList, registeredPlayers, gameInfo, mvpDetails, gameNum, updateMvpDetails, insertMvpDetails, userPlayer);
+                CollectMatchMvpData(view, matchList, registeredPlayers, gameInfo, mvpDetails, updateMvpDetails, insertMvpDetails, userPlayer);
 
                 insertDetailsList.AddRange(matchList.Select(x => x.MatchDetail));
                 insertStatsList.AddRange(matchList.Select(x => x.PlayerStats));
@@ -184,7 +183,7 @@ namespace Domain.Services.Implementations
         }
 
         public void CollectMatchMvpData(MatchSubmissionView view, List<MatchDetailContract> matchList, Dictionary<string, SummonerInfoEntity> registeredPlayers,
-            GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, int gameNum, List<MatchMvpEntity> updateMvpDetails, 
+            GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, List<MatchMvpEntity> updateMvpDetails, 
             List<MatchMvpEntity> insertMvpDetails, SummonerInfoEntity userPlayer)
         {
             var validMvpPlayers = new List<Guid>();
@@ -193,7 +192,7 @@ namespace Domain.Services.Implementations
             registeredPlayers.TryGetValue(gameInfo.BlueMvp.ToLowerInvariant(), out var blueMvp);
             registeredPlayers.TryGetValue(gameInfo.RedMvp.ToLowerInvariant(), out var redMvp);
 
-            if (mvpDetails.TryGetValue(gameNum, out var mvpEntity))
+            if (mvpDetails.TryGetValue(gameInfo.GameNum, out var mvpEntity))
             {
                 if (!string.IsNullOrEmpty(gameInfo.BlueMvp) && blueMvp != null && blueMvp.Id != mvpEntity.BlueMvp &&
                     validMvpPlayers.Contains(blueMvp.Id))
@@ -218,7 +217,7 @@ namespace Domain.Services.Implementations
                     Id = Guid.NewGuid(),
                     BlueMvp = blueMvp != null && validMvpPlayers.Contains(blueMvp.Id) ? blueMvp.Id : new Guid?(),
                     RedMvp = redMvp != null && validMvpPlayers.Contains(redMvp.Id) ? redMvp.Id : new Guid?(),
-                    Game = gameNum,
+                    Game = gameInfo.GameNum,
                     TeamScheduleId = view.ScheduleId,
                     CreatedBy = userPlayer.SummonerName,
                     CreatedOn = DateTime.Now
@@ -228,7 +227,7 @@ namespace Domain.Services.Implementations
         }
 
         public async Task CollectPlayerMatchDetailsAsync(MatchSubmissionView view, Match riotMatch, ChampionListStatic champions, GameInfo gameInfo,
-            Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration, SeasonInfoEntity seasonInfo, int gameNum, 
+            Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration, SeasonInfoEntity seasonInfo, 
             Dictionary<MatchDetailKey, MatchDetailEntity> matchDictionary, List<MatchDetailContract> matchList, Guid divisionId,
             List<ChampionStatsEntity> championDetails)
         {
@@ -275,7 +274,7 @@ namespace Domain.Services.Implementations
                 var matchDetail = new MatchDetailEntity
                 {
                     Id = Guid.NewGuid(),
-                    Game = gameNum,
+                    Game = gameInfo.GameNum,
                     PlayerId = registeredPlayer.Id,
                     PlayerStatsId = matchStat.Id,
                     SeasonInfoId = seasonInfo.Id,
@@ -292,7 +291,7 @@ namespace Domain.Services.Implementations
                 championDetails.Add(pickedChampionStat);
 
                 //Add special achievements here
-                var achievements = await AddSpecialAchievements(participant, ourChampion, registeredPlayer, seasonInfo.Id, riotMatch, view, gameNum);
+                var achievements = await AddSpecialAchievements(participant, ourChampion, registeredPlayer, seasonInfo.Id, riotMatch, view, gameInfo.GameNum);
                 matchList.Add(new MatchDetailContract(gameInfoPlayer.IsBlue, matchDetail, matchStat, achievements));
             }
         }

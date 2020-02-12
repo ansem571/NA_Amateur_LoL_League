@@ -31,7 +31,7 @@ namespace Domain.Repositories.Implementations
         public async Task<IEnumerable<ScheduleEntity>> GetAllUpdatedMatchesAsync(Guid seasonInfoId)
         {
             return await _table.ReadManyAsync(
-                "(HomeTeamWins is not null AND HomeTeamWins > 0) or (AwayTeamWins is not null AND AwayTeamWins > 0) AND SeasonInfoId = @seasonInfoId");
+                "(HomeTeamWins is not null AND HomeTeamWins > 0) or (AwayTeamWins is not null AND AwayTeamWins > 0) AND SeasonInfoId = @seasonInfoId", new { seasonInfoId });
         }
 
         public async Task<bool> InsertAsync(IEnumerable<ScheduleEntity> entities)
@@ -44,6 +44,12 @@ namespace Domain.Repositories.Implementations
         {
             entities = entities.ToList();
             return !entities.Any() || await _table.UpdateAsync(entities);
+        }
+
+        public async Task<IEnumerable<ScheduleEntity>> GetAllPlayoffMatchesAsync(Guid seasonInfoId)
+        {
+            return await _table.ReadManyAsync("IsPlayoffMatch = 1 AND SeasonInfoId = @seasonInfoId",
+                new {seasonInfoId});
         }
     }
 }

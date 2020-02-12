@@ -25,9 +25,10 @@ namespace Web.Controllers
         private readonly IScheduleService _scheduleService;
         private readonly IMatchDetailService _googleDriveService;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
+        private readonly IScheduleRepository _scheduleRepository;
 
         public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
-            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService, ISummonerInfoRepository summonerInfoRepository)
+            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService, ISummonerInfoRepository summonerInfoRepository, IScheduleRepository scheduleRepository)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
@@ -36,6 +37,7 @@ namespace Web.Controllers
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
             _googleDriveService = googleDriveService ?? throw new ArgumentNullException(nameof(googleDriveService));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
+            _scheduleRepository = scheduleRepository;
         }
 
         [TempData]
@@ -224,10 +226,10 @@ namespace Web.Controllers
         public async Task<IActionResult> SendMatchDataAsync(int weekNumber, string hometeam, string awayteam, Guid scheduleId)
         {
             var playersList = await _accountService.GetAllValidPlayers(hometeam, awayteam);
-
+            var schedule = await _scheduleRepository.GetScheduleAsync(scheduleId);
             var view = new MatchSubmissionView
             {
-                Week = $"Week {weekNumber}",
+                Week = !schedule.IsPlayoffMatch ? $"Week {weekNumber}" : $"Playoff {weekNumber}",
                 HomeTeamName = hometeam,
                 AwayTeamName = awayteam,
                 ScheduleId = scheduleId,
@@ -367,7 +369,7 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateRosterLineup(UpdateRosterLineupView view)
         {
-            
+
             try
             {
                 var result = await _rosterService.UpdateRosterLineupAsync(view);

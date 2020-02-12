@@ -1,9 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using DAL.Entities.UserData;
+using DAL.Stores;
+using Domain.Forms;
+using Domain.Repositories.Interfaces;
+using Domain.Season3Services.Interfaces;
 using Domain.Services.Interfaces;
+using Domain.Views;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Models.Admin;
@@ -15,13 +23,24 @@ namespace Web.Controllers
     {
         private readonly IAdminService _adminService;
         private readonly ILogger _logger;
-        private readonly IMatchDetailService _googleDriveService;
+        private readonly IDivisionService _divisionService;
+        private readonly IPlayoffService _playoffService;
+        private readonly ISeasonInfoService _seasonInfoService;
+        private readonly IUserService _userService;
+        private readonly ISummonerInfoRepository _summonerInfoRepository;
+        private readonly IRosterService _rosterService;
 
-        public AdminController(IAdminService adminService, ILogger logger, IMatchDetailService googleDriveService)
+        public AdminController(IAdminService adminService, ILogger logger, IDivisionService divisionService, IPlayoffService playoffService, ISeasonInfoService seasonInfoService, 
+            IUserService userService, ISummonerInfoRepository summonerInfoRepository, IRosterService rosterService)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _googleDriveService = googleDriveService ?? throw new ArgumentNullException(nameof(googleDriveService));
+            _divisionService = divisionService ?? throw new ArgumentNullException(nameof(divisionService));
+            _playoffService = playoffService ?? throw new ArgumentNullException(nameof(playoffService));
+            _seasonInfoService = seasonInfoService ?? throw new ArgumentNullException(nameof(seasonInfoService));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
+            _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
         }
 
         [TempData]
@@ -172,6 +191,61 @@ namespace Web.Controllers
             }
 
             return View(model: StatusMessage);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BanUser()
+        {
+            var players = await _summonerInfoRepository.GetAllSummonersAsync();
+
+            return View(players);
+        }
+
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BanUser(Guid userId)
+        {
+            try
+            {
+                var result = await _userService.UpdateBannedUserAsync(userId);
+                StatusMessage = result ? "Successfully updated user" : "Failed to update ban status";
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error sending ");
+                StatusMessage = "Failed to update ban status";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin, Tribunal")]
+        public async Task<IActionResult> CreatePlayoffSeeds()
+        {
+            var model = await _rosterService.GetSeasonInfoView();
+            model.StatusMessage = StatusMessage;
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin, Tribunal")]
+        public async Task<IActionResult> CreatePlayoffSeeds(PlayoffInputForm form)
+        {
+            try
+            {
+                var result = await _playoffService.SetupPlayoffSchedule(form.Seeds, form.WeekOf, form.BracketFormat);
+                StatusMessage = result ? "Successfully created playoff seeds" : "Failed to created playoff seeds";
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error sending ");
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

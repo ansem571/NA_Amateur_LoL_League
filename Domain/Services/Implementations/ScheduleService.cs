@@ -43,7 +43,6 @@ namespace Domain.Services.Implementations
 
         public async Task<Dictionary<string, List<ScheduleView>>> GetAllSchedules()
         {
-            var views = new Dictionary<string, List<ScheduleView>>();
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime());
             var divisionsTask = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
             var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
@@ -52,6 +51,15 @@ namespace Domain.Services.Implementations
             var rosters = (await rostersTask).ToDictionary(x => x.Id, x => x);
             var divisions = (await divisionsTask).ToList();
             var schedules = (await schedulesTask).ToList();
+
+
+            return SetupSchedule(rosters, divisions, schedules);
+        }
+
+        public Dictionary<string, List<ScheduleView>> SetupSchedule(Dictionary<Guid, TeamRosterEntity> rosters, List<DivisionEntity> divisions, List<ScheduleEntity> schedules)
+        {
+            var views = new Dictionary<string, List<ScheduleView>>();
+
             foreach (var schedule in schedules)
             {
                 rosters.TryGetValue(schedule.HomeRosterTeamId, out var homeTeam);
@@ -94,14 +102,12 @@ namespace Domain.Services.Implementations
                 }
             }
 
-            var divisionOrder = divisions.OrderBy(x => x.UpperLimit).Select(x=>x.Name).ToList();
+            var divisionOrder = divisions.OrderBy(x => x.UpperLimit).Select(x => x.Name).ToList();
             views = views.OrderByDescending(x => divisionOrder.IndexOf(x.Key)).ThenBy(x => x.Value.Select(y => y.WeekOf)).ToDictionary(x => x.Key, x => x.Value);
 
             return views;
         }
-
         
-
         public async Task<bool> UpdateScheduleAsync(ScheduleView view)
         {
             var scheduleInfo = await _scheduleRepository.GetScheduleAsync(view.ScheduleId);
@@ -183,7 +189,7 @@ namespace Domain.Services.Implementations
 
             var rostersGrouped = (await rostersTask).Rosters.GroupBy(x => x.Division.DivisionName)
                 .ToDictionary(x => x.Key, x => x.ToList());
-            var schedules = (await schedulesTask).ToList();
+            var schedules = (await schedulesTask).Where(x=>!x.IsPlayoffMatch).ToList();
 
             foreach (var division in rostersGrouped)
             {
