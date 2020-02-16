@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
@@ -202,7 +203,6 @@ namespace Web.Controllers
             return View(players);
         }
 
-
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> BanUser(Guid userId)
@@ -226,16 +226,23 @@ namespace Web.Controllers
         public async Task<IActionResult> CreatePlayoffSeeds()
         {
             var model = await _rosterService.GetSeasonInfoView();
-            model.StatusMessage = StatusMessage;
-            return View(model);
+            var viewModel = new PlayoffInputView
+            {
+                PlayoffInputForm = new PlayoffInputForm(),
+                SeasonInfoView = model
+            };
+            viewModel.SeasonInfoView.StatusMessage = StatusMessage;
+            return View(viewModel);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin, Tribunal")]
-        public async Task<IActionResult> CreatePlayoffSeeds(PlayoffInputForm form)
+        public async Task<IActionResult> CreatePlayoffSeeds(PlayoffInputView view)
         {
             try
             {
+                var form = view.PlayoffInputForm;
+                form.Seeds = form.Seeds.Where(seed => seed.DivisionId == Guid.Empty || seed.RosterId == Guid.Empty).ToList();
                 var result = await _playoffService.SetupPlayoffSchedule(form.Seeds, form.WeekOf, form.BracketFormat);
                 StatusMessage = result ? "Successfully created playoff seeds" : "Failed to created playoff seeds";
 

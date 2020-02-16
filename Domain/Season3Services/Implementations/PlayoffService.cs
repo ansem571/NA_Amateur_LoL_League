@@ -77,6 +77,7 @@ namespace Domain.Season3Services.Implementations
                 throw new Exception(message);
             }
 
+            var schedules = new List<ScheduleEntity>();
             switch (bracketFormat)
             {
                 case PlayoffFormat.Standard:
@@ -87,6 +88,18 @@ namespace Domain.Season3Services.Implementations
                         {
                             var higherSeed = list[i];
                             var lowerSeed = list[playoffSeeds.Count() - i - 1];
+
+                            schedules.Add(new ScheduleEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                HomeRosterTeamId = higherSeed.RosterId,
+                                AwayRosterTeamId = lowerSeed.RosterId,
+                                IsPlayoffMatch = true,
+                                SeasonInfoId = seasonInfo.Id,
+                                MatchWeek = weekOf,
+                                AwayTeamWins = 0,
+                                HomeTeamWins = 0
+                            });
                         }
 
                     }
@@ -97,7 +110,7 @@ namespace Domain.Season3Services.Implementations
                     throw new ArgumentOutOfRangeException(nameof(bracketFormat), bracketFormat, null);
             }
 
-            return true;
+            return await _scheduleRepository.InsertAsync(schedules);
         }
     }
 }

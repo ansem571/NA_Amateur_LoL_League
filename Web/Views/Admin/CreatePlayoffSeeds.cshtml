@@ -1,21 +1,14 @@
-﻿
-@using Domain.Forms
+﻿@model Domain.Forms.PlayoffInputView
 @using Domain.Views
-@model Domain.Views.SeasonInfoView
 
 @{
     ViewData["Title"] = "CreatePlayoffSeeds";
-    var count = 0;
-    var input = new PlayoffInputForm
-    {
-        Seeds = new List<PlayoffSeedInsertView>()
-    };
 }
 <h2>CreatePlayoffSeeds</h2>
 
 <div class="row">
     @{
-                var divisions = Model.Rosters.GroupBy(x => x.Division.DivisionName).ToDictionary(x => x.Key, x => x.ToList());
+        var divisions = Model.SeasonInfoView.Rosters.GroupBy(x => x.Division.DivisionName).ToDictionary(x => x.Key, x => x.ToList());
         foreach (var division in divisions)
         {
             <label name="DivisionName">@division.Key</label>
@@ -58,40 +51,53 @@
 </div>
 
 <div>
-    <table id="seedTable" class="table table-bordered">
-        <tr>
-            <th>
-                RosterId
-            </th>
-            <th>
-                DivisionId
-            </th>
-            <th>
-                Seed# (1-4)
-            </th>
-        </tr>
-        @foreach (var item in input.Seeds)
-        {
-            Html.RenderPartial("AddSeedPartial", item);
-        }
-    </table>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <form method="post">
+        <table id="seedTable" class="table table-bordered" style="color: black">
+            <tr>
+                <th>
+                    RosterId
+                </th>
+                <th>
+                    DivisionId
+                </th>
+                <th>
+                    Seed# (1-4)
+                </th>
+            </tr>
+            @if (Model.PlayoffInputForm.Seeds == null)
+            {
+                Model.PlayoffInputForm.Seeds = new List<PlayoffSeedInsertView>();
+                const int count = 4;
+                for (var i = 0; i < count; i++)
+                {
+                    var seed = new PlayoffSeedInsertView();
+                    Model.PlayoffInputForm.Seeds.Add(seed);
+                    <tr>
+                        <td>
+                            <input type="text" asp-for="@Model.PlayoffInputForm.Seeds[i].RosterId" />
+                        </td>
+                        <td>
+                            <input type="text" asp-for="@Model.PlayoffInputForm.Seeds[i].DivisionId" />
+                        </td>
+                        <td>
+                            <input type="text" asp-for="@Model.PlayoffInputForm.Seeds[i].Seed" />
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+        <label asp-for="@Model.PlayoffInputForm.BracketFormat"></label>
+        <select asp-items="Html.GetEnumSelectList<PlayoffFormat>()" asp-for="@Model.PlayoffInputForm.BracketFormat"></select>
+        <label asp-for="@Model.PlayoffInputForm.WeekOf"></label>
+        <input type="datetime-local" asp-for="@Model.PlayoffInputForm.WeekOf" style="color: black" />
 
-    <div class="excontainer">
-        <button id="loadbasic">basic load</button>
-        <div id="result"></div>
- 
-    </div>
-    <button type="submit">Post Playoff Seeds</button>
-
+        <div class="row" style="color: black">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
 </div>
 
-<script>
-    function addItem() {
-        @{
-            input.Seeds.Add(new PlayoffSeedInsertView());
-            count = count + 1;
-        };
-        alert('Seeds' + @input.Seeds.Count);
-        alert('Count' + @count);
-    }
-</script>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
