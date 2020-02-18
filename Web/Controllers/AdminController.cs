@@ -242,7 +242,7 @@ namespace Web.Controllers
             try
             {
                 var form = view.PlayoffInputForm;
-                form.Seeds = form.Seeds.Where(seed => seed.DivisionId == Guid.Empty || seed.RosterId == Guid.Empty).ToList();
+                form.Seeds = form.Seeds.Where(seed => seed.DivisionId != Guid.Empty || seed.RosterId != Guid.Empty).ToList();
                 var result = await _playoffService.SetupPlayoffSchedule(form.Seeds, form.WeekOf, form.BracketFormat);
                 StatusMessage = result ? "Successfully created playoff seeds" : "Failed to created playoff seeds";
 
