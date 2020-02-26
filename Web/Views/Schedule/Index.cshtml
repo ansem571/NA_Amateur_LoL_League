@@ -87,7 +87,7 @@
                                         {
                                             <button style="color: black !important" class="btn" id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule('@week.ScheduleId')">+</button>
                                             <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showSchedule'@week.ScheduleId}}" style="display: none">
-                                                <input type="datetime-local" name="playTime" />
+                                                <input style="color: black !important" type="datetime-local" name="playTime" />
                                                 <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
                                                 <button style="color: black !important" class="center-block btn">Submit play time</button>
                                             </form>
@@ -108,7 +108,7 @@
                                         {
                                             <button style="color: black !important" class="btn" id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster('@week.ScheduleId')">+</button>
                                             <form asp-controller="Schedule" asp-action="AssignCastersAsync" method="post" id="{{'showCaster'@week.ScheduleId}}" style="display: none">
-                                                <input type="text" name="names" />
+                                                <input style="color: black !important" type="text" name="names" />
                                                 <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
                                                 <button class="center-block btn">Submit casters</button>
                                             </form>
@@ -130,9 +130,9 @@
                                         <input type="hidden" name="homeTeam" value="@week.HomeTeam" />
                                         <input type="hidden" name="awayTeam" value="@week.AwayTeam" />
                                         <label>HomeScore</label>
-                                        <input type="text" name="homeScore" />
+                                        <input style="color: black !important" type="text" name="homeScore" />
                                         <label>AwayScore</label>
-                                        <input type="text" name="awayScore" />
+                                        <input style="color: black !important" type="text" name="awayScore" />
                                         <button style="color: black !important" class="center-block btn">Submit scores</button>
                                     </form>
                                 </td>

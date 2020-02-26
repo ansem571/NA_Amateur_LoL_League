@@ -433,14 +433,7 @@ namespace Domain.Services.Implementations
             roster.Wins += wins;
             roster.Loses += loses;
 
-            if (wins == 2 && loses == 0)
-            {
-                roster.Points += 3;
-            }
-            else if (wins == 1 && loses == 1)
-            {
-                roster.Points += 1;
-            }
+            roster.Points += (int) (wins * 1.5);
             var result = await _teamRosterRepository.UpdateAsync(roster);
             return result;
         }
