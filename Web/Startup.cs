@@ -82,6 +82,7 @@ namespace Web
                 };
                 await roleManager.CreateAsync(role);
             }
+
             //Add any other user who will NEED Admin privileges 
             var user = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
             if (!await userManager.IsInRoleAsync(user, "Admin"))
