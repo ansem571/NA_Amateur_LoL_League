@@ -8,6 +8,7 @@ using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -32,6 +33,8 @@ namespace Web
             services
                 .AddMemoryCache()
                 .AddMyServices(Configuration);
+
+            services.AddMvc(x => x.EnableEndpointRouting = false);
 
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
@@ -67,7 +70,6 @@ namespace Web
             var thread = new Thread(() => GlobalVariables.UpdateCache(lookupRepo, logger));
             thread.Start();
         }
-
         private async Task CreateAdminRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -89,7 +91,6 @@ namespace Web
                 await userManager.AddToRoleAsync(user, "Admin");
             }
         }
-
         private async Task CreateTribunalRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -136,8 +137,6 @@ namespace Web
                 }
             }
         }
-
-
         private async Task CreateModeratorRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -168,7 +167,6 @@ namespace Web
                 }
             }
         }
-
         private void DeleteBadImages()
         {
             var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
@@ -190,7 +188,7 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseDeveloperExceptionPage();
 
