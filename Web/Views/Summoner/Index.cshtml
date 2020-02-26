@@ -8,7 +8,7 @@
 }
 
 <h2>@ViewData["Title"]</h2>
-@Html.Partial("_StatusMessage", Model.StatusMessage)
+@await Html.PartialAsync("_StatusMessage", Model.StatusMessage)
 @if (Model.IsValid)
 {
     <div class="row">

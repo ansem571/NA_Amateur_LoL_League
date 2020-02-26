@@ -4,14 +4,14 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
 using DAL.Entities.UserData;
+using Dapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
 namespace DAL.Stores
 {
-    public class UserStore : IUserStore<UserEntity>, IUserEmailStore<UserEntity>, IUserPhoneNumberStore<UserEntity>,
+    public class UserStore : IUserEmailStore<UserEntity>, IUserPhoneNumberStore<UserEntity>,
         IUserTwoFactorStore<UserEntity>, IUserPasswordStore<UserEntity>, IUserRoleStore<UserEntity>
     {
         private readonly string _connectionString;

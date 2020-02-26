@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{675CAE80-6D4C-49EF-B1AD-D88CFCF1E34D}"
 EndProject
@@ -15,7 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp", "RiotSharp\Riot
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp.AspNetCore", "RiotSharp.AspNetCore\RiotSharp.AspNetCore.csproj", "{477AD2CE-FFED-40FC-B31E-BC24C7144130}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{F43C8E4A-F677-4C99-9180-04377446B63C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject", "TestProject\TestProject.csproj", "{F43C8E4A-F677-4C99-9180-04377446B63C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{675CAE80-6D4C-49EF-B1AD-D88CFCF1E34D} = {675CAE80-6D4C-49EF-B1AD-D88CFCF1E34D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
