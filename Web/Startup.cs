@@ -34,8 +34,6 @@ namespace Web
                 .AddMemoryCache()
                 .AddMyServices(Configuration);
 
-            services.AddMvc(x => x.EnableEndpointRouting = false);
-
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
 

@@ -6,8 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Dapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace DAL.Stores
 {
