@@ -29,41 +29,7 @@ namespace Web.Controllers
 
         [TempData]
         public string StatusMessage { get; set; }
-
-        public async Task<IActionResult> NewHome()
-        {
-            var seasonInfoTask = _accountService.GetSeasonInfoAsync();
-            var userTask = _userManager.GetUserAsync(User);
-            var model = new IndexViewModel();
-
-            var user = await userTask;
-            if (user != null)
-            {
-                var blacklisted = await _blacklistRepository.GetByUserIdAsync(user.Id);
-                if (blacklisted != null && blacklisted.IsBanned)
-                {
-                    await _signInManager.SignOutAsync();
-                    return RedirectToAction("InvalidUser", "Manage");
-                }
-                model = new IndexViewModel
-                {
-                    Username = user.UserName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    IsEmailConfirmed = user.ConfirmedEmail,
-                    StatusMessage = StatusMessage
-                };
-            }
-            var seasonInfo = await seasonInfoTask;
-
-            var viewModel = new HomeViewModel
-            {
-                IndexViewModel = model,
-                SeasonInfo = seasonInfo
-            };
-            return View(viewModel);
-        }
-
+        
         public async Task<IActionResult> Index()
         {
             var seasonInfoTask = _accountService.GetSeasonInfoAsync();

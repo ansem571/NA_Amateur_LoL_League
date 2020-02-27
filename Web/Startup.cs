@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
@@ -8,12 +9,15 @@ using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using RiotSharp.Caching;
+using Swashbuckle.AspNetCore.Swagger;
 using Web.Extensions;
 
 namespace Web
@@ -32,7 +36,27 @@ namespace Web
         {
             services
                 .AddMemoryCache()
-                .AddMyServices(Configuration);
+                .AddMyServices(Configuration)
+                .AddCors(options =>
+                {
+                    options.AddPolicy("CorsPolicy",
+                        builder => builder.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials());
+                })
+                .AddSwaggerGen(c =>
+                {
+                    var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                    var version =
+                        $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
+                    c.SwaggerDoc(version,
+                        new Info
+                        {
+                            Title = $"{assemblyName.Name} {version}",
+                            Version = version
+                        });
+                });
 
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
@@ -54,8 +78,17 @@ namespace Web
             DeleteBadImages();
 
             Task.Run(() => SetupChampionCache(services)).Wait();
-
-            services.AddMvc();
+            services.AddMvc(o =>
+                {
+                    o.Conventions.Add(new CommaSeparatedQueryStringConvention());
+                    o.ModelMetadataDetailsProviders.Add(new RequiredBindingMetadataProvider());
+                })
+            .AddJsonOptions(o =>
+            {
+                o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                o.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            });
         }
 
         private async Task SetupChampionCache(IServiceCollection services)
@@ -208,6 +241,17 @@ namespace Web
                     name: "PlayerProfile",
                     template: "{controller=UserProfile}/{action=PlayerProfile}");
             });
+            app.UseCors("CorsPolicy");
+
+            app
+                .UseSwagger()
+                .UseSwaggerUI(c =>
+                {
+                    var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                    var version =
+                        $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
+                    c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"{assemblyName.Name} {version}");
+                });
         }
     }
 }

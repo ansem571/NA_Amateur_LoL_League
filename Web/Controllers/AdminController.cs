@@ -10,6 +10,7 @@ using Domain.Repositories.Interfaces;
 using Domain.Season3Services.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -254,6 +255,17 @@ namespace Web.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GoToSwagger()
+        {
+            var url = Request.GetUri();
+            var swaggerUrl = url.ToString().Replace("Admin/GoToSwagger", "swagger/index.html");
+
+
+            return Redirect(swaggerUrl);
         }
     }
 }

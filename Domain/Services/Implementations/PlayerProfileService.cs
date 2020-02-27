@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Entities.LeagueInfo;
+using Domain.Exceptions;
 using Domain.Forms;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
+using Microsoft.Extensions.Logging;
 
 namespace Domain.Services.Implementations
 {
@@ -24,6 +26,7 @@ namespace Domain.Services.Implementations
         private readonly IAlternateAccountMapper _alternateAccountMapper;
         private readonly ITierDivisionMapper _tierDivisionMapper;
         private readonly IMatchDetailRepository _matchDetailRepository;
+        private readonly ILogger _logger;
 
         //Skarner Alston Reztip pentakill 5/29/2019
         //Perfect Game ABCDE vs TDK semi finals 10/17/2019
@@ -31,7 +34,7 @@ namespace Domain.Services.Implementations
         public PlayerProfileService(ISummonerInfoRepository summonerInfoRepository, IAchievementRepository achievementRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository, IAlternateAccountRepository alternateAccountRepository,
             IPlayerStatsRepository playerStatsRepository, ISeasonInfoRepository seasonInfoRepository, IPlayerStatsMapper playerStatsMapper,
-            IAlternateAccountMapper alternateAccountMapper, ITierDivisionMapper tierDivisionMapper, IMatchDetailRepository matchDetailRepository)
+            IAlternateAccountMapper alternateAccountMapper, ITierDivisionMapper tierDivisionMapper, IMatchDetailRepository matchDetailRepository, ILogger logger)
         {
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
             _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));
@@ -44,6 +47,7 @@ namespace Domain.Services.Implementations
             _alternateAccountMapper = alternateAccountMapper ?? throw new ArgumentNullException(nameof(alternateAccountMapper));
             _tierDivisionMapper = tierDivisionMapper ?? throw new ArgumentNullException(nameof(tierDivisionMapper));
             _matchDetailRepository = matchDetailRepository ?? throw new ArgumentNullException(nameof(matchDetailRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<bool> InsertAchievement(UserAchievementForm form)
@@ -67,6 +71,12 @@ namespace Domain.Services.Implementations
             var achievementsTask = _achievementRepository.GetAchievementsForUserAsync(userId);
 
             var summoner = await summonerTask;
+            if (summoner == null)
+            {
+                var message = $"User {userId} was not found.";
+                _logger.LogError(message);
+                throw new SummonerInfoException($"User {userId} was not found.");
+            }
             var achievements = await achievementsTask;
 
             var alternateAccountsTask = _alternateAccountRepository.ReadAllForSummonerAsync(summoner.Id);
