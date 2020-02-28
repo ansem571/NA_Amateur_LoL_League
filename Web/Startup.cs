@@ -40,8 +40,10 @@ namespace Web
             var origins = new List<string>
             {
                 "http://localhost",
+                "http://casuauleal.com",
+                "https://casuauleal.com",
                 "http://www.casualeal.com",
-                "https://www.casuauleal.com"
+                "https://www.casuauleal.com",
             };
             services
                 .AddMemoryCache()
