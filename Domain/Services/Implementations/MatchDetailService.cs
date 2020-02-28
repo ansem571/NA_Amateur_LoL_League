@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
@@ -447,7 +448,7 @@ namespace Domain.Services.Implementations
 
             using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))
             {
-                using (var csvWriter = new CsvWriter(writer))
+                using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
                 {
                     //csvWriter.WriteField("");
 

@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using DAL.Entities.UserData;
-using DAL.Stores;
 using Domain.Forms;
 using Domain.Repositories.Interfaces;
 using Domain.Season3Services.Interfaces;
 using Domain.Services.Interfaces;
-using Domain.Views;
-using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Models.Admin;
@@ -259,10 +254,10 @@ namespace Web.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GoToSwagger()
+        public IActionResult GoToSwagger()
         {
-            var url = Request.GetUri();
-            var swaggerUrl = url.ToString().Replace("Admin/GoToSwagger", "swagger/index.html");
+            var url = Request.GetDisplayUrl();
+            var swaggerUrl = url.Replace("Admin/GoToSwagger", "swagger/index.html");
 
 
             return Redirect(swaggerUrl);
