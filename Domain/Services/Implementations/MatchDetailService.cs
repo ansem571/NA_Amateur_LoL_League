@@ -448,7 +448,7 @@ namespace Domain.Services.Implementations
 
             using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))
             {
-                using (var csvWriter = new CsvWriter(writer, CultureInfo.CurrentCulture))
+                using (var csvWriter = new CsvWriter(writer))
                 {
                     //csvWriter.WriteField("");
 

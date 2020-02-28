@@ -60,6 +60,7 @@ namespace Web.ApiControllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateTeamAsync(IEnumerable<Guid> summonerIds)
         {
+            await Task.Delay(0);
             throw new NotImplementedException();
         }
     }

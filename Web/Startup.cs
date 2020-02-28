@@ -1,10 +1,6 @@
-﻿
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
@@ -18,8 +14,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using RiotSharp.Caching;
+using Swashbuckle.AspNetCore.Swagger;
 using Web.Extensions;
 
 namespace Web
@@ -32,7 +31,6 @@ namespace Web
         }
 
         public IConfiguration Configuration { get; }
-        public IWebHostEnvironment Environment { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -58,9 +56,9 @@ namespace Web
                     var version =
                         $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
                     c.SwaggerDoc(version,
-                        new OpenApiInfo
+                        new Info
                         {
-                            Title = $"{assemblyName.Name} {version} - {Environment.EnvironmentName}",
+                            Title = $"{assemblyName.Name} {version}",
                             Version = version
                         });
                 });
@@ -89,13 +87,12 @@ namespace Web
                 {
                     o.Conventions.Add(new CommaSeparatedQueryStringConvention());
                     o.ModelMetadataDetailsProviders.Add(new RequiredBindingMetadataProvider());
-                    o.EnableEndpointRouting = false;
                 })
             .AddJsonOptions(o =>
             {
-                o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-                o.JsonSerializerOptions.IgnoreNullValues = true;
+                o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                o.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
 
         }
@@ -266,17 +263,6 @@ namespace Web
                         $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
                     c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"{assemblyName.Name} {version}");
                 });
-            app.UseRouting();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.Map("/health", HealthRequest);
-                endpoints.MapControllers();
-            });
-        }
-        private async Task<int> HealthRequest(HttpContext context)
-        {
-            await Task.CompletedTask;
-            return context.Response.StatusCode = 200;
         }
     }
 }
