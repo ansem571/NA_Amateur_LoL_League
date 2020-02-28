@@ -4,7 +4,7 @@
 }
 <h4>@ViewData["Title"]</h4>
 <div class="row">
-    @await Html.PartialAsync("_StatusMessage", @Model)
+    @Html.Partial("_StatusMessage", @Model)
 </div>
 <div class="row">
     <p>

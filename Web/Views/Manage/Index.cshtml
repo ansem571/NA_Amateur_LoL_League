@@ -6,7 +6,7 @@
 }
 
 <h4>@ViewData["Title"]</h4>
-@await Html.PartialAsync("_StatusMessage", Model.ProfileInfo.StatusMessage)
+@Html.Partial("_StatusMessage", Model.ProfileInfo.StatusMessage)
 <div class="row">
     <div class="col-md-6">
         <form method="post">
@@ -45,7 +45,7 @@
 <div class="row">
     <br />
     <div>
-        @await Html.PartialAsync("_InstructionsPartial")
+        @Html.Partial("_InstructionsPartial")
     </div>
 </div>
 
@@ -63,10 +63,10 @@
     <div class="row">
         @if (Model.ProfileInfo.Username == "Ansem571")
         {
-            @await Html.PartialAsync("~/Views/Account/RegisterForSeason.cshtml", Model.SummonerInfo)
+            @Html.Partial("~/Views/Account/RegisterForSeason.cshtml", Model.SummonerInfo)
         }
 
-        @await Html.PartialAsync("~/Views/Summoner/_RequestSummonerPartial.cshtml", Model.SummonerInfo)
+        @Html.Partial("~/Views/Summoner/_RequestSummonerPartial.cshtml", Model.SummonerInfo)
     </div>
 }
 

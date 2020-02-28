@@ -1,7 +1,0 @@
-﻿[*.cs]
-
-# AD0001: Analyzer 'Microsoft.AspNetCore.Mvc.Analyzers.TopLevelParameterNameAnalyzer' threw an exception of type 'System.NullReferenceException' with message 'Object reference not set to an instance of an object.'.
-dotnet_diagnostic.AD0001.severity = none
-
-# CS0618: Type or member is obsolete
-dotnet_diagnostic.CS0618.severity = none

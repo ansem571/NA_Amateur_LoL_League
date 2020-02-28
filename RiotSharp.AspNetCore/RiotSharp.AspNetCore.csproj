@@ -18,7 +18,6 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard1.3\RiotSharp.AspNetCore.xml</DocumentationFile>
-    <WarningLevel>3</WarningLevel>
   </PropertyGroup>
 
   <ItemGroup>

@@ -46,7 +46,7 @@ else if (!Model.IndexViewModel.IsEmailConfirmed && !string.IsNullOrEmpty(Model.I
             <div class="card">
                 <div class="card-body">
                     
-                    @await Html.PartialAsync("_InstructionsPartial")
+                    @Html.Partial("_InstructionsPartial")
                 </div>
             </div>
         </div>

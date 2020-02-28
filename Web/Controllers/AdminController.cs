@@ -146,7 +146,6 @@ namespace Web.Controllers
                 //{
                 //    throw new Exception("Failed to update roster tier scores");
                 //}
-                await Task.Delay(100);
 
                 StatusMessage = "Fuck you Karen";
                 return RedirectToAction("Index");

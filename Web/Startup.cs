@@ -110,6 +110,7 @@ namespace Web
             var thread = new Thread(() => GlobalVariables.UpdateCache(lookupRepo, logger));
             thread.Start();
         }
+
         private async Task CreateAdminRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -132,6 +133,7 @@ namespace Web
                 await userManager.AddToRoleAsync(user, "Admin");
             }
         }
+
         private async Task CreateTribunalRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -178,6 +180,8 @@ namespace Web
                 }
             }
         }
+
+
         private async Task CreateModeratorRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -208,6 +212,7 @@ namespace Web
                 }
             }
         }
+
         private void DeleteBadImages()
         {
             var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\logos");
