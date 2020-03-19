@@ -7,7 +7,6 @@ namespace Domain.Views
         public Guid RosterId { get; set; }
         public Guid DivisionId { get; set; }
         public int Seed { get; set; }
-        public PlayoffFormat BracketFormat { get; set; }
     }
 
     public enum PlayoffFormat

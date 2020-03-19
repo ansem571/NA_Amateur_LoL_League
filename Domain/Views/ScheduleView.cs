@@ -12,6 +12,7 @@ namespace Domain.Views
         public DateTime WeekOf { get; set; }
         public DateTime? PlayTime { get; set; }
         public string CasterName { get; set; }
+        public bool IsPlayoffMatch { get; set; }
 
         public ScheduleView() { }
 

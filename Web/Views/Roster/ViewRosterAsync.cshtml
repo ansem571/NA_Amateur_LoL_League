@@ -1,7 +1,6 @@
 ﻿@using DAL.Entities.UserData
 @using Domain.Enums
 @using Microsoft.AspNetCore.Identity
-@using Web.Models.Roster
 
 @inject SignInManager<UserEntity> SignInManager
 @inject UserManager<UserEntity> UserManager
@@ -241,6 +240,10 @@
             var weekNumber = 0;
             foreach (var week in Model.ScheduleLineup.OrderBy(x => x.WeekOf).ThenBy(y => y.PlayTime))
             {
+                if (week.IsPlayoffMatch)
+                {
+                    weekNumber = 0;
+                }
                 weekNumber++;
                 <tr>
                     <td>@week.HomeTeam</td>

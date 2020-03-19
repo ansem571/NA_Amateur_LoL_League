@@ -1,21 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
-using Domain.Enums;
 using Domain.Helpers;
 using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using RiotSharp.Caching;
+using Swashbuckle.AspNetCore.Swagger;
 using Web.Extensions;
 
 namespace Web
@@ -32,9 +35,33 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var origins = new List<string>
+            {
+                "http://localhost",
+                "http://casuauleal.com",
+                "https://casuauleal.com",
+                "http://www.casualeal.com",
+                "https://www.casuauleal.com",
+            };
             services
                 .AddMemoryCache()
-                .AddMyServices(Configuration);
+                .AddMyServices(Configuration)
+                .AddCors(options =>
+                {
+                    services.AddCors(o => o.AddPolicy("AllowSpecificOrigin", p => p.WithOrigins(origins.ToArray())));
+                })
+                .AddSwaggerGen(c =>
+                {
+                    var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                    var version =
+                        $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
+                    c.SwaggerDoc(version,
+                        new Info
+                        {
+                            Title = $"{assemblyName.Name} {version}",
+                            Version = version
+                        });
+                });
 
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
@@ -56,8 +83,18 @@ namespace Web
             DeleteBadImages();
 
             Task.Run(() => SetupChampionCache(services)).Wait();
+            services.AddMvc(o =>
+                {
+                    o.Conventions.Add(new CommaSeparatedQueryStringConvention());
+                    o.ModelMetadataDetailsProviders.Add(new RequiredBindingMetadataProvider());
+                })
+            .AddJsonOptions(o =>
+            {
+                o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                o.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            });
 
-            services.AddMvc();
         }
 
         private async Task SetupChampionCache(IServiceCollection services)
@@ -85,6 +122,7 @@ namespace Web
                 };
                 await roleManager.CreateAsync(role);
             }
+
             //Add any other user who will NEED Admin privileges 
             var user = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
             if (!await userManager.IsInRoleAsync(user, "Admin"))
@@ -214,6 +252,17 @@ namespace Web
                     name: "PlayerProfile",
                     template: "{controller=UserProfile}/{action=PlayerProfile}");
             });
+            app.UseCors("CorsPolicy");
+
+            app
+                .UseSwagger()
+                .UseSwaggerUI(c =>
+                {
+                    var assemblyName = Assembly.GetExecutingAssembly().GetName();
+                    var version =
+                        $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
+                    c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"{assemblyName.Name} {version}");
+                });
         }
     }
 }

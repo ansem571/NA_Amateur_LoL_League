@@ -21,5 +21,15 @@ namespace Domain.Repositories.Implementations
             var result = (await _table.ReadManyAsync("UserId = @userId", new {userId}, top: 1)).FirstOrDefault();
             return result;
         }
+
+        public async Task<bool> CreateAsync(BlacklistEntity entity)
+        {
+            return await _table.InsertAsync(entity) == 1;
+        }
+
+        public async Task<bool> UpdateAsync(BlacklistEntity entity)
+        {
+            return await _table.UpdateAsync(entity);
+        }
     }
 }

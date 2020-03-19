@@ -47,6 +47,7 @@ namespace Web.Controllers
         [TempData]
         public string StatusMessage { get; set; }
 
+        [HttpGet]
         public IActionResult InvalidUser()
         {
             return View("InvalidUser");

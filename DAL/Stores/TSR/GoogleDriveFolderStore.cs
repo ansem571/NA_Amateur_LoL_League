@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DAL.Data.Implementations;
+﻿using DAL.Data.Implementations;
 using DAL.Databases.Interfaces;
 using DAL.Entities.Logging;
 

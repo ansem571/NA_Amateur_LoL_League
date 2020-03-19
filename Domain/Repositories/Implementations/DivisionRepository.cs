@@ -33,5 +33,20 @@ namespace Domain.Repositories.Implementations
                 new {teamTierScore, seasonInfoId})).FirstOrDefault();
             return division;
         }
+
+        public async Task<bool> CreateDivisionAsync(DivisionEntity entity)
+        {
+            return await _table.InsertAsync(entity) == 1;
+        }
+
+        public async Task<bool> UpdateDivisionAsync(DivisionEntity entity)
+        {
+            return await _table.UpdateAsync(entity);
+        }
+
+        public async Task<bool> DeleteDivisionAsync(DivisionEntity entity)
+        {
+            return await _table.DeleteAsync(entity);
+        }
     }
 }

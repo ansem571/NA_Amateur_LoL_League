@@ -18,7 +18,8 @@ namespace Domain.Mappers.Implementations
                 AwayTeamScore = entity.AwayTeamWins,
                 WeekOf = entity.MatchWeek,
                 PlayTime = entity.MatchScheduledTime,
-                CasterName = entity.CasterName
+                CasterName = entity.CasterName,
+                IsPlayoffMatch = entity.IsPlayoffMatch
             };
         }
 
@@ -34,7 +35,8 @@ namespace Domain.Mappers.Implementations
                 AwayTeamWins = view.AwayTeamScore,
                 MatchWeek = view.WeekOf,
                 MatchScheduledTime = view.PlayTime,
-                CasterName = view.CasterName
+                CasterName = view.CasterName,
+                IsPlayoffMatch = view.IsPlayoffMatch
             };
         }
     }

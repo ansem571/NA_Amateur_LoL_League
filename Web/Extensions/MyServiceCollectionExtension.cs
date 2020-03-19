@@ -10,6 +10,8 @@ using Domain.Mappers.Implementations;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Implementations;
 using Domain.Repositories.Interfaces;
+using Domain.Season3Services.Implementations;
+using Domain.Season3Services.Interfaces;
 using Domain.Services.Implementations;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +19,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using RiotSharp.Caching;
 
 namespace Web.Extensions
 {
@@ -79,6 +80,7 @@ namespace Web.Extensions
             services.TryAddSingleton<ITableStorageRepository<MatchDetailEntity>, MatchDetailStore>();
             services.TryAddSingleton<ITableStorageRepository<MatchMvpEntity>, MatchMvpStore>();
             services.TryAddSingleton<ITableStorageRepository<ChampionStatsEntity>, ChampionStatsStore>();
+            services.TryAddSingleton<ITableStorageRepository<PlayoffSeedEntity>, PlayoffSeedStore>();
             return services;
         }
 
@@ -92,6 +94,8 @@ namespace Web.Extensions
             services.TryAddSingleton<IAlternateAccountMapper, AlternateAccountMapper>();
             services.TryAddSingleton<IPlayerStatsMapper, PlayerStatsMapper>();
             services.TryAddSingleton<IScheduleMapper, ScheduleMapper>();
+            services.TryAddSingleton<IDivisionFormToEntityMapper, DivisionFormToEntityMapper>();
+            services.TryAddSingleton<ISeasonFormToEntityMapper, SeasonFormToEntityMapper>();
             return services;
         }
 
@@ -114,6 +118,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IMatchDetailRepository, MatchDetailRepository>();
             services.TryAddSingleton<IMatchMvpRepository, MatchMvpRepository>();
             services.TryAddSingleton<IChampionStatsRepository, ChampionStatsRepository>();
+            services.TryAddSingleton<IPlayoffSeedRepository, PlayoffSeedRepository>();
             return services;
         }
 
@@ -126,6 +131,10 @@ namespace Web.Extensions
             services.TryAddSingleton<IScheduleService, ScheduleService>();
             services.TryAddSingleton<IMatchDetailService, MatchDetailService>();
             services.TryAddSingleton<IPlayerProfileService, PlayerProfileService>();
+            services.TryAddSingleton<IDivisionService, DivisionService>();
+            services.TryAddSingleton<IPlayoffService, PlayoffService>();
+            services.TryAddSingleton<ISeasonInfoService, SeasonInfoService>();
+            services.TryAddSingleton<IUserService, UserService>();
             return services;
         }
     }

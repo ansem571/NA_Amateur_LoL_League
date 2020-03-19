@@ -1,0 +1,112 @@
+﻿@model Domain.Forms.PlayoffInputView
+@using Domain.Views
+
+@{
+    ViewData["Title"] = "CreatePlayoffSeeds";
+}
+<h2>CreatePlayoffSeeds</h2>
+
+<div class="row">
+    @{
+        var divisions = Model.SeasonInfoView.Rosters.GroupBy(x => x.Division.DivisionName).ToDictionary(x => x.Key, x => x.ToList());
+        foreach (var division in divisions)
+        {
+            <label name="DivisionName">@division.Key</label>
+            <label name="DivisionId">@division.Value.First().Division.DivisionId</label>
+            <table class="table table-bordered">
+                <tr>
+                    <th>
+                        TeamName
+                    </th>
+                    <th>
+                        Wins
+                    </th>
+                    <th>
+                        Loses
+                    </th>
+                    <th>
+                        RosterId
+                    </th>
+                </tr>
+                @foreach (var team in division.Value.OrderByDescending(x => x.Points))
+                {
+                    <tr>
+                        <td>
+                            @team.TeamName
+                        </td>
+                        <td>
+                            @team.Wins
+                        </td>
+                        <td>
+                            @team.Loses
+                        </td>
+                        <td>
+                            @team.RosterId
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+    }
+</div>
+<div class="row">
+    <div class="col-md-3"></div>
+    <p class="col-md-6">
+        Hello, in order to setup playoff seeds, copy the team's RosterId into the RosterId column below. Only do 1 division per submission.
+        This will setup seeding and the schedule for that week. Week 1 playoff starts on Feb 26, midnight. Copy the DivisionId next to the Division name from the above table, into the table below for all seeds.
+        The order in the table above is the order the teams are in the standings, but may be off due to tiebreaker rules. Be sure to consult with the standings of the teams to be sure they are correct.
+        When it is finals. You can put the seed numbers as the higher seed vs the lower seed. Any of the Id columns left as the 0s will be removed on server side, so you don't have to worry.
+        Any other questions ask Ansem571. Only do it once so the schedules aren't duplicated.
+    </p>
+</div>
+<div>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <form method="post">
+        <table id="seedTable" class="table table-bordered" style="color: black">
+            <tr>
+                <th>
+                    RosterId
+                </th>
+                <th>
+                    DivisionId
+                </th>
+                <th>
+                    Seed# (1-4)
+                </th>
+            </tr>
+            @if (Model.PlayoffInputForm.Seeds == null)
+            {
+                Model.PlayoffInputForm.Seeds = new List<PlayoffSeedInsertView>();
+                const int count = 4;
+                for (var i = 0; i < count; i++)
+                {
+                    var seed = new PlayoffSeedInsertView();
+                    Model.PlayoffInputForm.Seeds.Add(seed);
+                    <tr>
+                        <td>
+                            <input type="text" asp-for="@Model.PlayoffInputForm.Seeds[i].RosterId" />
+                        </td>
+                        <td>
+                            <input type="text" asp-for="@Model.PlayoffInputForm.Seeds[i].DivisionId" />
+                        </td>
+                        <td>
+                            <input type="text" asp-for="@Model.PlayoffInputForm.Seeds[i].Seed" />
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+        <label asp-for="@Model.PlayoffInputForm.BracketFormat"></label>
+        <select asp-items="Html.GetEnumSelectList<PlayoffFormat>()" asp-for="@Model.PlayoffInputForm.BracketFormat"></select>
+        <label asp-for="@Model.PlayoffInputForm.WeekOf"></label>
+        <input type="datetime-local" asp-for="@Model.PlayoffInputForm.WeekOf" style="color: black" />
+
+        <div class="row" style="color: black">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

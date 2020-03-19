@@ -29,7 +29,7 @@ namespace Web.Controllers
 
         [TempData]
         public string StatusMessage { get; set; }
-
+        
         public async Task<IActionResult> Index()
         {
             var seasonInfoTask = _accountService.GetSeasonInfoAsync();

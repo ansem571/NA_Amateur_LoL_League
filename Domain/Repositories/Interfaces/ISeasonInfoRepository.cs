@@ -9,5 +9,7 @@ namespace Domain.Repositories.Interfaces
     {
         Task<SeasonInfoEntity> GetActiveSeasonInfoByDateAsync(DateTime date);
         Task<IEnumerable<SeasonInfoEntity>> GetAllSeasonsAsync();
+        Task<bool> CreateSeasonAsync(SeasonInfoEntity season);
+        Task<bool> UpdateSeasonAsync(SeasonInfoEntity season);
     }
 }

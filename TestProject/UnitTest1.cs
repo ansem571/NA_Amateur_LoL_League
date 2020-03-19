@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Enums;
 using Domain.Helpers;
-using Domain.Views;
 using Xunit;
 
 namespace TestProject
