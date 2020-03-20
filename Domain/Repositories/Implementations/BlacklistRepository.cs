@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Data.Interfaces;
@@ -20,6 +21,11 @@ namespace Domain.Repositories.Implementations
         {
             var result = (await _table.ReadManyAsync("UserId = @userId", new {userId}, top: 1)).FirstOrDefault();
             return result;
+        }
+
+        public async Task<IEnumerable<BlacklistEntity>> GetAllAsync()
+        {
+            return await _table.ReadAllAsync();
         }
 
         public async Task<bool> CreateAsync(BlacklistEntity entity)

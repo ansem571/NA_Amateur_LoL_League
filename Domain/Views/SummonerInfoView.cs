@@ -20,8 +20,7 @@ namespace Domain.Views
         public int CurrentLp { get; set; }
         [Required]
         public string OpGgUrl { get; set; }
-        [Required]
-        public bool IsValid { get; set; }
+        public bool IsValid { get; set; } = false;
         public bool IsSubOnly { get; set; }
         public Guid UserId { get; set; }
 

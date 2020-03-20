@@ -28,6 +28,7 @@ namespace Domain.Services.Implementations
         private readonly ITeamPlayerRepository _teamPlayerRepository;
         private readonly ITeamRosterRepository _teamRosterRepository;
         private readonly ISeasonInfoRepository _seasonInfoRepository;
+        private readonly IBlacklistRepository _blacklistRepository;
         private const int AltenateAccountsCount = 3;
         private const int RequestingSummonerCount = 6;
         private const int TeamRosterMaxCount = 7;
@@ -35,7 +36,7 @@ namespace Domain.Services.Implementations
         public AccountService(ILogger logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
             ISummonerInfoRepository summonerInfoRepository, IAlternateAccountRepository alternateAccountRepository,
             IRequestedSummonerRepository requestedSummonerRepository, ITeamPlayerRepository teamPlayerRepository,
-            ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository)
+            ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository, IBlacklistRepository blacklistRepository)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -55,6 +56,8 @@ namespace Domain.Services.Implementations
                                     throw new ArgumentNullException(nameof(teamRosterRepository));
             _seasonInfoRepository = seasonInfoRepository ??
                                     throw new ArgumentNullException(nameof(seasonInfoRepository));
+            _blacklistRepository = blacklistRepository ??
+                                    throw new ArgumentNullException(nameof(blacklistRepository));
         }
 
         public async Task<bool> CreateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
@@ -330,9 +333,9 @@ namespace Domain.Services.Implementations
         public async Task<FpSummonerView> GetFpSummonerView()
         {
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
-            var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
+            var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var teams = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).ToDictionary(x => x.Id, x => x);
-
+            var blackLists = (await _blacklistRepository.GetAllAsync()).ToDictionary(x => x.UserId, x => x);
             var usedSummoners = new Dictionary<Guid, SummonerInfoEntity>();
             var fpSummonerView = new FpSummonerView();
 
@@ -345,19 +348,23 @@ namespace Domain.Services.Implementations
                     {
                         usedSummoners.Add(player.SummonerId, summoner);
                         var mapped = _summonerMapper.Map(summoner);
-                        fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
+                        
+                        if (!blackLists.TryGetValue(mapped.UserId, out var blackList))
                         {
-                            UserId = summoner.UserId,
-                            RosterId = team.Key,
-                            SummonerName = summoner.SummonerName,
-                            Role = mapped.Role,
-                            OffRole = mapped.OffRole,
-                            TierDivision = mapped.TierDivision,
-                            OpGgUrl = summoner.OpGGUrlLink,
-                            TeamName = team.Value.TeamName,
-                            IsRegistered = summoner.IsValidPlayer,
-                            IsEsubOnly = mapped.IsSubOnly
-                        });
+                            fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
+                            {
+                                UserId = summoner.UserId,
+                                RosterId = team.Key,
+                                SummonerName = summoner.SummonerName,
+                                Role = mapped.Role,
+                                OffRole = mapped.OffRole,
+                                TierDivision = mapped.TierDivision,
+                                OpGgUrl = summoner.OpGGUrlLink,
+                                TeamName = team.Value.TeamName,
+                                IsRegistered = summoner.IsValidPlayer,
+                                IsEsubOnly = mapped.IsSubOnly
+                            });
+                        }
                     }
                     else
                     {
@@ -371,18 +378,21 @@ namespace Domain.Services.Implementations
             foreach (var remainingSummoner in remainingSummoners)
             {
                 var mapped = _summonerMapper.Map(remainingSummoner.Value);
-                fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
+                if (!blackLists.TryGetValue(mapped.UserId, out var blackList))
                 {
-                    UserId = remainingSummoner.Value.UserId,
-                    SummonerName = mapped.SummonerName,
-                    Role = mapped.Role,
-                    OffRole = mapped.OffRole,
-                    TierDivision = mapped.TierDivision,
-                    OpGgUrl = mapped.OpGgUrl,
-                    TeamName = "Unassigned",
-                    IsEsubOnly = mapped.IsSubOnly,
-                    IsRegistered = mapped.IsValid
-                });
+                    fpSummonerView.SummonerInfos.Add(new FpSummonerInfo
+                    {
+                        UserId = remainingSummoner.Value.UserId,
+                        SummonerName = mapped.SummonerName,
+                        Role = mapped.Role,
+                        OffRole = mapped.OffRole,
+                        TierDivision = mapped.TierDivision,
+                        OpGgUrl = mapped.OpGgUrl,
+                        TeamName = "Unassigned",
+                        IsEsubOnly = mapped.IsSubOnly,
+                        IsRegistered = mapped.IsValid
+                    });
+                }
             }
 
             return fpSummonerView;
@@ -552,7 +562,7 @@ namespace Domain.Services.Implementations
             var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Today);
             var homeTeamTask = _teamRosterRepository.GetByTeamNameAsync(homeTeamName, seasonInfo.Id);
             var awayTeamTask = _teamRosterRepository.GetByTeamNameAsync(awayTeamName, seasonInfo.Id);
-            var players = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x=>x.Id, x=>x);
+            var players = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var homeTeam = await homeTeamTask;
             var awayTeam = await awayTeamTask;
 
@@ -563,7 +573,7 @@ namespace Domain.Services.Implementations
             returningList.Add("Home Team Players: ");
             foreach (var homePlayer in homeTeamPlayers)
             {
-                if(players.TryGetValue(homePlayer.SummonerId, out var summoner))
+                if (players.TryGetValue(homePlayer.SummonerId, out var summoner))
                 {
                     returningList.Add(summoner.SummonerName);
                     players.Remove(homePlayer.SummonerId);
@@ -582,7 +592,7 @@ namespace Domain.Services.Implementations
             }
 
             returningList.Add("Valid e-subs: ");
-            foreach (var player in players.OrderBy(x=>x.Value.SummonerName))
+            foreach (var player in players.OrderBy(x => x.Value.SummonerName))
             {
                 returningList.Add(player.Value.SummonerName);
             }
