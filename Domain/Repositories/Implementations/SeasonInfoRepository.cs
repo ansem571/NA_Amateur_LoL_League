@@ -19,7 +19,7 @@ namespace Domain.Repositories.Implementations
 
         public async Task<SeasonInfoEntity> GetActiveSeasonInfoByDateAsync(DateTime date)
         {
-            var season = (await _table.ReadManyAsync("SeasonEndDate is null OR SeasonEndDate <= @date",
+            var season = (await _table.ReadManyAsync("SeasonEndDate is null OR SeasonEndDate >= @date",
                 new { date }, top: 1)).FirstOrDefault();
             return season;
         }
