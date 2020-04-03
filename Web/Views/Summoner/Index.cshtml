@@ -36,8 +36,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="OffRole"></label>
-                <select asp-items="Html.GetEnumSelectList<SummonerRoleEnum>()" asp-for="OffRole" class="form-control">
-                </select>
+                <select asp-items="Html.GetEnumSelectList<SummonerRoleEnum>()" asp-for="OffRole" class="form-control"></select>
             </div>
             <div class="form-group">
                 <label asp-for="IsSubOnly">E-Sub only</label>
@@ -46,6 +45,10 @@
             <div class="form-group">
                 <label asp-for="TierDivision"></label>
                 <select asp-items="Html.GetEnumSelectList<TierDivisionEnum>()" asp-for="TierDivision" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="PreviousSeasonTierDivision">(if you had a rank in season 9)</label>
+                <select asp-items="Html.GetEnumSelectList<TierDivisionEnum>()" asp-for="PreviousSeasonTierDivision" class="form-control"></select>
             </div>
             <div class="form-group">
                 <label asp-for="CurrentLp"></label>

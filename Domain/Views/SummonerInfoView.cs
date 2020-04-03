@@ -15,6 +15,7 @@ namespace Domain.Views
         public SummonerRoleEnum OffRole { get; set; }
         [Required]
         public TierDivisionEnum TierDivision { get; set; }
+        public TierDivisionEnum? PreviousSeasonTierDivision { get; set; }
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Value must be positive")]
         public int CurrentLp { get; set; }

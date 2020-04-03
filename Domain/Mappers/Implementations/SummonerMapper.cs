@@ -15,9 +15,9 @@ namespace Domain.Mappers.Implementations
         private readonly IAlternateAccountMapper _alternateAccountMapper;
         public SummonerMapper(ISummonerRoleMapper summonerRoleMapper, ITierDivisionMapper tierDivisionMapper, IAlternateAccountMapper alternateAccountMapper)
         {
-            _summonerRoleMapper = summonerRoleMapper ?? 
+            _summonerRoleMapper = summonerRoleMapper ??
                                   throw new ArgumentNullException(nameof(summonerRoleMapper));
-            _tierDivisionMapper = tierDivisionMapper ?? 
+            _tierDivisionMapper = tierDivisionMapper ??
                                   throw new ArgumentNullException(nameof(tierDivisionMapper));
             _alternateAccountMapper = alternateAccountMapper ??
                                       throw new ArgumentNullException(nameof(alternateAccountMapper));
@@ -31,6 +31,9 @@ namespace Domain.Mappers.Implementations
                 Role = _summonerRoleMapper.Map(entity.RoleId),
                 OffRole = entity.OffRoleId.HasValue ? _summonerRoleMapper.Map(entity.OffRoleId.Value) : SummonerRoleEnum.None,
                 TierDivision = _tierDivisionMapper.Map(entity.Tier_DivisionId),
+                PreviousSeasonTierDivision = entity.PreviousSeasonRankId != null 
+                    ? _tierDivisionMapper.Map(entity.PreviousSeasonRankId.Value) 
+                    : default(TierDivisionEnum?),
                 CurrentLp = entity.CurrentLp,
                 OpGgUrl = entity.OpGGUrlLink,
                 IsValid = entity.IsValidPlayer,
@@ -51,6 +54,9 @@ namespace Domain.Mappers.Implementations
                 RoleId = _summonerRoleMapper.Map(view.Role),
                 OffRoleId = view.OffRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.OffRole) : default(Guid?),
                 Tier_DivisionId = _tierDivisionMapper.Map(view.TierDivision),
+                PreviousSeasonRankId = view.PreviousSeasonTierDivision != null
+                    ? _tierDivisionMapper.Map(view.PreviousSeasonTierDivision.Value)
+                    : default(Guid?),
                 OpGGUrlLink = view.OpGgUrl,
                 IsValidPlayer = view.IsValid,
                 CurrentLp = view.CurrentLp,
@@ -75,6 +81,9 @@ namespace Domain.Mappers.Implementations
                 Role = _summonerRoleMapper.Map(entity.RoleId),
                 OffRole = entity.OffRoleId.HasValue ? _summonerRoleMapper.Map(entity.OffRoleId.Value) : SummonerRoleEnum.None,
                 TierDivision = _tierDivisionMapper.Map(entity.Tier_DivisionId),
+                PreviousSeasonTierDivision = entity.PreviousSeasonRankId != null
+                    ? _tierDivisionMapper.Map(entity.PreviousSeasonRankId.Value)
+                    : default(TierDivisionEnum?),
                 CurrentLp = entity.CurrentLp,
                 OpGgUrl = entity.OpGGUrlLink,
                 IsValid = entity.IsValidPlayer,
@@ -109,6 +118,9 @@ namespace Domain.Mappers.Implementations
                 RoleId = _summonerRoleMapper.Map(view.Role),
                 OffRoleId = view.OffRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.OffRole) : default(Guid),
                 Tier_DivisionId = _tierDivisionMapper.Map(view.TierDivision),
+                PreviousSeasonRankId = view.PreviousSeasonTierDivision != null
+                    ? _tierDivisionMapper.Map(view.PreviousSeasonTierDivision.Value)
+                    : default(Guid?),
                 OpGGUrlLink = view.OpGgUrl,
                 IsValidPlayer = view.IsValid,
                 CurrentLp = view.CurrentLp,

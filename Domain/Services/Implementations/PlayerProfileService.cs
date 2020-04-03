@@ -128,6 +128,10 @@ namespace Domain.Services.Implementations
                 PlayerStats = playerStatsDictionary,
                 AlternateAccountViews = altAccountsMapped
             };
+            if (summoner.PreviousSeasonRankId != null)
+            {
+                view.PreviousSeasonRank = _tierDivisionMapper.Map(summoner.PreviousSeasonRankId.Value);
+            }
 
             return view;
         }

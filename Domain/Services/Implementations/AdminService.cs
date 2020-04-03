@@ -146,7 +146,11 @@ namespace Domain.Services.Implementations
                         SummonerId = summoner.Id,
                         SeasonInfoId = seasonInfo.Id
                     });
-                    var tierScore = int.Parse((await _lookupRepository.GetLookupEntity(summoner.Tier_DivisionId)).Value);
+                    var currentTierScore = int.Parse((await _lookupRepository.GetLookupEntity(summoner.Tier_DivisionId)).Value);
+                    var previousTierScore = summoner.PreviousSeasonRankId != null 
+                        ? int.Parse((await _lookupRepository.GetLookupEntity(summoner.Tier_DivisionId)).Value)
+                        : 0;
+                    var tierScore = Math.Max(currentTierScore, previousTierScore);
                     teamTierScores.Add(tierScore + summoner.CurrentLp);
                 }
 

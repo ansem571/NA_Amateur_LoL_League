@@ -8,6 +8,7 @@ namespace Domain.Views
         public string PlayerName { get; set; }
         public string TeamName { get; set; }
         public TierDivisionEnum Rank { get; set; }
+        public TierDivisionEnum? PreviousSeasonRank { get; set; }
         public IEnumerable<AchievementView> Achievements { get; set; }
         public Dictionary<int, PlayerStatsView> PlayerStats { get; set; }
         //public PlayerStatsView PlayerStats { get; set; }

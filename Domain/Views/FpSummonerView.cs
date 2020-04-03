@@ -17,6 +17,7 @@ namespace Domain.Views
         public SummonerRoleEnum Role { get; set; }
         public SummonerRoleEnum OffRole { get; set; }
         public TierDivisionEnum TierDivision { get; set; }
+        public TierDivisionEnum? PreviousSeasonTierDivision { get; set; }
         public string OpGgUrl { get; set; }
         public string TeamName { get; set; }
         public Guid RosterId { get; set; }

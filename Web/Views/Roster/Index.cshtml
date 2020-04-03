@@ -38,6 +38,7 @@
         <th><button onclick="OrderByTeamName('@registeredPlayers', 'Role')">Role</button></th>*@
         <th>Off Role</th>
         <th>@Html.ActionLink(string.Concat("Rank ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.TierDivision })</th>
+        <th>Previous Season Rank (if available)</th>
         <th>op.gg link</th>
         <th>@Html.ActionLink(string.Concat("Team Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.TeamName })</th>
         <th>@Html.ActionLink(string.Concat("E-Sub only ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.ESub })</th>
@@ -55,6 +56,14 @@
             <td>@item.Role.ToString()</td>
             <td>@item.OffRole.ToString()</td>
             <td>@item.TierDivision.ToString()</td>
+            @if (item.PreviousSeasonTierDivision != null)
+            {
+                <td>@item.PreviousSeasonTierDivision.Value.ToString()</td>
+            }
+            else
+            {
+                <td>N/A</td>
+            }
             <td><a href="@item.OpGgUrl" target="_blank">@item.OpGgUrl</a></td>
             @{
                 if (item.TeamName == "Unassigned")
@@ -70,208 +79,3 @@
         </tr>
     }
 </table>
-<script>
-    function Test() {
-        alert("This is a test");
-    }
-
-    //function OrderByTeamName() {
-    //    if (arguments.length < 2)
-    //        return;
-    //    alert("Hello");
-    //    var t1 = arguments[0];
-    //    var t2 = arguments[1];
-    //    alert(t1);
-    //    alert(t2);
-    //}
-
-
-    function OrderByTeamName() {
-        alert(arguments.length);
-        if (arguments.length < 2)
-            return;
-        alert("Hello");
-        var t1 = arguments[0];
-        var t2 = arguments[1];
-        alert(t1.valueOf());
-        alert(t2.valueOf());
-        //Registered players
-        if (arguments[0] == @registeredPlayers) {
-            @remainingSortOrder = arguments[1];
-            @remainingSortSummoner = string.IsNullOrEmpty( @remainingSortOrder) ? "summoner_desc" : "";
-            @remainingSortRole =  @remainingSortOrder === "Role" ? "role_desc" : "Role";
-            @remainingSortTierDivision =  @remainingSortOrder === "TierDivision" ? "tierDivision_desc" : "TierDivision";
-            @remainingSortTeamName =  @remainingSortOrder === "TeamName" ? "teamName_desc" : "TeamName";
-            @remainingSortESub =  @remainingSortOrder === "ESub" ? "ESub_desc" : "ESub";
-
-            switch (@remainingSortOrder) {
-            case "summoner_desc":
-            {
-                @registeredPlayers = @registeredPlayers.OrderByDescending(x => x.SummonerName).ToList();
-                break;
-            }
-            case "role_desc":
-            {
-                @registeredPlayers = @registeredPlayers.OrderByDescending(x => x.Role).ThenBy(x => x.OffRole).ToList();
-                break;
-            }
-            case "Role":
-            {
-                @registeredPlayers = @registeredPlayers.OrderBy(x => x.Role).ThenBy(x => x.OffRole).ToList();
-                break;
-            }
-            case "tierDivision_desc":
-            {
-                @registeredPlayers = @registeredPlayers.OrderByDescending(x => x.TierDivision).ToList();
-                break;
-            }
-            case "TierDivision":
-            {
-                @registeredPlayers = @registeredPlayers.OrderBy(x => x.TierDivision).ToList();
-                break;
-            }
-            case "teamName_desc":
-            {
-                @registeredPlayers = @registeredPlayers.OrderByDescending(x => x.TeamName).ToList();
-                break;
-            }
-            case "TeamName":
-            {
-                @registeredPlayers = @registeredPlayers.OrderBy(x => x.TeamName).ToList();
-                break;
-            }
-            case "ESub":
-            {
-                @registeredPlayers = @registeredPlayers.OrderBy(x => x.IsEsubOnly).ToList();
-                break;
-            }
-            case "ESub_desc":
-            {
-                @registeredPlayers = @registeredPlayers.OrderByDescending(x => x.IsEsubOnly).ToList();
-                break;
-            }
-            default:
-                @registeredPlayers = @registeredPlayers.OrderBy(x => x.SummonerName).ToList();
-                break;
-            }
-
-            //Esubs
-            if (arguments[0] == @eSubsOnly) {
-                @eSubSortOrder = arguments[1];
-                @eSubSortSummoner = string.IsNullOrEmpty( @eSubSortOrder) ? "summoner_desc" : "";
-                @eSubSortRole =  @eSubSortOrder === "Role" ? "role_desc" : "Role";
-                @eSubSortTierDivision =  @eSubSortOrder === "TierDivision" ? "tierDivision_desc" : "TierDivision";
-                @eSubSortTeamName =  @eSubSortOrder === "TeamName" ? "teamName_desc" : "TeamName";
-                @eSubSortESub =  @eSubSortOrder === "ESub" ? "ESub_desc" : "ESub";
-                switch (@eSubSortOrder) {
-                case "summoner_desc":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderByDescending(x => x.SummonerName).ToList();
-                    break;
-                }
-                case "role_desc":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderByDescending(x => x.Role).ThenBy(x => x.OffRole).ToList();
-                    break;
-                }
-                case "Role":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderBy(x => x.Role).ThenBy(x => x.OffRole).ToList();
-                    break;
-                }
-                case "tierDivision_desc":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderByDescending(x => x.TierDivision).ToList();
-                    break;
-                }
-                case "TierDivision":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderBy(x => x.TierDivision).ToList();
-                    break;
-                }
-                case "teamName_desc":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderByDescending(x => x.TeamName).ToList();
-                    break;
-                }
-                case "TeamName":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderBy(x => x.TeamName).ToList();
-                    break;
-                }
-                case "ESub":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderBy(x => x.IsEsubOnly).ToList();
-                    break;
-                }
-                case "ESub_desc":
-                {
-                    @eSubsOnly = @eSubsOnly.OrderByDescending(x => x.IsEsubOnly).ToList();
-                    break;
-                }
-                default:
-                    @eSubsOnly = @eSubsOnly.OrderBy(x => x.SummonerName).ToList();
-                    break;
-                }
-
-                if (arguments[0] == @remaining) {
-                    @remainingSortOrder = arguments[1];
-                    @remainingSortSummoner = string.IsNullOrEmpty( @remainingSortOrder) ? "summoner_desc" : "";
-                    @remainingSortRole =  @remainingSortOrder === "Role" ? "role_desc" : "Role";
-                    @remainingSortTierDivision =  @remainingSortOrder === "TierDivision" ? "tierDivision_desc" : "TierDivision";
-                    @remainingSortTeamName =  @remainingSortOrder === "TeamName" ? "teamName_desc" : "TeamName";
-                    @remainingSortESub =  @remainingSortOrder === "ESub" ? "ESub_desc" : "ESub";
-                    switch (@remainingSortOrder) {
-                    case "summoner_desc":
-                    {
-                        @remaining = @remaining.OrderByDescending(x => x.SummonerName).ToList();
-                        break;
-                    }
-                    case "role_desc":
-                    {
-                        @remaining = @remaining.OrderByDescending(x => x.Role).ThenBy(x => x.OffRole).ToList();
-                        break;
-                    }
-                    case "Role":
-                    {
-                        @remaining = @remaining.OrderBy(x => x.Role).ThenBy(x => x.OffRole).ToList();
-                        break;
-                    }
-                    case "tierDivision_desc":
-                    {
-                        @remaining = @remaining.OrderByDescending(x => x.TierDivision).ToList();
-                        break;
-                    }
-                    case "TierDivision":
-                    {
-                        @remaining = @remaining.OrderBy(x => x.TierDivision).ToList();
-                        break;
-                    }
-                    case "teamName_desc":
-                    {
-                        @remaining = @remaining.OrderByDescending(x => x.TeamName).ToList();
-                        break;
-                    }
-                    case "TeamName":
-                    {
-                        @remaining = @remaining.OrderBy(x => x.TeamName).ToList();
-                        break;
-                    }
-                    case "ESub":
-                    {
-                        @remaining = @remaining.OrderBy(x => x.IsEsubOnly).ToList();
-                        break;
-                    }
-                    case "ESub_desc":
-                    {
-                        @remaining = @remaining.OrderByDescending(x => x.IsEsubOnly).ToList();
-                        break;
-                    }
-                    default:
-                        @remaining = @remaining.OrderBy(x => x.SummonerName).ToList();
-                        break;
-                    }
-                }
-
-            }
-</script>
