@@ -107,7 +107,7 @@ namespace Domain.Services.Implementations
 
             return views;
         }
-        
+
         public async Task<bool> UpdateScheduleAsync(ScheduleView view)
         {
             var scheduleInfo = await _scheduleRepository.GetScheduleAsync(view.ScheduleId);
@@ -150,14 +150,7 @@ namespace Domain.Services.Implementations
                     {
                         var homeRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.HomeTeam)?.RosterId;
                         var awayRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.AwayTeam)?.RosterId;
-                        var swap = TrueRandom.TrueRandomGenerator();
-
-                        if (!swap)
-                        {
-                            var temp = homeRosterId;
-                            homeRosterId = awayRosterId;
-                            awayRosterId = temp;
-                        }
+                        
 
                         var mapped = _scheduleMapper.Map(view, seasonInfo.SeasonInfo.SeasonInfoId, homeRosterId ?? Guid.Empty, awayRosterId ?? Guid.Empty);
                         scheduleEntities.Add(mapped);
@@ -189,7 +182,7 @@ namespace Domain.Services.Implementations
 
             var rostersGrouped = (await rostersTask).Rosters.GroupBy(x => x.Division.DivisionName)
                 .ToDictionary(x => x.Key, x => x.ToList());
-            var schedules = (await schedulesTask).Where(x=>!x.IsPlayoffMatch).ToList();
+            var schedules = (await schedulesTask).Where(x => !x.IsPlayoffMatch).ToList();
 
             foreach (var division in rostersGrouped)
             {
@@ -243,14 +236,14 @@ namespace Domain.Services.Implementations
             var seasonInfo = _rosterService.GetSeasonInfoView().Result;
 
             var views = new List<ScheduleView>();
-            if (teamNames.Count == 5)
+            if (teamNames.Count % 2 == 1)
             {
-                return GenerateSpecialRoundRobin(teamNames);
+                return GenerateOddTeamRoundRobin(teamNames);
             }
 
             var teamSize = teamNames.Count;
 
-            var weeks = Math.Min(teamSize - 1, 6);
+            var weeks = Math.Min(teamSize - 1, 7);
             var halfSize = teamSize / 2;
             var teams = new List<string>();
             teams.AddRange(teamNames);
@@ -280,6 +273,16 @@ namespace Domain.Services.Implementations
                 {
                     firstTeam = teams[(week + index) % teamSize];
                     secondTeam = teams[(week + teamSize - index) % teamSize];
+
+                    var swap = TrueRandom.TrueRandomGenerator();
+
+                    if (!swap)
+                    {
+                        var temp = firstTeam;
+                        firstTeam = secondTeam;
+                        secondTeam = temp;
+                    }
+
                     views.Add(new ScheduleView
                     {
                         ScheduleId = Guid.NewGuid(),
@@ -292,29 +295,66 @@ namespace Domain.Services.Implementations
                 }
             }
 
+            if (weeks < 4)
+            {
+                var tempViews = new List<ScheduleView>(views);
+                foreach (var view in views)
+                {
+                    var round2 = new ScheduleView
+                    {
+                        ScheduleId = Guid.NewGuid(),
+                        HomeTeam = view.AwayTeam,
+                        AwayTeam = view.HomeTeam,
+                        HomeTeamScore = 0,
+                        AwayTeamScore = 0,
+                        WeekOf = view.WeekOf.AddDays(21)
+                    };
+                    tempViews.Add(round2);
+                }
+
+                views = tempViews;
+            }
+
             return views;
         }
 
-        private IEnumerable<ScheduleView> GenerateSpecialRoundRobin(List<string> teamNames)
+        private IEnumerable<ScheduleView> GenerateOddTeamRoundRobin(List<string> teamNames)
         {
             var seasonInfo = _rosterService.GetSeasonInfoView().Result;
 
             var views = new List<ScheduleView>();
 
-            const int weeks = 5;
-
             var startDate = seasonInfo.SeasonInfo.SeasonStartDate;
-            for (var week = 0; week < weeks; week++)
+            for (var week = 0; week < teamNames.Count; week++)
             {
                 var date = startDate.AddDays(7 * week);
-                views.AddRange(CreateForWeek(week, teamNames, date));
+                var weeklyMatches = new List<ScheduleView>();
+                if (teamNames.Count == 5)
+                {
+                    weeklyMatches.AddRange(CreateFor5TeamWeek(week, teamNames, date));
+                }
+                else if(teamNames.Count == 7)
+                {
+                    weeklyMatches.AddRange(CreateFor7TeamWeek(week, teamNames, date));
+                }
+
+                foreach (var match in weeklyMatches)
+                {
+                    var swap = TrueRandom.TrueRandomGenerator();
+                    if (!swap)
+                    {
+                        var temp = match.HomeTeam;
+                        match.HomeTeam = match.AwayTeam;
+                        match.AwayTeam = temp;
+                    }
+                }
             }
 
             return views;
         }
 
         //TODO: Make a calculator for this, someday
-        private IEnumerable<ScheduleView> CreateForWeek(int week, IEnumerable<string> teamNames, DateTime date)
+        private IEnumerable<ScheduleView> CreateFor5TeamWeek(int week, IEnumerable<string> teamNames, DateTime date)
         {
             var list = new List<ScheduleView>();
             var t = teamNames.ToList();
@@ -352,6 +392,56 @@ namespace Domain.Services.Implementations
                 list.Add(new ScheduleView(t[0], t[3], date));
                 list.Add(new ScheduleView(t[1], "Bye", date));
                 list.Add(new ScheduleView(t[2], t[4], date));
+            }
+
+            return list;
+        }
+
+        //TODO: Make a calculator for this, someday
+        private IEnumerable<ScheduleView> CreateFor7TeamWeek(int week, IEnumerable<string> teamNames, DateTime date)
+        {
+            var list = new List<ScheduleView>();
+            var t = teamNames.ToList();
+            //week 1
+            if (week == 0)
+            {
+                list.Add(new ScheduleView(t[0], t[1], date));
+                list.Add(new ScheduleView(t[2], t[3], date));
+                list.Add(new ScheduleView(t[4], t[5], date));
+                list.Add(new ScheduleView(t[0], t[6], date));
+            }
+            //week 2
+            if (week == 1)
+            {
+                list.Add(new ScheduleView(t[0], t[2], date));
+                list.Add(new ScheduleView(t[1], t[3], date));
+                list.Add(new ScheduleView(t[4], t[6], date));
+                list.Add(new ScheduleView(t[1], t[5], date));
+            }
+            //week 3
+            if (week == 2)
+            {
+                list.Add(new ScheduleView(t[0], t[3], date));
+                list.Add(new ScheduleView(t[1], t[4], date));
+                list.Add(new ScheduleView(t[2], t[5], date));
+                list.Add(new ScheduleView(t[3], t[6], date));
+            }
+            //week 4
+            if (week == 3)
+            {
+                list.Add(new ScheduleView(t[0], t[4], date));
+                list.Add(new ScheduleView(t[1], t[6], date));
+                list.Add(new ScheduleView(t[3], t[5], date));
+                list.Add(new ScheduleView(t[2], t[6], date));
+            }
+            //week 5
+            if (week == 4)
+            {
+                list.Add(new ScheduleView(t[0], t[5], date));
+                list.Add(new ScheduleView(t[1], t[2], date));
+                list.Add(new ScheduleView(t[2], t[4], date));
+                list.Add(new ScheduleView(t[3], t[4], date));
+                list.Add(new ScheduleView(t[5], t[6], date));
             }
 
             return list;
