@@ -137,7 +137,7 @@
         Vladimir,
         Volibear,
         Warwick,
-        Wukong,
+        MonkeyKing, //Wukong
         Xayah,
         Xerath,
         XinZhao,

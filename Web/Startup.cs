@@ -146,16 +146,18 @@ namespace Web
                 await roleManager.CreateAsync(role);
             }
             //Add any other user who will NEED Admin privileges 
-            var user1 = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
-            var user2 = await userManager.FindByEmailAsync("ansem571@gmail.com");
-            var user3 = await userManager.FindByEmailAsync("josiahrosendahl@gmail.com");
-            var user4 = await userManager.FindByEmailAsync("gwrobinson2@gmail.com");
-            var user5 = await userManager.FindByEmailAsync("michael.spindel05@gmail.com");
-            var user6 = await userManager.FindByEmailAsync("scatter.catt@gmail.com");
-            var user7 = await userManager.FindByEmailAsync("shadow2097@gmail.com");
-            var user8 = await userManager.FindByEmailAsync("morrisonsviewpoint@gmail.com");
-            var user9 = await userManager.FindByEmailAsync("gman.mcgee@gmail.com");
-            var user10 = await userManager.FindByEmailAsync("Mike_Salinas112@hotmail.com");
+            var user1 = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com"); //me
+            var user2 = await userManager.FindByEmailAsync("ansem571@gmail.com"); //me
+            var user3 = await userManager.FindByEmailAsync("josiahrosendahl@gmail.com"); //foozle
+            var user4 = await userManager.FindByEmailAsync("gwrobinson2@gmail.com"); //karen
+            //var user5 = await userManager.FindByEmailAsync("michael.spindel05@gmail.com"); //mans
+            var user5 = await userManager.FindByEmailAsync("brandonleekinnaird@gmail.com"); //spanish teacher
+            var user6 = await userManager.FindByEmailAsync("scatter.catt@gmail.com"); //scatter
+            var user7 = await userManager.FindByEmailAsync("shadow2097@gmail.com"); //shadow
+            var user8 = await userManager.FindByEmailAsync("morrisonsviewpoint@gmail.com"); //amo
+            var user9 = await userManager.FindByEmailAsync("gman.mcgee@gmail.com"); //king majora
+            var user10 = await userManager.FindByEmailAsync("Mike_Salinas112@hotmail.com"); //ultimate ace
+            var user11 = await userManager.FindByEmailAsync("syoung4246@gmail.com"); //sunny
             var users = new List<UserEntity>
             {
                 user1,
@@ -167,7 +169,8 @@ namespace Web
                 user7,
                 user8,
                 user9,
-                user10
+                user10,
+                user11
             };
             foreach (var user in users)
             {

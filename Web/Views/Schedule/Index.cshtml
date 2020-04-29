@@ -19,6 +19,12 @@
 
 <h2>@ViewData["Title"]</h2>
 @{
+    @*if (isAdmin)
+    {
+        <button class="bigRedButton center-block">
+            @Html.ActionLink("Create Schedules", "CreateScheduleAsync")
+        </button>
+    }*@
     if (!Model.Any())
     {
         <div class="card center-block">

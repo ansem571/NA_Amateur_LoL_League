@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DAL.Entities.UserData;
 using Domain.Repositories.Interfaces;
 using Domain.Season3Services.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Models.Admin;
@@ -25,9 +27,10 @@ namespace Web.ApiControllers
         private readonly IUserService _userService;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IRosterService _rosterService;
+        private readonly UserManager<UserEntity> _userManager;
 
         public AdminsController(IAdminService adminService, ILogger logger, IDivisionService divisionService, IPlayoffService playoffService, ISeasonInfoService seasonInfoService,
-            IUserService userService, ISummonerInfoRepository summonerInfoRepository, IRosterService rosterService)
+            IUserService userService, ISummonerInfoRepository summonerInfoRepository, IRosterService rosterService, UserManager<UserEntity> userManager)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -37,6 +40,7 @@ namespace Web.ApiControllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         [HttpGet("GetTeamsToBeCreated")]
@@ -60,6 +64,16 @@ namespace Web.ApiControllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateTeamAsync(IEnumerable<Guid> summonerIds)
         {
+            await Task.Delay(0);
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("Token")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetTokenAsync()
+        {
+            //var token = await _userManager.cr
             await Task.Delay(0);
             throw new NotImplementedException();
         }

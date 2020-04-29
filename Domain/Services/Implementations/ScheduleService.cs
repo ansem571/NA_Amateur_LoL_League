@@ -144,13 +144,29 @@ namespace Domain.Services.Implementations
                 var scheduleEntities = new List<ScheduleEntity>();
                 foreach (var division in divisions)
                 {
-                    var teamNames = division.Value.Select(x => x.TeamName).ToList();
+                    if (!division.Key.Contains("Freljord"))
+                    {
+                        continue;
+                    }
+                    var teamNames = division.Value.OrderBy(x => x.TeamTierScore).Select(x => x.TeamName).ToList();
+                    //var newOrder = new List<string>
+                    //{
+                    //    teamNames[2],
+                    //    teamNames[0],
+                    //    teamNames[6],
+                    //    teamNames[3],
+                    //    teamNames[5],
+                    //    teamNames[1],
+                    //    teamNames[4],
+
+                    //};
+
                     var views = GenerateRoundRobin(teamNames);
                     foreach (var view in views)
                     {
                         var homeRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.HomeTeam)?.RosterId;
                         var awayRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.AwayTeam)?.RosterId;
-                        
+
 
                         var mapped = _scheduleMapper.Map(view, seasonInfo.SeasonInfo.SeasonInfoId, homeRosterId ?? Guid.Empty, awayRosterId ?? Guid.Empty);
                         scheduleEntities.Add(mapped);
@@ -333,7 +349,7 @@ namespace Domain.Services.Implementations
                 {
                     weeklyMatches.AddRange(CreateFor5TeamWeek(week, teamNames, date));
                 }
-                else if(teamNames.Count == 7)
+                else if (teamNames.Count == 7)
                 {
                     weeklyMatches.AddRange(CreateFor7TeamWeek(week, teamNames, date));
                 }
@@ -348,6 +364,7 @@ namespace Domain.Services.Implementations
                         match.AwayTeam = temp;
                     }
                 }
+                views.AddRange(weeklyMatches);
             }
 
             return views;
@@ -405,43 +422,53 @@ namespace Domain.Services.Implementations
             //week 1
             if (week == 0)
             {
-                list.Add(new ScheduleView(t[0], t[1], date));
+                list.Add(new ScheduleView(t[5], t[6], date));
                 list.Add(new ScheduleView(t[2], t[3], date));
-                list.Add(new ScheduleView(t[4], t[5], date));
-                list.Add(new ScheduleView(t[0], t[6], date));
+                list.Add(new ScheduleView(t[0], t[4], date));
             }
             //week 2
             if (week == 1)
             {
-                list.Add(new ScheduleView(t[0], t[2], date));
-                list.Add(new ScheduleView(t[1], t[3], date));
-                list.Add(new ScheduleView(t[4], t[6], date));
-                list.Add(new ScheduleView(t[1], t[5], date));
+                list.Add(new ScheduleView(t[5], t[3], date));
+                list.Add(new ScheduleView(t[2], t[4], date));
+                list.Add(new ScheduleView(t[1], t[6], date));
             }
             //week 3
             if (week == 2)
             {
-                list.Add(new ScheduleView(t[0], t[3], date));
-                list.Add(new ScheduleView(t[1], t[4], date));
-                list.Add(new ScheduleView(t[2], t[5], date));
-                list.Add(new ScheduleView(t[3], t[6], date));
+                list.Add(new ScheduleView(t[5], t[2], date));
+                list.Add(new ScheduleView(t[6], t[3], date));
+                list.Add(new ScheduleView(t[0], t[1], date));
             }
             //week 4
             if (week == 3)
             {
-                list.Add(new ScheduleView(t[0], t[4], date));
-                list.Add(new ScheduleView(t[1], t[6], date));
-                list.Add(new ScheduleView(t[3], t[5], date));
-                list.Add(new ScheduleView(t[2], t[6], date));
+                list.Add(new ScheduleView(t[5], t[0], date));
+                list.Add(new ScheduleView(t[2], t[1], date));
+                list.Add(new ScheduleView(t[6], t[4], date));
             }
             //week 5
             if (week == 4)
             {
-                list.Add(new ScheduleView(t[0], t[5], date));
-                list.Add(new ScheduleView(t[1], t[2], date));
-                list.Add(new ScheduleView(t[2], t[4], date));
+                list.Add(new ScheduleView(t[5], t[4], date));
+                list.Add(new ScheduleView(t[0], t[6], date));
+                list.Add(new ScheduleView(t[1], t[3], date));
+            }
+
+            //week 6
+            if (week == 5)
+            {
+                list.Add(new ScheduleView(t[5], t[1], date));
+                list.Add(new ScheduleView(t[0], t[2], date));
                 list.Add(new ScheduleView(t[3], t[4], date));
-                list.Add(new ScheduleView(t[5], t[6], date));
+            }
+
+            //week 7
+            if (week == 6)
+            {
+                list.Add(new ScheduleView(t[0], t[3], date));
+                list.Add(new ScheduleView(t[1], t[4], date));
+                list.Add(new ScheduleView(t[2], t[6], date));
             }
 
             return list;
