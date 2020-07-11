@@ -29,7 +29,7 @@ namespace Domain.Repositories.Implementations
 
         public async Task<DivisionEntity> GetDivisionByTeamScoreAsync(int teamTierScore, Guid seasonInfoId)
         {
-            var division = (await _table.ReadManyAsync("LowerLimit < @teamTierScore AND UpperLimit > @teamTierScore AND SeasonInfoId = @seasonInfoId",
+            var division = (await _table.ReadManyAsync("LowerLimit <= @teamTierScore AND UpperLimit >= @teamTierScore AND SeasonInfoId = @seasonInfoId",
                 new {teamTierScore, seasonInfoId})).FirstOrDefault();
             return division;
         }

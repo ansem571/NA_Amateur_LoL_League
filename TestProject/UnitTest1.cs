@@ -14,7 +14,8 @@ namespace TestProject
         [Fact]
         public async Task TestNames()
         {
-            var matchId = 3394141527;
+            //https://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/3391075957/44347500?tab=overview
+            var matchId = 3391075957;
             var version = (await GlobalVariables.ChampsApi.Versions.GetAllAsync()).First();
             var championsTask = GlobalVariables.ChampsApi.Champions.GetAllAsync(version);
             var riotMatchTask = GlobalVariables.Api.Match.GetMatchAsync(RiotSharp.Misc.Region.Na, matchId);
@@ -33,7 +34,7 @@ namespace TestProject
             var localChampionTop = new LookupEntity
             {
                 Id = Guid.NewGuid(),
-                Enum = ChampionsEnum.Wukong.ToString(),
+                Enum = ChampionsEnum.MonkeyKing.ToString(),
                 Category = "Champion",
                 Description = "",
                 Value = "Wukong"
@@ -48,6 +49,19 @@ namespace TestProject
                     riotChampion == localChampionTop.Value.ToLowerInvariant())
                 {
                     return;
+                }
+            }
+
+            foreach (var ban in riotMatch.Teams.SelectMany(x => x.Bans))
+            {
+                var riotChampion = champions.Keys[ban.ChampionId].ToLowerInvariant();
+                try
+                {
+                    //var ourChampion = GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(riotChampion);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error getting banned champion: {riotChampion}");
                 }
             }
             Assert.True(false);

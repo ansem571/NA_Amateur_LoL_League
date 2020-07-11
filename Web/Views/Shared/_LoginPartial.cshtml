@@ -17,9 +17,12 @@
             <li>
                 <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">My Profile</a>
             </li>
-            <li>
-                <a asp-area="" asp-controller="Summoner" asp-action="Index">My SummonerInfo</a>
-            </li>
+            @if (user != null && user.ConfirmedEmail)
+            {
+                <li>
+                    <a asp-area="" asp-controller="Summoner" asp-action="Index">My SummonerInfo</a>
+                </li>
+            }
 
             <li>
                 <a asp-area="" asp-controller="Account" asp-action="RegisterForSeason">Register For Season</a>

@@ -341,7 +341,7 @@ namespace Domain.Services.Implementations
 
             foreach (var team in teams)
             {
-                var players = await _teamPlayerRepository.ReadAllForRosterAsync(team.Key);
+                var players = ((await _teamPlayerRepository.ReadAllForRosterAsync(team.Key))).Where(x=>x.SeasonInfoId == seasonInfo.Id).ToList();
                 foreach (var player in players)
                 {
                     if (summoners.TryGetValue(player.SummonerId, out var summoner) && !usedSummoners.TryGetValue(player.SummonerId, out _))

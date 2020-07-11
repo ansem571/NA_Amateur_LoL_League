@@ -33,7 +33,7 @@ namespace Web.Controllers
             {
                 var returnUrl = "http://www.casualeal.com/Summoner/Index";
                 return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
-            }
+            }         
 
             var model = await _accountService.GetSummonerViewAsync(user);
             model.StatusMessage = StatusMessage;
