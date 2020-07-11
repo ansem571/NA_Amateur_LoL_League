@@ -60,7 +60,7 @@ namespace Domain.Services.Implementations
 
         public async Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var summonersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
@@ -105,7 +105,7 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerIds)
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             summonerIds = summonerIds.ToList();
             var result = false;
@@ -147,7 +147,7 @@ namespace Domain.Services.Implementations
                         SeasonInfoId = seasonInfo.Id
                     });
                     var currentTierScore = int.Parse((await _lookupRepository.GetLookupEntity(summoner.Tier_DivisionId)).Value);
-                    var previousTierScore = summoner.PreviousSeasonRankId != null 
+                    var previousTierScore = summoner.PreviousSeasonRankId != null
                         ? int.Parse((await _lookupRepository.GetLookupEntity(summoner.Tier_DivisionId)).Value)
                         : 0;
                     var tierScore = Math.Max(currentTierScore, previousTierScore);
@@ -213,7 +213,7 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> AssignTeamCaptain(TeamCaptainView view)
         {
-            var seasonInfo = (await _seasonInfoRepository.GetAllSeasonsAsync()).OrderBy(x=>x.SeasonStartDate).Last();
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var summoner = (await _summonerInfoRepository.GetAllForSummonerNamesAsync(new List<string> { view.SummonerName })).FirstOrDefault();
             var roster = await _teamRosterRepository.GetByTeamNameAsync(view.RosterName, seasonInfo.Id);
@@ -222,21 +222,31 @@ namespace Domain.Services.Implementations
             {
                 return false;
             }
-
+            
             var entity = new TeamCaptainEntity
             {
                 SummonerId = summoner.Id,
                 TeamRosterId = roster.Id
             };
 
-            return await _teamCaptainRepository.CreateCaptainAsync(entity);
+            var captain = await _teamCaptainRepository.GetCaptainByRosterId(roster.Id);
+
+            if (captain == null)
+            {
+                return await _teamCaptainRepository.CreateCaptainAsync(entity);
+            }
+            else
+            {
+                await _teamCaptainRepository.DeleteCaptainAsync(captain);
+                return await _teamCaptainRepository.CreateCaptainAsync(entity);
+            }
         }
 
         [Obsolete("Refer to interface")]
         public async Task<bool> UploadPlayerStatsAsync(IEnumerable<IFormFile> files)
         {
             var newStats = new List<PartialPlayerInfo>();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var teamsTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var registeredPlayersTask = _summonerInfoRepository.GetAllSummonersAsync();
             var playerStatsTask = _playerStatsRepository.GetAllStatsAsync(seasonInfo.Id);

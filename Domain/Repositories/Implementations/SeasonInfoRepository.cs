@@ -1,10 +1,10 @@
-﻿using System;
+﻿using DAL.Data.Interfaces;
+using DAL.Entities.LeagueInfo;
+using Domain.Repositories.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DAL.Data.Interfaces;
-using DAL.Entities.LeagueInfo;
-using Domain.Repositories.Interfaces;
 
 namespace Domain.Repositories.Implementations
 {
@@ -21,6 +21,12 @@ namespace Domain.Repositories.Implementations
         {
             var season = (await _table.ReadManyAsync("SeasonEndDate is null OR SeasonEndDate >= @date",
                 new { date }, top: 1)).FirstOrDefault();
+            return season;
+        }
+
+        public async Task<SeasonInfoEntity> GetCurrentSeasonAsync()
+        {
+            var season = (await _table.ReadManyAsync("IsCurrentSeason = 1", top: 1)).FirstOrDefault();
             return season;
         }
 

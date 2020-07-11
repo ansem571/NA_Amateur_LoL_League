@@ -38,7 +38,7 @@ namespace Domain.Season3Services.Implementations
 
         public async Task<Dictionary<string, List<ScheduleView>>> GetPlayoffSchedule()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var divisionsTask = _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id);
@@ -56,7 +56,7 @@ namespace Domain.Season3Services.Implementations
         public async Task<bool> SetupPlayoffSchedule(IEnumerable<PlayoffSeedInsertView> playoffSeeds, DateTime weekOf, PlayoffFormat bracketFormat)
         {
             playoffSeeds = playoffSeeds.OrderBy(x => x.Seed).ToList();
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var list = playoffSeeds.Select(playoffSeed => new PlayoffSeedEntity
             {

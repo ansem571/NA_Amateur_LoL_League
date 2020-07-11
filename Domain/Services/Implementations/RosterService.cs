@@ -85,8 +85,7 @@ namespace Domain.Services.Implementations
             //var seasonInfo = seasons[1];
 
             //TODO: Uncomment when ready to push
-            var seasonInfoTask = _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
-            var seasonInfo = await seasonInfoTask;
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var rostersTask = GetAllRosters(seasonInfo);
 
@@ -133,7 +132,7 @@ namespace Domain.Services.Implementations
             var list = new List<RosterView>();
             if (seasonInfo == null)
             {
-                seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+                seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             }
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
             var captainsTask = _teamCaptainRepository.GetAllTeamCaptainsAsync();
@@ -199,7 +198,7 @@ namespace Domain.Services.Implementations
         /// <returns></returns>
         public async Task<RosterView> GetRosterAsync(Guid rosterId)
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var alternateAccountsTask = _alternateAccountRepository.ReadAllAsync();
             var rosterTask = _teamRosterRepository.GetByTeamIdAsync(rosterId);
@@ -278,7 +277,7 @@ namespace Domain.Services.Implementations
             //var seasonInfo = seasons[1];
 
             //TODO: Uncomment when ready to push
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var schedulesTask = _scheduleRepository.GetAllAsync(seasonInfo.Id);
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
@@ -422,7 +421,7 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> AddToTeamScoreAsync(string teamName, int wins, int loses)
         {
-            var seasonInfo = (await _seasonInfoRepository.GetAllSeasonsAsync()).OrderBy(x => x.SeasonStartDate).Last();
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var roster = await _teamRosterRepository.GetByTeamNameAsync(teamName, seasonInfo.Id);
             if (roster.Wins == null)
             {

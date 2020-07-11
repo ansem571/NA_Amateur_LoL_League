@@ -77,7 +77,7 @@ namespace Domain.Services.Implementations
         {
             var divisionTask = _scheduleService.GetDivisionIdByScheduleAsync(view.ScheduleId);
             var matchesTask = _matchDetailRepository.ReadForScheduleId(view.ScheduleId);
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var registeredPlayersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
             var previousListedMvpsTask = _matchMvpRepository.ReadAllForTeamScheduleId(view.ScheduleId);
             var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);

@@ -10,5 +10,6 @@ namespace Domain.Repositories.Interfaces
         Task<TeamCaptainEntity> GetCaptainByRosterId(Guid rosterId);
         Task<IEnumerable<TeamCaptainEntity>> GetAllTeamCaptainsAsync();
         Task<bool> CreateCaptainAsync(TeamCaptainEntity entity);
+        Task<bool> DeleteCaptainAsync(TeamCaptainEntity entity);
     }
 }

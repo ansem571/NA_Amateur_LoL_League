@@ -11,5 +11,6 @@ namespace Domain.Repositories.Interfaces
         Task<IEnumerable<SeasonInfoEntity>> GetAllSeasonsAsync();
         Task<bool> CreateSeasonAsync(SeasonInfoEntity season);
         Task<bool> UpdateSeasonAsync(SeasonInfoEntity season);
+        Task<SeasonInfoEntity> GetCurrentSeasonAsync();
     }
 }

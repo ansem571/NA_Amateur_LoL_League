@@ -221,7 +221,7 @@ namespace Domain.Services.Implementations
 
         public async Task<SummonerRequestView> GetRequestedSummonersAsync(UserEntity user)
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Now);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToList();
             var summonerEntity = summoners.First(x => x.UserId == user.Id);
             summoners.Remove(summonerEntity);
@@ -262,7 +262,7 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> UpdateSummonerRequestsAsync(UserEntity user, SummonerRequestView view)
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Now);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             SetIsSubToElements(view);
             var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var summonerEntity = summoners.First(x => x.Value.UserId == user.Id);
@@ -332,7 +332,7 @@ namespace Domain.Services.Implementations
 
         public async Task<FpSummonerView> GetFpSummonerView()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime().Date);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).ToDictionary(x => x.Id, x => x);
             var teams = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).ToDictionary(x => x.Id, x => x);
             var blackLists = (await _blacklistRepository.GetAllAsync()).ToDictionary(x => x.UserId, x => x);
@@ -402,7 +402,7 @@ namespace Domain.Services.Implementations
 
         public async Task<SeasonInfoViewPartial> GetSeasonInfoAsync()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(TimeZoneExtensions.GetCurrentTime());
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var partialSeasonView = new SeasonInfoViewPartial
             {
@@ -415,7 +415,7 @@ namespace Domain.Services.Implementations
 
         public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Now);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).Where(x => x.IsValidPlayer).ToDictionary(x => x.Id, x => x);
             var requests = (await _requestedSummonerRepository.ReadAllForSeasonAsync(seasonInfo.Id)).GroupBy(x => x.SummonerId)
@@ -561,7 +561,7 @@ namespace Domain.Services.Implementations
 
         public async Task<List<string>> GetAllValidPlayers(string homeTeamName, string awayTeamName)
         {
-            var seasonInfo = await _seasonInfoRepository.GetActiveSeasonInfoByDateAsync(DateTime.Today);
+            var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var homeTeamTask = _teamRosterRepository.GetByTeamNameAsync(homeTeamName, seasonInfo.Id);
             var awayTeamTask = _teamRosterRepository.GetByTeamNameAsync(awayTeamName, seasonInfo.Id);
             var players = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToDictionary(x => x.Id, x => x);

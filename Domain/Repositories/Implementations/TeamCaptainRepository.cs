@@ -34,5 +34,11 @@ namespace Domain.Repositories.Implementations
         {
             return await _table.InsertAsync(entity) == 1;
         }
+
+        public async Task<bool> DeleteCaptainAsync(TeamCaptainEntity entity)
+        {
+            return await _table.DeleteWhereAsync("SummonerId = @summonerId AND TeamRosterId = @teamRosterId",
+                new { summonerId = entity.SummonerId, teamRosterId = entity.TeamRosterId });
+        }
     }
 }

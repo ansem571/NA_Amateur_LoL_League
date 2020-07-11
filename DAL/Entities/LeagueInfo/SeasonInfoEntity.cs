@@ -13,5 +13,6 @@ namespace DAL.Entities.LeagueInfo
         public DateTime ClosedRegistrationDate { get; set; }
         public DateTime SeasonStartDate { get; set; }
         public DateTime? SeasonEndDate { get; set; }
+        public bool IsCurrentSeason { get; set; }
     }
 }
