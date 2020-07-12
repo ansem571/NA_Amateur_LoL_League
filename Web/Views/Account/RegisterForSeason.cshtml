@@ -56,7 +56,7 @@ else
 
         if (Model.IsAcademyEligable() || isAdmin)
         {
-            <form method="get" asp-controller="Account" asp-action="RegisterForAcademy" id="AcademyLink" style="display: none;color:black;">
+            <form method="post" asp-controller="Account" asp-action="RegisteredForAcademy" id="AcademyLink" style="display: none;color:black;">
                 <button type="submit">Register for Academy</button>
             </form>
         }
