@@ -41,7 +41,22 @@ namespace Web.Controllers
         [TempData]
         public string ErrorMessage { get; set; }
 
-        [HttpGet]
+        [HttpGet("RegisteredForAcademy")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisteredForAcademy()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                var returnUrl = "http://www.casualeal.com/Account/RegisteredForAcademy";
+                return RedirectToAction("Login", routeValues: new { returnUrl });
+            }
+            await _accountService.UpdateSummonerValidAsync(user, true);
+            return View();
+        }
+
+        [HttpGet("SuccessfulPayment")]
         [AllowAnonymous]
         public async Task<IActionResult> SuccessfulPayment()
         {
@@ -54,7 +69,7 @@ namespace Web.Controllers
             }
             await _accountService.UpdateSummonerValidAsync(user);
             return View();
-        }
+        }   
 
         [HttpGet]
         [AllowAnonymous]

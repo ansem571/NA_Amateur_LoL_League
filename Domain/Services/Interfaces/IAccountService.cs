@@ -8,7 +8,7 @@ namespace Domain.Services.Interfaces
     public interface IAccountService
     {
         Task<bool> UpdateSummonerInfoAsync(SummonerInfoView view, UserEntity user);
-        Task<bool> UpdateSummonerValidAsync(UserEntity user);
+        Task<bool> UpdateSummonerValidAsync(UserEntity user, bool isAcademy = false);
 
         Task<SummonerInfoView> GetSummonerViewAsync(UserEntity user);
 

@@ -132,11 +132,12 @@ namespace Domain.Services.Implementations
             }
         }
 
-        public async Task<bool> UpdateSummonerValidAsync(UserEntity user)
+        public async Task<bool> UpdateSummonerValidAsync(UserEntity user, bool isAcademy = false)
         {
             var account = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
 
             account.IsValidPlayer = true;
+            account.IsAcademyPlayer = isAcademy;
 
             return await _summonerInfoRepository.UpdateAsync(new List<SummonerInfoEntity> { account });
         }
@@ -235,7 +236,12 @@ namespace Domain.Services.Implementations
             };
             if (!requestedSummonerEntities.Any())
             {
-                view.RequestedSummoners.AddRange(AddEmptyRequestedSummonerViews(RequestingSummonerCount));
+                var count = RequestingSummonerCount;
+                if (summonerEntity.IsAcademyPlayer)
+                {
+                    count = 1;
+                }
+                view.RequestedSummoners.AddRange(AddEmptyRequestedSummonerViews(count));
             }
             else
             {
@@ -254,9 +260,19 @@ namespace Domain.Services.Implementations
                 view.RequestedSummoners = requestedSummoners;
 
                 var missingCount = RequestingSummonerCount - view.RequestedSummoners.Count;
+                if (summonerEntity.IsAcademyPlayer)
+                {
+                    missingCount = 1 - view.RequestedSummoners.Count;
+                }
+
                 view.RequestedSummoners.AddRange(AddEmptyRequestedSummonerViews(missingCount));
             }
-            SetIsSubToElements(view);
+
+            if (!summonerEntity.IsAcademyPlayer)
+            {
+                SetIsSubToElements(view);
+            }
+
             return view;
         }
 
@@ -341,14 +357,14 @@ namespace Domain.Services.Implementations
 
             foreach (var team in teams)
             {
-                var players = ((await _teamPlayerRepository.ReadAllForRosterAsync(team.Key))).Where(x=>x.SeasonInfoId == seasonInfo.Id).ToList();
+                var players = ((await _teamPlayerRepository.ReadAllForRosterAsync(team.Key))).Where(x => x.SeasonInfoId == seasonInfo.Id).ToList();
                 foreach (var player in players)
                 {
                     if (summoners.TryGetValue(player.SummonerId, out var summoner) && !usedSummoners.TryGetValue(player.SummonerId, out _))
                     {
                         usedSummoners.Add(player.SummonerId, summoner);
                         var mapped = _summonerMapper.Map(summoner);
-                        
+
                         if (!blackLists.TryGetValue(mapped.UserId, out var blackList))
                         {
                             fpSummonerView.SummonerInfos.Add(new FpSummonerInfo

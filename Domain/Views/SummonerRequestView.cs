@@ -9,6 +9,7 @@ namespace Domain.Views
         /// Name of the summoner making the request
         /// </summary>
         public string SummonerName { get; set; }
+        public bool IsAcademy { get; set; }
         /// <summary>
         /// List of summoners being requested
         /// </summary>

@@ -21,5 +21,6 @@ namespace DAL.Entities.LeagueInfo
         public Guid? TeamRoleId { get; set; }
         public DateTime? UpdatedOn { get; set; }
         public Guid? PreviousSeasonRankId { get; set; }
+        public bool IsAcademyPlayer { get; set; }
     }
 }

@@ -31,6 +31,29 @@ namespace Domain.Views
 
         public string StatusMessage { get; set; }
 
+        public bool IsAcademy { get; set; }
+
+        public bool IsAcademyEligable()
+        {
+            var validValues = new List<TierDivisionEnum>
+            {
+                TierDivisionEnum.Unranked,
+                TierDivisionEnum.Silver2,
+                TierDivisionEnum.Silver3,
+                TierDivisionEnum.Silver4,
+                TierDivisionEnum.Bronze1,
+                TierDivisionEnum.Bronze2,
+                TierDivisionEnum.Bronze3,
+                TierDivisionEnum.Bronze4,
+                TierDivisionEnum.Iron1,
+                TierDivisionEnum.Iron2,
+                TierDivisionEnum.Iron3,
+                TierDivisionEnum.Iron4
+            };
+
+            return validValues.Contains(TierDivision) && (PreviousSeasonTierDivision == null || validValues.Contains(PreviousSeasonTierDivision.Value));
+        }
+
         //Remove empty views
         public void RemoveEmptyViewsForDb()
         {

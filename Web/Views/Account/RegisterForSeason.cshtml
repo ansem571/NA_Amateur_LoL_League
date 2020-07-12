@@ -17,12 +17,16 @@ else
     if (!Model.IsValid || isAdmin)
     {
         <div>
-            <p>
+            <p style="width:50%">
                 Sign up for the new Season. Have you read and Agreed to the Rules and Conditions of the League?
                 If you have not read the rules refer to the "About" page from the navbar above.
-                By paying, you agree to our rules and will abide by them.
+            </p><p style="width:50%">
+                By clicking, you agree to our rules and will abide by them. Register for CEAL Pro Play by click the checkbox and register below.
             </p>
-            <input type="checkbox" onchange="enableSignup()" />
+            <div class="row">
+                Ceal Pro Play
+                <input type="checkbox" onchange="enableSignup()" />
+            </div>
         </div>
 
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" ID="PaypalLink" style="display: none">
@@ -31,6 +35,31 @@ else
             <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
             <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
         </form>
+
+        if (Model.IsAcademyEligable() || isAdmin)
+        {
+            <div>
+                <p style="width:50%">
+                    You are eligable to join Academy this Season if you so choose. You can still sign up to join the regular pool of players,
+                    but know you will have to work harder for it.
+                </p><p style="width:50%">
+                    If you have not read the rules refer to the "About" page from the navbar above. By clicking, you agree to our rules and will abide by them.
+                    If you wish to join the CEAL Academy, please click the checkbox and register below.
+                </p>
+                <div class="row">
+                    Ceal Academy
+                    <input type="checkbox" onchange="enableSignup2()" />
+                </div>
+            </div>
+        }
+
+
+        if (Model.IsAcademyEligable() || isAdmin)
+        {
+            <form method="get" asp-controller="Account" asp-action="RegisterForAcademy" id="AcademyLink" style="display: none;color:black;">
+                <button type="submit">Register for Academy</button>
+            </form>
+        }
     }
     else if (Model.IsValid)
     {
@@ -42,6 +71,14 @@ else
 <script>
     function enableSignup() {
         var x = document.getElementById("PaypalLink");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+    function enableSignup2() {
+        var x = document.getElementById("AcademyLink");
         if (x.style.display === "none") {
             x.style.display = "block";
         } else {
