@@ -31,7 +31,7 @@ namespace Domain.Views
 
         public string StatusMessage { get; set; }
 
-        public bool IsAcademy { get; set; }
+        public bool IsAcademyPlayer { get; set; }
 
         public bool IsAcademyEligable()
         {

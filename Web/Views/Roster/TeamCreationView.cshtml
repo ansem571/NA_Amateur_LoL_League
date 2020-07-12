@@ -1,5 +1,5 @@
 ﻿@using Domain.Enums
-@model List<Domain.Views.RequestedPlayersView>
+@model Dictionary<bool, List<Domain.Views.RequestedPlayersView>>
 @{
     ViewBag.Title = "Team Creation";
 }
@@ -7,62 +7,74 @@
 <h2>@ViewData["Title"]</h2>
 @if (@Model.Any())
 {
-    <table class="table table-bordered">
-        <tr>
-            @{
-                var minTeamCount = 5;
-                var maxTeamSize = Model.Max(x => x.Summoners.Count);
-                var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
-
-                for (var i = 0; i < teamCount; i++)
-                {
-                    var index = i + 1;
-                    <th>
-                        <div>
-
-                            @if (index > minTeamCount)
-                            {
-                                <div>Sub@(index - minTeamCount)</div>
-                            }
-                            else
-                            {
-                                <div>@((SummonerRoleEnum) index)</div>
-                            }
-                        </div>
-                    </th>
-                }
-            }
-            <th>Looking For</th>
-        </tr>
-        @foreach (var group in Model)
+    foreach (var kvp in Model)
+    {
+        if (kvp.Key)
         {
+            <div>Academy Players</div>
+        }
+        if (!kvp.Key)
+        {
+            <div>Non-Academy Players</div>
+        }
+        var list = kvp.Value;
+        <table class="table table-bordered">
             <tr>
                 @{
-                    var unused = new List<SummonerRoleEnum>
+                    var minTeamCount = 5;
+                    var maxTeamSize = list.Max(x => x.Summoners.Count);
+                    var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+                    for (var i = 0; i < teamCount; i++)
+                    {
+                        var index = i + 1;
+                        <th>
+                            <div>
+
+                                @if (index > minTeamCount)
+                                {
+                                    <div>Sub@(index - minTeamCount)</div>
+                                }
+                                else
+                                {
+                                    <div>@((SummonerRoleEnum)index)</div>
+                                }
+                            </div>
+                        </th>
+                    }
+                }
+                <th>Looking For</th>
+            </tr>
+            @foreach (var group in list)
+            {
+                <tr>
+                    @{
+                        var unused = new List<SummonerRoleEnum>
                     {
                         SummonerRoleEnum.Top, SummonerRoleEnum.Jungle, SummonerRoleEnum.Mid, SummonerRoleEnum.Adc, SummonerRoleEnum.Sup
                     };
-                    for (var index = 0; index < group.Summoners.Count; index++)
-                    {
-                        var player = group.Summoners[index];
-                        if (string.IsNullOrEmpty(player.SummonerName))
+                        for (var index = 0; index < group.Summoners.Count; index++)
                         {
-                            <td>Unfilled</td>
+                            var player = group.Summoners[index];
+                            if (string.IsNullOrEmpty(player.SummonerName))
+                            {
+                                <td>Unfilled</td>
+                            }
+                            if (!string.IsNullOrEmpty(player.SummonerName))
+                            {
+                                <td>
+                                    <div>@player.SummonerName - @player.Rank</div>
+                                    @if (index > 4)
+                                    {
+                                        <div> - @player.RoleForTeam</div>
+                                    }
+                                </td>
+                            }
                         }
-                        if (!string.IsNullOrEmpty(player.SummonerName))
-                        {
-                            <td>
-                                <div>@player.SummonerName - @player.Rank</div>
-                                @if (index > 4)
-                                {
-                                    <div> - @player.RoleForTeam</div>
-                                }
-                            </td>
-                        }
+                        <td>@group.LookingForString</td>
                     }
-                    <td>@group.LookingForString</td>
-                }
-            </tr>
-        }
-    </table>
+                </tr>
+            }
+        </table>
+    }
 }

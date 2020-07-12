@@ -226,6 +226,10 @@ namespace Domain.Services.Implementations
             var summoners = (await _summonerInfoRepository.GetAllValidSummonersAsync()).ToList();
             var summonerEntity = summoners.First(x => x.UserId == user.Id);
             summoners.Remove(summonerEntity);
+            if (summonerEntity.IsAcademyPlayer)
+            {
+                summoners = summoners.Where(x => x.IsAcademyPlayer).ToList();
+            }
 
             var requestedSummonerEntities = (await _requestedSummonerRepository.ReadAllForSummonerAsync(summonerEntity.Id, seasonInfo.Id)).ToList();
             var view = new SummonerRequestView
@@ -429,7 +433,7 @@ namespace Domain.Services.Implementations
             return partialSeasonView;
         }
 
-        public async Task<List<RequestedPlayersView>> GetRequestedPlayersAsync()
+        public async Task<Dictionary<bool, List<RequestedPlayersView>>> GetRequestedPlayersAsync()
         {
             var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
@@ -440,10 +444,18 @@ namespace Domain.Services.Implementations
 
             var onRosters = new List<string>();
             var usedSummoners = new List<Guid>();
-            var tempTeams = new List<RequestedPlayersView>();
+            var nonAcademy = new List<RequestedPlayersView>();
+            var academy = new List<RequestedPlayersView>();
+            var dictionary = new Dictionary<bool, List<RequestedPlayersView>>
+            {
+                {true, academy },
+                {false, nonAcademy }
+            };
+
             foreach (var requestedList in requests.Values)
             {
                 var summoner = summoners[requestedList.First().SummonerId];
+                var list = summoner.IsAcademyPlayer ? dictionary[true] : dictionary[false];
                 if (!usedSummoners.Contains(summoner.Id))
                 {
                     usedSummoners.Add(summoner.Id);
@@ -462,7 +474,7 @@ namespace Domain.Services.Implementations
                     Rank = summonerMapped.TierDivision
                 };
 
-                var existingGroup = tempTeams.FirstOrDefault(x => x.Summoners.Contains(partial));
+                var existingGroup = list.FirstOrDefault(x => x.Summoners.Contains(partial));
                 if (existingGroup == null)
                 {
                     existingGroup = new RequestedPlayersView
@@ -499,7 +511,7 @@ namespace Domain.Services.Implementations
                         Rank = requestedMapped.TierDivision
                     };
 
-                    var view = tempTeams.FirstOrDefault(x => x.Summoners.Contains(requestedPartail));
+                    var view = list.FirstOrDefault(x => x.Summoners.Contains(requestedPartail));
                     if (view == null)
                     {
                         existingGroup.Summoners.Add(requestedPartail);
@@ -518,11 +530,11 @@ namespace Domain.Services.Implementations
                     }
                 }
 
-                var oldGroup = tempTeams.FirstOrDefault(x => x.Id == existingGroup.Id);
+                var oldGroup = list.FirstOrDefault(x => x.Id == existingGroup.Id);
                 if (oldGroup == null)
                 {
                     existingGroup.Summoners = existingGroup.Summoners.Distinct().ToList();
-                    tempTeams.Add(existingGroup);
+                    list.Add(existingGroup);
                 }
                 else
                 {
@@ -539,7 +551,8 @@ namespace Domain.Services.Implementations
             foreach (var summonerInfoEntity in summoners.Values)
             {
                 var summonerMapped = _summonerMapper.Map(summonerInfoEntity);
-                tempTeams.Add(new RequestedPlayersView
+                var list = summonerMapped.IsAcademyPlayer ? dictionary[true] : dictionary[false];
+                list.Add(new RequestedPlayersView
                 {
                     Summoners = new List<PartialSummonerView>
                     {
@@ -553,14 +566,14 @@ namespace Domain.Services.Implementations
                 });
             }
 
-            var tempList = new List<RequestedPlayersView>(tempTeams);
+            var tempList = new List<RequestedPlayersView>(nonAcademy);
             foreach (var tempTeam in tempList)
             {
                 var summonerNames = tempTeam.Summoners.Select(x => x.SummonerName).ToList();
                 var match = summonerNames.Intersect(onRosters);
                 if (match.Any())
                 {
-                    tempTeams.Remove(tempTeam);
+                    nonAcademy.Remove(tempTeam);
                 }
 
                 tempTeam.CleanupList();
@@ -572,7 +585,7 @@ namespace Domain.Services.Implementations
 
             }
 
-            return tempTeams;
+            return dictionary;
         }
 
         public async Task<List<string>> GetAllValidPlayers(string homeTeamName, string awayTeamName)

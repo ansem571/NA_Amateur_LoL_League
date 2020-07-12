@@ -15,7 +15,7 @@ namespace Domain.Services.Interfaces
         Task<SummonerRequestView> GetRequestedSummonersAsync(UserEntity user);
         Task<bool> UpdateSummonerRequestsAsync(UserEntity user, SummonerRequestView view);
 
-        Task<List<RequestedPlayersView>> GetRequestedPlayersAsync();
+        Task<Dictionary<bool, List<RequestedPlayersView>>> GetRequestedPlayersAsync();
         Task<FpSummonerView> GetFpSummonerView();
 
         Task<SeasonInfoViewPartial> GetSeasonInfoAsync();
