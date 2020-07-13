@@ -18,13 +18,20 @@ else
     {
         <div>
             <p style="width:50%">
+                To anyone signing up for this season, please note that you are only allowed to sign up for one group. By clicking the "Register for Ceal" button, you will not be able to sign up for CEAL Academy and vice versa.
+            </p>
+            <p style="width:50%">
+                You do not need to register here to sign up as a caster. You only need to mark yourself as an e-sub on your SummonerInfo page.
+            </p>
+            <br />
+            <p style="width:50%">
                 Sign up for the new Season. Have you read and Agreed to the Rules and Conditions of the League?
                 If you have not read the rules refer to the "About" page from the navbar above.
             </p><p style="width:50%">
-                By clicking, you agree to our rules and will abide by them. Register for CEAL Pro Play by click the checkbox and register below.
+                By clicking, you agree to our rules and will abide by them. Register for CEAL by click the checkbox and register below.
             </p>
             <div class="row">
-                Ceal Pro Play
+                Register for Ceal
                 <input type="checkbox" onchange="enableSignup()" />
             </div>
         </div>
@@ -35,6 +42,8 @@ else
             <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
             <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
         </form>
+
+        <br />
 
         if (Model.IsAcademyEligable() || isAdmin)
         {
@@ -47,7 +56,7 @@ else
                     If you wish to join the CEAL Academy, please click the checkbox and register below.
                 </p>
                 <div class="row">
-                    Ceal Academy
+                    Register For Ceal Academy
                     <input type="checkbox" onchange="enableSignup2()" />
                 </div>
             </div>

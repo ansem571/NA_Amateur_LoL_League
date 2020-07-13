@@ -23,5 +23,6 @@ namespace Domain.Views
         public Guid RosterId { get; set; }
         public bool IsRegistered { get; set; }
         public bool IsEsubOnly { get; set; }
+        public bool IsAcademyPlayer { get; set; }
     }
 }

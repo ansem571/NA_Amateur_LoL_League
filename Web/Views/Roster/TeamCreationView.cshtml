@@ -11,11 +11,11 @@
     {
         if (kvp.Key)
         {
-            <div>Academy Players</div>
+            <div>Ceal Academy Players</div>
         }
         if (!kvp.Key)
         {
-            <div>Non-Academy Players</div>
+            <div>Ceal Players</div>
         }
         var list = kvp.Value;
         <table class="table table-bordered">
@@ -47,33 +47,41 @@
             </tr>
             @foreach (var group in list)
             {
-                <tr>
-                    @{
-                        var unused = new List<SummonerRoleEnum>
-                    {
+        <tr>
+            @{
+                var unused = new List<SummonerRoleEnum>
+    {
                         SummonerRoleEnum.Top, SummonerRoleEnum.Jungle, SummonerRoleEnum.Mid, SummonerRoleEnum.Adc, SummonerRoleEnum.Sup
                     };
-                        for (var index = 0; index < group.Summoners.Count; index++)
+                for (var index = 0; index < teamCount; index++)
+                {
+                    if (index < group.Summoners.Count)
+                    {
+                        var player = group.Summoners[index] ?? null;
+                        if (!string.IsNullOrEmpty(player.SummonerName))
                         {
-                            var player = group.Summoners[index];
-                            if (string.IsNullOrEmpty(player.SummonerName))
-                            {
-                                <td>Unfilled</td>
-                            }
-                            if (!string.IsNullOrEmpty(player.SummonerName))
-                            {
-                                <td>
-                                    <div>@player.SummonerName - @player.Rank</div>
-                                    @if (index > 4)
-                                    {
-                                        <div> - @player.RoleForTeam</div>
-                                    }
-                                </td>
-                            }
+                            <td>
+                                <div>@player.SummonerName - @player.Rank</div>
+                                @if (index > 4)
+                                {
+                                    <div> - @player.RoleForTeam</div>
+                                }
+                            </td>
                         }
-                        <td>@group.LookingForString</td>
+                        else
+                        {
+                            <td>Unfilled</td>
+                        }
                     }
-                </tr>
+                    else
+                    {
+                        <td>Unfilled</td>
+                    }
+
+                }
+                <td>@group.LookingForString</td>
+            }
+        </tr>
             }
         </table>
     }

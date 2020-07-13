@@ -383,7 +383,8 @@ namespace Domain.Services.Implementations
                                 OpGgUrl = summoner.OpGGUrlLink,
                                 TeamName = team.Value.TeamName,
                                 IsRegistered = summoner.IsValidPlayer,
-                                IsEsubOnly = mapped.IsSubOnly
+                                IsEsubOnly = mapped.IsSubOnly,
+                                IsAcademyPlayer = mapped.IsAcademyPlayer
                             });
                         }
                     }
@@ -412,7 +413,8 @@ namespace Domain.Services.Implementations
                         OpGgUrl = mapped.OpGgUrl,
                         TeamName = "Unassigned",
                         IsEsubOnly = mapped.IsSubOnly,
-                        IsRegistered = mapped.IsValid
+                        IsRegistered = mapped.IsValid,
+                        IsAcademyPlayer = mapped.IsAcademyPlayer
                     });
                 }
             }

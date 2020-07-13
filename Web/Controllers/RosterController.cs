@@ -51,6 +51,7 @@ namespace Web.Controllers
             ViewBag.TierDivision = sortOrder == "TierDivision" ? "tierDivision_desc" : "TierDivision";
             ViewBag.TeamName = sortOrder == "TeamName" ? "teamName_desc" : "TeamName";
             ViewBag.ESub = sortOrder == "ESub" ? "ESub_desc" : "ESub";
+            ViewBag.AcademyPlayer = sortOrder == "AcademyPlayer" ? "AcademyPlayer_desc" : "AcademyPlayer";
 
             var model = await _accountService.GetFpSummonerView();
 
@@ -99,6 +100,16 @@ namespace Web.Controllers
                 case "ESub_desc":
                     {
                         model.SummonerInfos = model.SummonerInfos.OrderByDescending(x => x.IsEsubOnly).ToList();
+                        break;
+                    }
+                case "AcademyPlayer":
+                    {
+                        model.SummonerInfos = model.SummonerInfos.OrderBy(x => x.IsAcademyPlayer).ToList();
+                        break;
+                    }
+                case "AcademyPlayer_desc":
+                    {
+                        model.SummonerInfos = model.SummonerInfos.OrderByDescending(x => x.IsAcademyPlayer).ToList();
                         break;
                     }
                 default:
