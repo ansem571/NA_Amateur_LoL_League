@@ -38,7 +38,8 @@ namespace Domain.Mappers.Implementations
                 OpGgUrl = entity.OpGGUrlLink,
                 IsValid = entity.IsValidPlayer,
                 IsSubOnly = entity.IsSubOnly ?? false,
-                IsAcademyPlayer = entity.IsAcademyPlayer
+                IsAcademyPlayer = entity.IsAcademyPlayer,
+                DiscordHandle = entity.DiscordHandle
             };
         }
 
@@ -63,7 +64,8 @@ namespace Domain.Mappers.Implementations
                 CurrentLp = view.CurrentLp,
                 IsSubOnly = view.IsSubOnly,
                 TeamRoleId = view.TeamRole != SummonerRoleEnum.None ? _summonerRoleMapper.Map(view.TeamRole) : default(Guid?),
-                IsAcademyPlayer = view.IsAcademyPlayer
+                IsAcademyPlayer = view.IsAcademyPlayer,
+                DiscordHandle = view.DiscordHandle
             };
         }
 
@@ -92,7 +94,8 @@ namespace Domain.Mappers.Implementations
                 PlayerStats = stats,
                 IsSubOnly = entity.IsSubOnly ?? false,
                 TeamRole = entity.TeamRoleId == null ? _summonerRoleMapper.Map(entity.RoleId) : _summonerRoleMapper.Map(entity.TeamRoleId.Value),
-                IsAcademyPlayer = entity.IsAcademyPlayer
+                IsAcademyPlayer = entity.IsAcademyPlayer,
+                DiscordHandle = entity.DiscordHandle
             };
         }
 
@@ -128,7 +131,8 @@ namespace Domain.Mappers.Implementations
                 IsValidPlayer = view.IsValid,
                 CurrentLp = view.CurrentLp,
                 IsSubOnly = view.IsSubOnly,
-                IsAcademyPlayer = view.IsAcademyPlayer
+                IsAcademyPlayer = view.IsAcademyPlayer,
+                DiscordHandle = view.DiscordHandle
             };
         }
 

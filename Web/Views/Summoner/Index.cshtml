@@ -31,6 +31,10 @@
                 <input asp-for="SummonerName" class="form-control" placeholder="Your name as it appears in client" />
             </div>
             <div class="form-group">
+                <label asp-for="DiscordHandle"></label>
+                <input asp-for="DiscordHandle" class="form-control" placeholder="Your Discord Handle with # so we can find you after you joined." />
+            </div>
+            <div class="form-group">
                 <label asp-for="Role"></label>
                 <select asp-items="Html.GetEnumSelectList<SummonerRoleEnum>()" asp-for="Role" class="form-control"></select>
             </div>

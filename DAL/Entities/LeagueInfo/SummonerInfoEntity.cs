@@ -22,5 +22,6 @@ namespace DAL.Entities.LeagueInfo
         public DateTime? UpdatedOn { get; set; }
         public Guid? PreviousSeasonRankId { get; set; }
         public bool IsAcademyPlayer { get; set; }
+        public string DiscordHandle { get; set; }
     }
 }

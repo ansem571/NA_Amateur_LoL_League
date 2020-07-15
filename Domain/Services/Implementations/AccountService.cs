@@ -384,7 +384,8 @@ namespace Domain.Services.Implementations
                                 TeamName = team.Value.TeamName,
                                 IsRegistered = summoner.IsValidPlayer,
                                 IsEsubOnly = mapped.IsSubOnly,
-                                IsAcademyPlayer = mapped.IsAcademyPlayer
+                                IsAcademyPlayer = mapped.IsAcademyPlayer,
+                                DiscordHandle = mapped.DiscordHandle
                             });
                         }
                     }
@@ -414,7 +415,8 @@ namespace Domain.Services.Implementations
                         TeamName = "Unassigned",
                         IsEsubOnly = mapped.IsSubOnly,
                         IsRegistered = mapped.IsValid,
-                        IsAcademyPlayer = mapped.IsAcademyPlayer
+                        IsAcademyPlayer = mapped.IsAcademyPlayer,
+                        DiscordHandle = mapped.DiscordHandle
                     });
                 }
             }

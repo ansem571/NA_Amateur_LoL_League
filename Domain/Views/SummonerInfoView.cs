@@ -33,6 +33,9 @@ namespace Domain.Views
 
         public bool IsAcademyPlayer { get; set; }
 
+        [Required]
+        public string DiscordHandle { get; set; }
+
         public bool IsAcademyEligable()
         {
             var validValues = new List<TierDivisionEnum>

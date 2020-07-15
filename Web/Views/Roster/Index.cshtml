@@ -22,6 +22,7 @@
         <th>@Html.ActionLink(string.Concat("Team Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.TeamName })</th>
         <th>@Html.ActionLink(string.Concat("E-Sub only ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.ESub })</th>
         <th>@Html.ActionLink(string.Concat("Academy Player ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.AcademyPlayer })</th>
+        <th>Discord Handle</th>
     </tr>
     @foreach (var item in Model.SummonerInfos)
     {
@@ -57,6 +58,7 @@
             }
             <td>@item.IsEsubOnly</td>
             <td>@item.IsAcademyPlayer</td>
+            <td>@item.DiscordHandle</td>
         </tr>
     }
 </table>

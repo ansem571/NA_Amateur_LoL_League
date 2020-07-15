@@ -24,5 +24,6 @@ namespace Domain.Views
         public bool IsRegistered { get; set; }
         public bool IsEsubOnly { get; set; }
         public bool IsAcademyPlayer { get; set; }
+        public string DiscordHandle { get; set; }
     }
 }
