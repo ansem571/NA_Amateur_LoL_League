@@ -569,24 +569,26 @@ namespace Domain.Services.Implementations
                     }
                 });
             }
-
-            var tempList = new List<RequestedPlayersView>(nonAcademy);
-            foreach (var tempTeam in tempList)
+            foreach (var list in dictionary.Values)
             {
-                var summonerNames = tempTeam.Summoners.Select(x => x.SummonerName).ToList();
-                var match = summonerNames.Intersect(onRosters);
-                if (match.Any())
+                var tempList = new List<RequestedPlayersView>(list);
+                foreach (var tempTeam in tempList)
                 {
-                    nonAcademy.Remove(tempTeam);
-                }
+                    var summonerNames = tempTeam.Summoners.Select(x => x.SummonerName).ToList();
+                    var match = summonerNames.Intersect(onRosters);
+                    if (match.Any())
+                    {
+                        list.Remove(tempTeam);
+                    }
 
-                tempTeam.CleanupList();
-                var missingCount = TeamRosterMaxCount - tempTeam.Summoners.Count;
-                if (missingCount > 0)
-                {
-                    tempTeam.Summoners.AddRange(AddEmptyPartialViews(missingCount));
-                }
+                    tempTeam.CleanupList();
+                    var missingCount = TeamRosterMaxCount - tempTeam.Summoners.Count;
+                    if (missingCount > 0)
+                    {
+                        tempTeam.Summoners.AddRange(AddEmptyPartialViews(missingCount));
+                    }
 
+                }
             }
 
             return dictionary;

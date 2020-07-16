@@ -18,6 +18,10 @@
             <div>Ceal Players</div>
         }
         var list = kvp.Value;
+        if (!list.Any())
+        {
+            continue;
+        }
         <table class="table table-bordered">
             <tr>
                 @{
