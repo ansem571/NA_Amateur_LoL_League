@@ -26,7 +26,7 @@
     <div class="col-md-6">
         <form method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
-            <input type="hidden" name="IsAcademyPlayer" value="IsAcademyPlayer" />
+            <input type="hidden" name="@Model.IsAcademyPlayer" value="@Model.IsAcademyPlayer" />
             <div class="form-group">
                 <label asp-for="SummonerName"></label>
                 <input asp-for="SummonerName" class="form-control" placeholder="Your name as it appears in client" />
