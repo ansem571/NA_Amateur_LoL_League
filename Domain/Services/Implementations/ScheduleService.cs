@@ -144,22 +144,7 @@ namespace Domain.Services.Implementations
                 var scheduleEntities = new List<ScheduleEntity>();
                 foreach (var division in divisions)
                 {
-                    if (!division.Key.Contains("Freljord"))
-                    {
-                        continue;
-                    }
                     var teamNames = division.Value.OrderBy(x => x.TeamTierScore).Select(x => x.TeamName).ToList();
-                    //var newOrder = new List<string>
-                    //{
-                    //    teamNames[2],
-                    //    teamNames[0],
-                    //    teamNames[6],
-                    //    teamNames[3],
-                    //    teamNames[5],
-                    //    teamNames[1],
-                    //    teamNames[4],
-
-                    //};
 
                     var views = GenerateRoundRobin(teamNames);
                     foreach (var view in views)

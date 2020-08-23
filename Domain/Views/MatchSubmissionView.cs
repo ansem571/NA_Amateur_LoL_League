@@ -90,6 +90,8 @@ namespace Domain.Views
         [Required]
         public string MatchHistoryLink { get; set; }
 
+        public string MatchReplayUrl { get; set; }
+
         /// <summary>
         /// For regular season, will just flip sides for game 2
         /// </summary>

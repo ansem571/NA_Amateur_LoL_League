@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using CsvHelper;
@@ -65,10 +67,21 @@ namespace Domain.Services.Implementations
 
             var csvDataFile = CreateCsvDataFile(view);
 
-            await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", "Match result for subject", view.FileName, new List<Attachment>
+            return await SendRoflFilesAsync(view, csvDataFile);
+        }
+
+        public async Task<bool> SendRoflFilesAsync(MatchSubmissionView view, string csvDataFile)
+        {
+            var attachments = new List<Attachment>();
+            if (!csvDataFile.IsNullOrEmpty())
             {
-                new Attachment(csvDataFile)
-            });
+                attachments.Add(new Attachment(csvDataFile));
+            }
+            var messageBody = "Match result for subject: ";
+            var urls = view.GameInfos.Where(x => !x.MatchReplayUrl.IsNullOrEmpty()).Select(x => x.MatchReplayUrl).ToList();
+            messageBody += string.Join(", ", urls);
+
+            await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", messageBody, view.FileName, attachments);
 
             return true;
         }
@@ -96,7 +109,7 @@ namespace Domain.Services.Implementations
 
             foreach (var gameInfo in view.GameInfos)
             {
-                
+
 
                 if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
                 {
@@ -184,7 +197,7 @@ namespace Domain.Services.Implementations
         }
 
         public void CollectMatchMvpData(MatchSubmissionView view, List<MatchDetailContract> matchList, Dictionary<string, SummonerInfoEntity> registeredPlayers,
-            GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, List<MatchMvpEntity> updateMvpDetails, 
+            GameInfo gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, List<MatchMvpEntity> updateMvpDetails,
             List<MatchMvpEntity> insertMvpDetails, SummonerInfoEntity userPlayer)
         {
             var validMvpPlayers = new List<Guid>();
@@ -228,7 +241,7 @@ namespace Domain.Services.Implementations
         }
 
         public async Task CollectPlayerMatchDetailsAsync(MatchSubmissionView view, Match riotMatch, ChampionListStatic champions, GameInfo gameInfo,
-            Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration, SeasonInfoEntity seasonInfo, 
+            Dictionary<string, SummonerInfoEntity> registeredPlayers, TimeSpan gameDuration, SeasonInfoEntity seasonInfo,
             Dictionary<MatchDetailKey, MatchDetailEntity> matchDictionary, List<MatchDetailContract> matchList, Guid divisionId,
             List<ChampionStatsEntity> championDetails)
         {
@@ -462,7 +475,7 @@ namespace Domain.Services.Implementations
                         {
                             if (i == 0)
                             {
-                                csvWriter.WriteField("");
+                                csvWriter.WriteField(gameInfo.MatchReplayUrl);
                                 csvWriter.WriteField(gameInfo.TeamWithSideSelection);
                                 if (gameInfo.HomeTeamForfeit)
                                 {
