@@ -28,12 +28,14 @@ namespace Web.Controllers
         private readonly UrlEncoder _urlEncoder;
         private readonly IAccountService _accountService;
         private readonly IBlacklistRepository _blacklistRepository;
+        private readonly ISummonerInfoRepository _summonerInfoRepository;
 
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
         public ManageController(UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager,
           IEmailService emailSender, ILogger logger, UrlEncoder urlEncoder,
-          IAccountService accountService, IBlacklistRepository blacklistRepository)
+          IAccountService accountService, IBlacklistRepository blacklistRepository,
+          ISummonerInfoRepository summonerInfoRepository)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
@@ -42,6 +44,7 @@ namespace Web.Controllers
             _urlEncoder = urlEncoder ?? throw new ArgumentNullException(nameof(urlEncoder));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _blacklistRepository = blacklistRepository ?? throw new ArgumentNullException(nameof(blacklistRepository));
+            _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
         }
 
         [TempData]
@@ -84,10 +87,15 @@ namespace Web.Controllers
             };
 
             var summonerInfo = await _accountService.GetSummonerViewAsync(user);
+            var summoners = await _accountService.GetFpSummonerView();
+            var referedBy = summoners.SummonerInfos.FirstOrDefault(x => x.UserId == user.ReferalId);
+
             var model = new AccountSummonerJointModel
             {
                 ProfileInfo = accountInfo,
-                SummonerInfo = summonerInfo
+                SummonerInfo = summonerInfo,
+                DiscordNames = summoners.SummonerInfos.Select(x => x.DiscordHandle),
+                ReferedByDiscordHandle = referedBy?.DiscordHandle
             };
             return View(model);
         }
@@ -136,6 +144,14 @@ namespace Web.Controllers
                 {
                     throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
                 }
+            }
+
+            user = await _userManager.GetUserAsync(User);
+            if (user.ReferalId == null && model.ReferedByDiscordHandle != null && model.ReferedByDiscordHandle != model.DefaultReferedByDiscordHandle)
+            {
+                var referedSummoner = await _summonerInfoRepository.GetSummonerByDiscordHandleAsync(model.ReferedByDiscordHandle);
+                user.ReferalId = referedSummoner.UserId;
+                await _userManager.UpdateAsync(user);
             }
 
             StatusMessage = "Your profile has been updated";

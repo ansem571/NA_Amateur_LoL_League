@@ -136,7 +136,8 @@ namespace DAL.Stores
                     [PasswordHash] = @{nameof(UserEntity.PasswordHash)},
                     [PhoneNumber] = @{nameof(UserEntity.PhoneNumber)},
                     [PhoneNumberConfirmed] = @{nameof(UserEntity.PhoneNumberConfirmed)},
-                    [TwoFactorEnabled] = @{nameof(UserEntity.TwoFactorEnabled)}
+                    [TwoFactorEnabled] = @{nameof(UserEntity.TwoFactorEnabled)},
+                    [ReferalId] = @{nameof(UserEntity.ReferalId)}
                     WHERE [Id] = @{nameof(UserEntity.Id)}", user);
             }
 

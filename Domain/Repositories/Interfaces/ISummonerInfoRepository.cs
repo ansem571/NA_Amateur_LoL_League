@@ -14,6 +14,7 @@ namespace Domain.Repositories.Interfaces
         Task<IEnumerable<SummonerInfoEntity>> GetAllForSummonerIdsAsync(IEnumerable<Guid> summonerIds);
         Task<IEnumerable<SummonerInfoEntity>> GetAllForSummonerNamesAsync(IEnumerable<string> summonerNames);
         Task<IEnumerable<SummonerInfoEntity>> GetAllAcademyPlayers();
+        Task<SummonerInfoEntity> GetSummonerByDiscordHandleAsync(string discordHandle);
         Task<bool> InsertAsync(SummonerInfoEntity entity);
         Task<bool> UpdateAsync(IEnumerable<SummonerInfoEntity> entities);
     }

@@ -66,5 +66,10 @@ namespace Domain.Repositories.Implementations
             }
             return await _table.UpdateAsync(entities);
         }
+
+        public async Task<SummonerInfoEntity> GetSummonerByDiscordHandleAsync(string discordHandle)
+        {
+            return (await _table.ReadManyAsync("DiscordHandle = @discordHandle", new { discordHandle })).FirstOrDefault();
+        }
     }
 }

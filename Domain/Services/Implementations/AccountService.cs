@@ -353,7 +353,7 @@ namespace Domain.Services.Implementations
         public async Task<FpSummonerView> GetFpSummonerView()
         {
             var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
-            var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).ToDictionary(x => x.Id, x => x);
+            var summoners = (await _summonerInfoRepository.GetAllSummonersAsync()).Where(x=>!x.DiscordHandle.IsNullOrEmpty()).ToDictionary(x => x.Id, x => x);
             var teams = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).ToDictionary(x => x.Id, x => x);
             var blackLists = (await _blacklistRepository.GetAllAsync()).ToDictionary(x => x.UserId, x => x);
             var usedSummoners = new Dictionary<Guid, SummonerInfoEntity>();
