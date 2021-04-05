@@ -50,13 +50,13 @@
             </div>
             <div class="form-group">
                 <label>Refered To CEAL by</label>
-                @if(Model.ReferedByDiscordHandle != null)
+                @if(Model.ReferredByDiscordHandle != null)
                 {
-                    <label>@Model.ReferedByDiscordHandle</label>
+                    <label>@Model.ReferredByDiscordHandle</label>
                 }
                 else
                 {
-                    <select asp-items="@selectList" asp-for="@Model.ReferedByDiscordHandle">Select User by Discord Handle</select>
+                    <select asp-items="@selectList" asp-for="@Model.ReferredByDiscordHandle">Select User by Discord Handle</select>
                 }
             </div>
             <button type="submit" class="btn btn-default">Save</button>

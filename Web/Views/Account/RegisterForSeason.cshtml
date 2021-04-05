@@ -17,9 +17,9 @@ else
     if (!Model.IsValid || isAdmin)
     {
         <div>
-            <p style="width:50%">
+            @*<p style="width:50%">
                 To anyone signing up for this season, please note that you are only allowed to sign up for one group. By clicking the "Register for Ceal" button, you will not be able to sign up for CEAL Academy and vice versa.
-            </p>
+            </p>*@
             <p style="width:50%">
                 You do not need to register here to sign up as a caster. You only need to mark yourself as an e-sub on your SummonerInfo page.
             </p>
@@ -45,7 +45,7 @@ else
 
         <br />
 
-        if (Model.IsAcademyEligable() || isAdmin)
+        @*if (Model.IsAcademyEligable() || isAdmin)
         {
             <div>
                 <p style="width:50%">
@@ -68,7 +68,7 @@ else
             <form method="post" asp-controller="Account" asp-action="RegisteredForAcademy" id="AcademyLink" style="display: none;color:black;">
                 <button type="submit">Register for Academy</button>
             </form>
-        }
+        }*@
     }
     else if (Model.IsValid)
     {

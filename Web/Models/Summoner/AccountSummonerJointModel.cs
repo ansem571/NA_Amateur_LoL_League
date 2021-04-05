@@ -9,7 +9,7 @@ namespace Web.Models.Summoner
         public IndexViewModel ProfileInfo { get; set; }
         public SummonerInfoView SummonerInfo { get; set; }
         public IEnumerable<string> DiscordNames { get; set; }
-        public string ReferedByDiscordHandle { get; set; }
+        public string ReferredByDiscordHandle { get; set; }
 
         public string DefaultReferedByDiscordHandle => "Select User by their Discord Handle";
 

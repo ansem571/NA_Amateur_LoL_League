@@ -26,9 +26,9 @@
     <div class="col-md-6">
         <form method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group" style="display:none">
+            @*<div class="form-group" style="display:none">
                 <input asp-for="IsAcademyPlayer" type="hidden" value="@Model.IsAcademyPlayer" />
-            </div>
+            </div>*@
             <div class="form-group">
                 <label asp-for="SummonerName"></label>
                 <input asp-for="SummonerName" class="form-control" placeholder="Your name as it appears in client" />
@@ -54,7 +54,7 @@
                 <select asp-items="Html.GetEnumSelectList<TierDivisionEnum>()" asp-for="TierDivision" class="form-control"></select>
             </div>
             <div class="form-group">
-                <label asp-for="PreviousSeasonTierDivision">(if you had a rank in season 9)</label>
+                <label asp-for="PreviousSeasonTierDivision">(if you had a rank in season 10)</label>
                 <select asp-items="Html.GetEnumSelectList<TierDivisionEnum>()" asp-for="PreviousSeasonTierDivision" class="form-control"></select>
             </div>
             <div class="form-group">

@@ -146,7 +146,7 @@ namespace Domain.Services.Implementations
                 {
                     var teamNames = division.Value.OrderBy(x => x.TeamTierScore).Select(x => x.TeamName).ToList();
 
-                    var views = GenerateRoundRobin(teamNames);
+                    var views = GenerateRoundRobin(teamNames, division.Key);
                     foreach (var view in views)
                     {
                         var homeRosterId = division.Value.FirstOrDefault(x => x.TeamName == view.HomeTeam)?.RosterId;
@@ -232,7 +232,7 @@ namespace Domain.Services.Implementations
             return standings;
         }
 
-        private IEnumerable<ScheduleView> GenerateRoundRobin(List<string> teamNames)
+        private IEnumerable<ScheduleView> GenerateRoundRobin(List<string> teamNames, string divisionName)
         {
             var seasonInfo = _rosterService.GetSeasonInfoView().Result;
 
@@ -256,6 +256,14 @@ namespace Domain.Services.Implementations
             for (var week = 0; week < weeks; week++)
             {
                 var date = startDate.AddDays(7 * week);
+                if(divisionName.Contains("Ionia") && week >= 3)
+                {
+                    date = date.AddDays(7);
+                }
+                if (divisionName.Contains("Shurima") && week >= 2)
+                {
+                    date = date.AddDays(7);
+                }
                 var teamIndex = week % teamSize;
                 var firstTeam = teams[teamIndex];
                 var secondTeam = teamNames[0];

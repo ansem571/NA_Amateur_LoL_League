@@ -95,7 +95,7 @@ namespace Web.Controllers
                 ProfileInfo = accountInfo,
                 SummonerInfo = summonerInfo,
                 DiscordNames = summoners.SummonerInfos.Select(x => x.DiscordHandle),
-                ReferedByDiscordHandle = referedBy?.DiscordHandle
+                ReferredByDiscordHandle = referedBy?.DiscordHandle
             };
             return View(model);
         }
@@ -147,9 +147,9 @@ namespace Web.Controllers
             }
 
             user = await _userManager.GetUserAsync(User);
-            if (user.ReferalId == null && model.ReferedByDiscordHandle != null && model.ReferedByDiscordHandle != model.DefaultReferedByDiscordHandle)
+            if (user.ReferalId == null && model.ReferredByDiscordHandle != null && model.ReferredByDiscordHandle != model.DefaultReferedByDiscordHandle)
             {
-                var referedSummoner = await _summonerInfoRepository.GetSummonerByDiscordHandleAsync(model.ReferedByDiscordHandle);
+                var referedSummoner = await _summonerInfoRepository.GetSummonerByDiscordHandleAsync(model.ReferredByDiscordHandle);
                 user.ReferalId = referedSummoner.UserId;
                 await _userManager.UpdateAsync(user);
             }
