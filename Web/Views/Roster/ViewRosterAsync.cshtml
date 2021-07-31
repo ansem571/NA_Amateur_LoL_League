@@ -17,7 +17,7 @@
 <h2>@ViewData["Title"]</h2>
 @{
 
-    if (Model.IsCaptain)
+    if (Model.IsCaptain || userIsTribunal)
     {
         <div class="row">
             <button style="color: black !important" class="btn" onclick="renameTeam()">Rename team?</button>
@@ -275,7 +275,7 @@
                         if (Model.IsCaptain || userIsTribunal)
                         {
                             <td>
-                                <button style="color: black !important" onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.HomeTeam, week.AwayTeam, week.ScheduleId}) + "'");"
+                                <button style="color: black !important" onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.ScheduleId}) + "'");"
                                         class="btn">
                                     Send Match Detail Data
                                 </button>

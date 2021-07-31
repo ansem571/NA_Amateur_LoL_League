@@ -26,9 +26,12 @@ namespace Web.Controllers
         private readonly IMatchDetailService _googleDriveService;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IScheduleRepository _scheduleRepository;
+        private readonly IGameInfoService _gameInfoService;
 
         public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
-            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService, ISummonerInfoRepository summonerInfoRepository, IScheduleRepository scheduleRepository)
+            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService, 
+            ISummonerInfoRepository summonerInfoRepository, IScheduleRepository scheduleRepository,
+            IGameInfoService gameInfoService)
         {
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
@@ -37,7 +40,8 @@ namespace Web.Controllers
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
             _googleDriveService = googleDriveService ?? throw new ArgumentNullException(nameof(googleDriveService));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
-            _scheduleRepository = scheduleRepository;
+            _scheduleRepository = scheduleRepository ?? throw new ArgumentNullException(nameof(scheduleRepository));
+            _gameInfoService = gameInfoService ?? throw new ArgumentNullException(nameof(gameInfoService));
         }
 
         [TempData]
@@ -234,17 +238,21 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SendMatchDataAsync(int weekNumber, string hometeam, string awayteam, Guid scheduleId)
+        public async Task<IActionResult> SendMatchDataAsync(int weekNumber, Guid scheduleId)
         {
-            var playersList = await _accountService.GetAllValidPlayers(hometeam, awayteam);
-            var schedule = await _scheduleRepository.GetScheduleAsync(scheduleId);
+            var scheduleTask = _scheduleRepository.GetScheduleAsync(scheduleId);
+            var schedule = await scheduleTask;
+            var matchInfoTask = _gameInfoService.GetGameInfoForMatch(scheduleId);
+            var matchInfo = await matchInfoTask;
+            var playersList = await _accountService.GetAllValidPlayers(matchInfo.HomeTeam, matchInfo.AwayTeam);
             var view = new MatchSubmissionView
             {
                 Week = !schedule.IsPlayoffMatch ? $"Week {weekNumber}" : $"Playoff {weekNumber}",
-                HomeTeamName = hometeam,
-                AwayTeamName = awayteam,
+                HomeTeamName = matchInfo.HomeTeam,
+                AwayTeamName = matchInfo.AwayTeam,
                 ScheduleId = scheduleId,
-                ValidPlayers = playersList
+                ValidPlayers = playersList,
+                GameInfos = matchInfo.GameInfos
             };
             return View(view);
         }

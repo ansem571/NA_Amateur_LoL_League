@@ -42,10 +42,17 @@ namespace Web
                 "https://casuauleal.com",
                 "http://www.casualeal.com",
                 "https://www.casuauleal.com",
+                "http://ceal.gg",
+                "https://ceal.gg",
             };
             services
                 .AddMemoryCache()
                 .AddMyServices(Configuration)
+                .AddLogging(x=> {
+                    x.ClearProviders();
+                    x.AddConsole();
+                    x.AddDebug();
+                    })
                 .AddCors(options =>
                 {
                     services.AddCors(o => o.AddPolicy("AllowSpecificOrigin", p => p.WithOrigins(origins.ToArray())));
@@ -76,11 +83,11 @@ namespace Web
             services.AddSingleton<IFileProvider>(
                 new PhysicalFileProvider(path));
 
-            Task.Run(() => CreateAdminRole(services)).Wait();
-            Task.Run(() => CreateTribunalRole(services)).Wait();
-            Task.Run(() => CreateModeratorRole(services)).Wait();
+            //Task.Run(() => CreateAdminRole(services)).Wait();
+            //Task.Run(() => CreateTribunalRole(services)).Wait();
+            //Task.Run(() => CreateModeratorRole(services)).Wait();
 
-            DeleteBadImages();
+            //DeleteBadImages();
 
             Task.Run(() => SetupChampionCache(services)).Wait();
             services.AddMvc(o =>
@@ -94,18 +101,13 @@ namespace Web
                 o.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
                 o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
-
         }
 
         private async Task SetupChampionCache(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
             var lookupRepo = builder.GetService<ILookupRepository>();
-            var logger = builder.GetService<ILogger>();
-            GlobalVariables.ChampionEnumCache = new Cache();
             await GlobalVariables.SetupChampionCache(lookupRepo);
-            var thread = new Thread(() => GlobalVariables.UpdateCache(lookupRepo, logger));
-            thread.Start();
         }
 
         private async Task CreateAdminRole(IServiceCollection services)
@@ -148,31 +150,26 @@ namespace Web
             //Add any other user who will NEED Admin privileges 
             var user1 = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com"); //me
             var user2 = await userManager.FindByEmailAsync("ansem571@gmail.com"); //me
-            var user3 = await userManager.FindByEmailAsync("josiahrosendahl@gmail.com"); //foozle
-            //var user4 = await userManager.FindByEmailAsync("gwrobinson2@gmail.com"); //karen
-            //var user5 = await userManager.FindByEmailAsync("michael.spindel05@gmail.com"); //mans
-            var user5 = await userManager.FindByEmailAsync("brandonleekinnaird@gmail.com"); //spanish teacher
-            //var user6 = await userManager.FindByEmailAsync("scatter.catt@gmail.com"); //scatter
-            //var user7 = await userManager.FindByEmailAsync("shadow2097@gmail.com"); //shadow
-            var user8 = await userManager.FindByEmailAsync("morrisonsviewpoint@gmail.com"); //amo
-           // var user9 = await userManager.FindByEmailAsync("gman.mcgee@gmail.com"); //king majora
-            var user10 = await userManager.FindByEmailAsync("Mike_Salinas112@hotmail.com"); //ultimate ace
-            var user11 = await userManager.FindByEmailAsync("syoung4246@gmail.com"); //sunny
-            var user12 = await userManager.FindByEmailAsync("brandoncap@live.com"); //aileronroll
-            var user13 = await userManager.FindByEmailAsync("brennan.lee.artrip@gmail.com"); //eidocles
-            var user14 = await userManager.FindByEmailAsync("christopheringlin@gmail.com"); //ttu phoenix
+            var user3 = await userManager.FindByEmailAsync("brandonleekinnaird@gmail.com"); //spanish teacher
+            var user4 = await userManager.FindByEmailAsync("morrisonsviewpoint@gmail.com"); //amo
+            var user5 = await userManager.FindByEmailAsync("Mike_Salinas112@hotmail.com"); //ultimate ace
+            var user6 = await userManager.FindByEmailAsync("brandoncap@live.com"); //aileronroll
+            var user7 = await userManager.FindByEmailAsync("brennan.lee.artrip@gmail.com"); //eidocles
+            var user8 = await userManager.FindByEmailAsync("christopheringlin@gmail.com"); //ttu phoenix
+            var user9 = await userManager.FindByEmailAsync("nolan-ryder2@hotmail.com"); //dragon ryder
+            var user10 = await userManager.FindByEmailAsync("lifelongtundra@gmail.com"); //tundra
             var users = new List<UserEntity>
             {
                 user1,
                 user2,
                 user3,
+                user4,
                 user5,
+                user6,
+                user7,
                 user8,
-                user10,
-                user11,
-                user12,
-                user13,
-                user14
+                user9,
+                user10
             };
             foreach (var user in users)
             {
@@ -182,8 +179,7 @@ namespace Web
                 }
             }
         }
-
-
+               
         private async Task CreateModeratorRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -201,10 +197,20 @@ namespace Web
 
             var user1 = await userManager.FindByEmailAsync("jadams.macdonnell1@gmail.com");
             var user2 = await userManager.FindByEmailAsync("ansem571@gmail.com");
+            var user3 = await userManager.FindByEmailAsync("xxmadruenoxx@gmail.com"); // Aseeraa
+            var user4 = await userManager.FindByEmailAsync("amajestksniper18@gmail.com"); // we jestin
+            var user5 = await userManager.FindByEmailAsync("itsmrkjc@gmail.com"); //cyinite
+            var user6 = await userManager.FindByEmailAsync("sime.tesevcic@gmail.com"); //slavic goon
+            var user7 = await userManager.FindByEmailAsync("gamingb32@gmail.com"); //GGodzilla123
             var users = new List<UserEntity>
             {
                 user1,
-                user2
+                user2,
+                user3,
+                user4,
+                user5,
+                user6,
+                user7
             };
             foreach (var user in users)
             {
@@ -238,7 +244,14 @@ namespace Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            //app.UseDeveloperExceptionPage();
+            if (env.IsDevelopment())
+            {
+            app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+            }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             app.Map("/health", lapp => lapp.Run(async ctx => ctx.Response.StatusCode = 200));

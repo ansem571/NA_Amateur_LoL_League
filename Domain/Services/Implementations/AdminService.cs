@@ -216,7 +216,7 @@ namespace Domain.Services.Implementations
             var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
             var summoner = (await _summonerInfoRepository.GetAllForSummonerNamesAsync(new List<string> { view.SummonerName })).FirstOrDefault();
-            var roster = await _teamRosterRepository.GetByTeamNameAsync(view.RosterName, seasonInfo.Id);
+            var roster = await _teamRosterRepository.GetByTeamNameAsync(view.RosterName.Trim(), seasonInfo.Id);
 
             if (summoner == null || roster == null)
             {

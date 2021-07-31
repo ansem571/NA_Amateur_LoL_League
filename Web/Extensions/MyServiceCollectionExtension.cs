@@ -135,6 +135,7 @@ namespace Web.Extensions
             services.TryAddSingleton<IPlayoffService, PlayoffService>();
             services.TryAddSingleton<ISeasonInfoService, SeasonInfoService>();
             services.TryAddSingleton<IUserService, UserService>();
+            services.TryAddSingleton<IGameInfoService, GameInfoService>();
             return services;
         }
     }

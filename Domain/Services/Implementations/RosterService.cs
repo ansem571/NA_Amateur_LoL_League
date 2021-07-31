@@ -314,8 +314,11 @@ namespace Domain.Services.Implementations
             {
                 var playerId = playerStat.Key.SummonerId;
                 var playerMvps =
-                    (mvpStats.SelectMany(x => x.Value).Where(x => x.BlueMvp == playerId || x.RedMvp == playerId)).GroupBy(x => (x.TeamScheduleId, x.Game)).ToDictionary(
-                        x => x.Key, x => x.FirstOrDefault());
+                    (mvpStats.SelectMany(x => x.Value)
+                    .Where(x => x.BlueMvp == playerId || x.RedMvp == playerId || 
+                        x.HonoraryBlueOppMvp == playerId || x.HonoraryRedOppMvp == playerId))
+                    .GroupBy(x => (x.TeamScheduleId, x.Game))
+                    .ToDictionary(x => x.Key, x => x.FirstOrDefault());
                 var mvpPoints = 0d;
                 if (playerMvps.Any())
                 {

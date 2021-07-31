@@ -13,5 +13,7 @@ namespace DAL.Entities.LeagueInfo
         public Guid? RedMvp { get; set; }
         public Guid TeamScheduleId { get; set; }
         public int Game { get; set; }
+        public Guid? HonoraryBlueOppMvp { get; set; }
+        public Guid? HonoraryRedOppMvp { get; set; }
     }
 }

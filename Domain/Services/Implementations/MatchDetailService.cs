@@ -36,12 +36,14 @@ namespace Domain.Services.Implementations
         private readonly ITeamPlayerRepository _teamPlayerRepository;
         private readonly ITeamRosterRepository _teamRosterRepository;
         private readonly IAchievementRepository _achievementRepository;
+        private readonly ILookupRepository _lookupRepository;
 
         private readonly string _wwwRootDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
         public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository, ISummonerInfoRepository summonerInfoRepository,
             ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository, IMatchMvpRepository matchMvpRepository,
-            IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository, IAchievementRepository achievementRepository)
+            IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository, 
+            IAchievementRepository achievementRepository, ILookupRepository lookupRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
@@ -55,10 +57,15 @@ namespace Domain.Services.Implementations
             _teamPlayerRepository = teamPlayerRepository ?? throw new ArgumentNullException(nameof(teamPlayerRepository));
             _teamRosterRepository = teamRosterRepository ?? throw new ArgumentNullException(nameof(teamRosterRepository));
             _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));
+            _lookupRepository = lookupRepository ?? throw new ArgumentNullException(nameof(lookupRepository));
         }
 
         public async Task<bool> SendFileData(MatchSubmissionView view, SummonerInfoEntity userPlayer)
         {
+            if (!GlobalVariables.ChampionDictionary.Any())
+            {
+                await GlobalVariables.SetupChampionCache(_lookupRepository);
+            }
             var addMatchStats = await UpdateStatsAsync(view, userPlayer);
             if (!addMatchStats)
             {
@@ -81,7 +88,7 @@ namespace Domain.Services.Implementations
             var urls = view.GameInfos.Where(x => !x.MatchReplayUrl.IsNullOrEmpty()).Select(x => x.MatchReplayUrl).ToList();
             messageBody += string.Join(", ", urls);
 
-            await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", messageBody, view.FileName, attachments);
+            await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", messageBody, view.FileName, attachments, new List<string> { "CEALmodliaison@gmail.com" });
 
             return true;
         }
@@ -170,7 +177,7 @@ namespace Domain.Services.Implementations
                 var riotChampion = champions.Keys[ban.ChampionId].ToLowerInvariant();
                 try
                 {
-                    var ourChampion = GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(riotChampion);
+                    var ourChampion = GlobalVariables.ChampionDictionary[riotChampion];
                     var bannedChampionStat =
                         CreateChampionStat(seasonInfo, divisionId, ourChampion.Id, view.ScheduleId);
                     championDetails.Add(bannedChampionStat);
@@ -205,6 +212,8 @@ namespace Domain.Services.Implementations
 
             registeredPlayers.TryGetValue(gameInfo.BlueMvp.ToLowerInvariant(), out var blueMvp);
             registeredPlayers.TryGetValue(gameInfo.RedMvp.ToLowerInvariant(), out var redMvp);
+            registeredPlayers.TryGetValue(gameInfo.BlueMvp.ToLowerInvariant(), out var honoraryBlueOppMvp);
+            registeredPlayers.TryGetValue(gameInfo.RedMvp.ToLowerInvariant(), out var honoraryRedOppMvp);
 
             if (mvpDetails.TryGetValue(gameInfo.GameNum, out var mvpEntity))
             {
@@ -218,6 +227,17 @@ namespace Domain.Services.Implementations
                     validMvpPlayers.Contains(redMvp.Id))
                 {
                     mvpEntity.RedMvp = redMvp.Id;
+                }
+                if (!string.IsNullOrEmpty(gameInfo.HonoraryBlueOppMvp) && honoraryBlueOppMvp != null && honoraryBlueOppMvp.Id != mvpEntity.HonoraryBlueOppMvp &&
+                    validMvpPlayers.Contains(honoraryBlueOppMvp.Id))
+                {
+                    mvpEntity.HonoraryBlueOppMvp = honoraryBlueOppMvp.Id;
+                }
+
+                if (!string.IsNullOrEmpty(gameInfo.HonoraryRedOppMvp) && honoraryRedOppMvp != null && honoraryRedOppMvp.Id != mvpEntity.HonoraryRedOppMvp &&
+                    validMvpPlayers.Contains(honoraryRedOppMvp.Id))
+                {
+                    mvpEntity.HonoraryRedOppMvp = honoraryRedOppMvp.Id;
                 }
 
                 mvpEntity.UpdatedBy = userPlayer.SummonerName;
@@ -299,7 +319,7 @@ namespace Domain.Services.Implementations
                 //per player
                 var win = participant.Stats.Winner;
                 var loss = !win;
-                var ourChampion = GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(riotChampion);
+                var ourChampion = GlobalVariables.ChampionDictionary[riotChampion];
 
                 var pickedChampionStat = CreateChampionStat(matchStat, seasonInfo, divisionId, win, loss, ourChampion.Id, matchDetail.Id, view.ScheduleId);
                 championDetails.Add(pickedChampionStat);
@@ -451,12 +471,6 @@ namespace Domain.Services.Implementations
 
         private string CreateCsvDataFile(MatchSubmissionView view)
         {
-            var matchCsvsDir = Path.Combine(_wwwRootDirectory, "MatchCsvs");
-            if (!Directory.Exists(matchCsvsDir))
-            {
-                Directory.CreateDirectory(matchCsvsDir);
-            }
-
             var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}-{Guid.NewGuid()}.csv");
 
             using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))

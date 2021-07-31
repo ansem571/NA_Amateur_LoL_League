@@ -110,6 +110,21 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <h4> Honorary Opponent Mvp(s) </h4>
+                        <div class="card col-md-3 pull-left">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].HonoraryBlueOppMvp"></label>
+                                <select asp-items="@playerList" asp-for="@Model.GameInfos[i].HonoraryBlueOppMvp"></select>
+                            </div>
+                        </div>
+                        <div class="card col-md-3 pull-right">
+                            <div class="card-body">
+                                <label asp-for="@Model.GameInfos[i].HonoraryRedOppMvp"></label>
+                                <select asp-items="@playerList" asp-for="@Model.GameInfos[i].HonoraryRedOppMvp"></select>
+                            </div>
+                        </div>
+                    </div>
                     @* Team details For Blue team*@
                     <div class="row">
                         <h4> Blue Team </h4>

@@ -12,6 +12,7 @@ namespace Domain.Repositories.Implementations
         Task<IEnumerable<ChampionStatsEntity>> GetAllChampionStats();
         Task<IEnumerable<ChampionStatsEntity>> GetStatsForPlayerAsync(Guid playerId);
         Task<IEnumerable<ChampionStatsEntity>> GetChampionStatsForPlayerAsync(Guid playerId, Guid championId);
+        Task<IEnumerable<ChampionStatsEntity>> GetChampionStatsForMatchDetailAsync(IEnumerable<Guid> matchDetailIds);
         Task<bool> CreateAsync(IEnumerable<ChampionStatsEntity> entities);
         Task<bool> DeleteByScheduleAsync(Guid teamScheduleId);
     }
@@ -66,6 +67,12 @@ namespace Domain.Repositories.Implementations
                 return true;
             }
             return await _table.DeleteWhereAsync("TeamScheduleId = @teamScheduleId", new {teamScheduleId});
+        }
+
+        public async Task<IEnumerable<ChampionStatsEntity>> GetChampionStatsForMatchDetailAsync(IEnumerable<Guid> matchDetailIds)
+        {
+            var entities = await _table.ReadManyAsync("MatchDetailId in @matchDetailIds", new { matchDetailIds });
+            return entities;
         }
     }
 }

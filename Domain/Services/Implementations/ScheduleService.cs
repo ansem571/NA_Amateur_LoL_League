@@ -256,14 +256,6 @@ namespace Domain.Services.Implementations
             for (var week = 0; week < weeks; week++)
             {
                 var date = startDate.AddDays(7 * week);
-                if(divisionName.Contains("Ionia") && week >= 3)
-                {
-                    date = date.AddDays(7);
-                }
-                if (divisionName.Contains("Shurima") && week >= 2)
-                {
-                    date = date.AddDays(7);
-                }
                 var teamIndex = week % teamSize;
                 var firstTeam = teams[teamIndex];
                 var secondTeam = teamNames[0];

@@ -26,11 +26,18 @@ namespace Domain.Services.Implementations
             _phoneMapper = phoneMapper ?? throw new ArgumentNullException(nameof(phoneMapper));
         }
 
-        public async Task SendEmailAsync(string to, string messageBody, string subject, IEnumerable<Attachment> attachments = null)
+        public async Task SendEmailAsync(string to, string messageBody, string subject, IEnumerable<Attachment> attachments = null, List<string> additionalTos = null)
         {
             const string fromEmail = "casualesportsamateurleague@gmail.com";
 
             var message = new MailMessage(fromEmail, to, subject, messageBody);
+            if (additionalTos != null)
+            {
+                foreach (var additionalTo in additionalTos)
+                {
+                    message.To.Add(additionalTo);
+                }
+            }
             if (attachments != null)
             {
                 foreach (var attachment in attachments)
@@ -60,7 +67,7 @@ namespace Domain.Services.Implementations
         {
             const string fromEmail = "ansem571@gmail.com";
             var carrierId = _phoneMapper.MapFromEnum(carrier);
-            
+
             //cant confirm email
             if (carrierId == null)
             {
@@ -95,11 +102,11 @@ namespace Domain.Services.Implementations
         {
             var strBuilder = new StringBuilder();
             strBuilder.AppendFormat($"You are almost done creating your account.", Environment.NewLine);
-            strBuilder.AppendFormat($"Please confirm your account by clicking this <a href='{HtmlEncoder.Default.Encode(link)}'>link</a>.", 
+            strBuilder.AppendFormat($"Please confirm your account by clicking this <a href='{HtmlEncoder.Default.Encode(link)}'>link</a>.",
                                     Environment.NewLine, Environment.NewLine);
             strBuilder.Append(GetAdditionalText());
-            
-            return SendEmailAsync(email, strBuilder.ToString(), 
+
+            return SendEmailAsync(email, strBuilder.ToString(),
                 "Confirm your email");
         }
 

@@ -39,6 +39,7 @@
         Gnar,
         Gragas,
         Graves,
+        Gwen,
         Hecarim,
         Heimerdinger,
         Illaoi,

@@ -8,11 +8,13 @@
     var user = await UserManager.GetUserAsync(User);
     var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
     var isTribunal = user != null && await UserManager.IsInRoleAsync(user, "Tribunal");
+    var isModerator = user != null && await UserManager.IsInRoleAsync(user, "Moderator");
+
 }
 
 @if (SignInManager.IsSignedIn(User))
 {
-    @if (isAdmin || isTribunal)
+    @if (isAdmin || isTribunal || isModerator)
     {
         <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right" style="margin-right:-10% !important;">
             <ul class="nav navbar-nav navbar-left">

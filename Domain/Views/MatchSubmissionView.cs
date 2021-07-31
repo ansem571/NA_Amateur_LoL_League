@@ -60,11 +60,11 @@ namespace Domain.Views
                    PlayerAdc.Contains(defaultValue) || PlayerSup.Contains(defaultValue);
         }
 
-        public LookupEntity LocalChampionTop => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionTop.ToString().ToLowerInvariant());
-        public LookupEntity LocalChampionJungle => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionJungle.ToString().ToLowerInvariant());
-        public LookupEntity LocalChampionMid => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionMid.ToString().ToLowerInvariant());
-        public LookupEntity LocalChampionAdc => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionAdc.ToString().ToLowerInvariant());
-        public LookupEntity LocalChampionSupport => GlobalVariables.ChampionEnumCache.Get<string, LookupEntity>(ChampionSup.ToString().ToLowerInvariant());
+        public LookupEntity LocalChampionTop => GlobalVariables.ChampionDictionary[ChampionTop.ToString().ToLowerInvariant()];
+        public LookupEntity LocalChampionJungle => GlobalVariables.ChampionDictionary[ChampionJungle.ToString().ToLowerInvariant()];
+        public LookupEntity LocalChampionMid => GlobalVariables.ChampionDictionary[ChampionMid.ToString().ToLowerInvariant()];
+        public LookupEntity LocalChampionAdc => GlobalVariables.ChampionDictionary[ChampionAdc.ToString().ToLowerInvariant()];
+        public LookupEntity LocalChampionSupport => GlobalVariables.ChampionDictionary[ChampionSup.ToString().ToLowerInvariant()];
     }
 
     public class GameInfoPlayer
@@ -106,6 +106,9 @@ namespace Domain.Views
 
         public string BlueMvp { get; set; }
         public string RedMvp { get; set; }
+
+        public string HonoraryBlueOppMvp { get; set; }
+        public string HonoraryRedOppMvp { get; set; }
         public int GameNum { get; set; }
 
         /// <summary>

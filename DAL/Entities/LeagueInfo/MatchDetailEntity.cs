@@ -14,5 +14,7 @@ namespace DAL.Entities.LeagueInfo
         public Guid PlayerId { get; set; }
         public Guid SeasonInfoId { get; set; }
         public bool Winner { get; set; }
+        public bool? Blue { get; set; }
+        public Guid? RoleId { get; set; }
     }
 }

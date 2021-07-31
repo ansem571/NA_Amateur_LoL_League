@@ -15,7 +15,7 @@ using Web.Models.Admin;
 
 namespace Web.Controllers
 {
-    [Authorize(Roles = "Admin, Tribunal")]
+    [Authorize(Roles = "Admin, Tribunal, Moderator")]
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
@@ -43,7 +43,7 @@ namespace Web.Controllers
         [TempData]
         public string StatusMessage { get; set; }
 
-        [Authorize(Roles = "Admin, Tribunal")]
+        [Authorize(Roles = "Admin, Tribunal, Moderator")]
         public IActionResult Index()
         {
             return View(model: StatusMessage);
@@ -95,7 +95,7 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin, Tribunal")]
+        [Authorize(Roles = "Admin, Tribunal, Moderator")]
         public async Task<IActionResult> CreateCaptainAsync()
         {
             var rosters = await _adminService.GetAllRosters();
@@ -108,7 +108,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin, Tribunal")]
+        [Authorize(Roles = "Admin, Tribunal, Moderator")]
         public async Task<IActionResult> CreateCaptainAsync(RosterCaptainViewModel viewModel)
         {
             try
