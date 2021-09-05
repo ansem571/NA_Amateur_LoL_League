@@ -275,7 +275,7 @@
                         if (Model.IsCaptain || userIsTribunal)
                         {
                             <td>
-                                <button style="color: black !important" onclick="@("window.location.href='" + Url.Action("SendMatchDataAsync", "Roster", new {weekNumber, week.ScheduleId}) + "'");"
+                                <button style="color: black !important" onclick="@("window.location.href='" + Url.Action("SendMatchDetailsAsync", "Roster", new {weekNumber, week.ScheduleId}) + "'");"
                                         class="btn">
                                     Send Match Detail Data
                                 </button>

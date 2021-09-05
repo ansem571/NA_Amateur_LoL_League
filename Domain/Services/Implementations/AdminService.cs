@@ -155,16 +155,12 @@ namespace Domain.Services.Implementations
                 }
 
                 var teamsCount = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).Count();
-                if (teamsCount >= 23)
-                {
-                    teamsCount++;
-                }
 
                 var teamTierScore = teamTierScores.OrderByDescending(x => x).Take(MinTeamCountRequirement).Sum();
                 var team = new TeamRosterEntity
                 {
                     Id = Guid.NewGuid(),
-                    TeamName = $"Team{teamsCount}",
+                    TeamName = $"Team{teamsCount+1}",
                     TeamTierScore = teamTierScore / MinTeamCountRequirement,
                     SeasonInfoId = seasonInfo.Id
                 };

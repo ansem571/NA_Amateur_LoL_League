@@ -10,5 +10,6 @@ namespace Domain.Views
         public string AwayTeam { get; set; }
         public Guid ScheduleId { get; set; }
         public List<GameInfo> GameInfos { get; set; }
+        public List<GameDetail> GameDetails { get; set; }
     }
 }

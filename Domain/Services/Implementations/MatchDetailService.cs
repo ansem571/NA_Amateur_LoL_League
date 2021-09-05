@@ -42,7 +42,7 @@ namespace Domain.Services.Implementations
 
         public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository, ISummonerInfoRepository summonerInfoRepository,
             ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository, IMatchMvpRepository matchMvpRepository,
-            IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository, 
+            IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             IAchievementRepository achievementRepository, ILookupRepository lookupRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -77,6 +77,19 @@ namespace Domain.Services.Implementations
             return await SendRoflFilesAsync(view, csvDataFile);
         }
 
+        public async Task<bool> SendFileData(SimplifiedMatchSubmissionView view, SummonerInfoEntity userPlayer)
+        {
+            var addMatchStats = await UpdateStatsAsync(view, userPlayer);
+            if (!addMatchStats)
+            {
+                return false;
+            }
+
+            var csvDataFile = CreateCsvDataFile(view);
+
+            return await SendRoflFilesAsync(view, csvDataFile);
+        }
+
         public async Task<bool> SendRoflFilesAsync(MatchSubmissionView view, string csvDataFile)
         {
             var attachments = new List<Attachment>();
@@ -91,6 +104,60 @@ namespace Domain.Services.Implementations
             await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", messageBody, view.FileName, attachments, new List<string> { "CEALmodliaison@gmail.com" });
 
             return true;
+        }
+
+        public async Task<bool> SendRoflFilesAsync(SimplifiedMatchSubmissionView view, string csvDataFile)
+        {
+            var attachments = new List<Attachment>();
+            if (!csvDataFile.IsNullOrEmpty())
+            {
+                attachments.Add(new Attachment(csvDataFile));
+                foreach (var screenshot in view.GameDetails.Select(x => x.PostGameScreenshot))
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        screenshot.CopyTo(ms);
+                        var fileBytes = ms.ToArray();
+                        var att = new Attachment(new MemoryStream(fileBytes), screenshot.FileName);
+                        attachments.Add(att);
+                    }
+                }
+            }
+            var messageBody = "Match result for subject: ";
+            var urls = view.GameDetails.Where(x => !x.MatchReplayUrl.IsNullOrEmpty()).Select(x => x.MatchReplayUrl).ToList();
+            messageBody += string.Join(", ", urls);
+
+            await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", messageBody, view.FileName, attachments, new List<string> { "CEALmodliaison@gmail.com" });
+
+            return true;
+        }
+
+        private async Task<bool> UpdateStatsAsync(SimplifiedMatchSubmissionView view, SummonerInfoEntity userPlayer)
+        {
+            var registeredPlayersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
+            var previousListedMvpsTask = _matchMvpRepository.ReadAllForTeamScheduleId(view.ScheduleId);
+            var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
+            var mvpDetails = (await previousListedMvpsTask).OrderBy(x => x.Game).ToDictionary(x => x.Game, x => x);
+
+            var insertMvpDetails = new List<MatchMvpEntity>();
+            var updateMvpDetails = new List<MatchMvpEntity>();
+
+            foreach (var gameInfo in view.GameDetails)
+            {
+                if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
+                {
+                    continue;
+                }
+
+                var matchList = new List<MatchDetailContract>();
+
+                CollectMatchMvpData(view, registeredPlayers, gameInfo, mvpDetails, updateMvpDetails, insertMvpDetails, userPlayer);
+            }
+
+            var insertMvpResult = await _matchMvpRepository.CreateAsync(insertMvpDetails);
+            var updateMvpResult = await _matchMvpRepository.UpdateAsync(updateMvpDetails);
+
+            return insertMvpResult && updateMvpResult;
         }
 
         private async Task<bool> UpdateStatsAsync(MatchSubmissionView view, SummonerInfoEntity userPlayer)
@@ -251,6 +318,61 @@ namespace Domain.Services.Implementations
                     Id = Guid.NewGuid(),
                     BlueMvp = blueMvp != null && validMvpPlayers.Contains(blueMvp.Id) ? blueMvp.Id : new Guid?(),
                     RedMvp = redMvp != null && validMvpPlayers.Contains(redMvp.Id) ? redMvp.Id : new Guid?(),
+                    Game = gameInfo.GameNum,
+                    TeamScheduleId = view.ScheduleId,
+                    CreatedBy = userPlayer.SummonerName,
+                    CreatedOn = DateTime.Now
+                };
+                insertMvpDetails.Add(mvpEntity);
+            }
+        }
+
+        public void CollectMatchMvpData(SimplifiedMatchSubmissionView view,
+            Dictionary<string, SummonerInfoEntity> registeredPlayers,
+            GameDetail gameInfo, Dictionary<int, MatchMvpEntity> mvpDetails, List<MatchMvpEntity> updateMvpDetails,
+            List<MatchMvpEntity> insertMvpDetails, SummonerInfoEntity userPlayer)
+        {
+            registeredPlayers.TryGetValue(gameInfo.BlueMvp.ToLowerInvariant(), out var blueMvp);
+            registeredPlayers.TryGetValue(gameInfo.RedMvp.ToLowerInvariant(), out var redMvp);
+            registeredPlayers.TryGetValue(gameInfo.HonoraryBlueOppMvp.ToLowerInvariant(), out var honoraryBlueOppMvp);
+            registeredPlayers.TryGetValue(gameInfo.HonoraryRedOppMvp.ToLowerInvariant(), out var honoraryRedOppMvp);
+
+            if (mvpDetails.TryGetValue(gameInfo.GameNum, out var mvpEntity))
+            {
+                if (!string.IsNullOrEmpty(gameInfo.BlueMvp) && blueMvp != null && blueMvp.Id != mvpEntity.BlueMvp)
+                {
+                    mvpEntity.BlueMvp = blueMvp.Id;
+                }
+
+                if (!string.IsNullOrEmpty(gameInfo.RedMvp) && redMvp != null && redMvp.Id != mvpEntity.RedMvp)
+                {
+                    mvpEntity.RedMvp = redMvp.Id;
+                }
+                if (!string.IsNullOrEmpty(gameInfo.HonoraryBlueOppMvp) && honoraryBlueOppMvp != null && 
+                    honoraryBlueOppMvp.Id != mvpEntity.HonoraryBlueOppMvp)
+                {
+                    mvpEntity.HonoraryBlueOppMvp = honoraryBlueOppMvp.Id;
+                }
+
+                if (!string.IsNullOrEmpty(gameInfo.HonoraryRedOppMvp) && honoraryRedOppMvp != null && 
+                    honoraryRedOppMvp.Id != mvpEntity.HonoraryRedOppMvp)
+                {
+                    mvpEntity.HonoraryRedOppMvp = honoraryRedOppMvp.Id;
+                }
+
+                mvpEntity.UpdatedBy = userPlayer.SummonerName;
+                mvpEntity.UpdatedOn = DateTime.Now;
+                updateMvpDetails.Add(mvpEntity);
+            }
+            else
+            {
+                mvpEntity = new MatchMvpEntity
+                {
+                    Id = Guid.NewGuid(),
+                    BlueMvp = blueMvp?.Id,
+                    RedMvp = redMvp?.Id,
+                    HonoraryBlueOppMvp = honoraryBlueOppMvp?.Id,
+                    HonoraryRedOppMvp = honoraryRedOppMvp?.Id,
                     Game = gameInfo.GameNum,
                     TeamScheduleId = view.ScheduleId,
                     CreatedBy = userPlayer.SummonerName,
@@ -576,6 +698,47 @@ namespace Domain.Services.Implementations
             return csvFile;
         }
 
+        private string CreateCsvDataFile(SimplifiedMatchSubmissionView view)
+        {
+            var csvFile = Path.Combine(_wwwRootDirectory, $"MatchCsvs\\{view.FileName}-{Guid.NewGuid()}.csv");
+
+            using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))
+            {
+                using (var csvWriter = new CsvWriter(writer))
+                {
+                    //csvWriter.WriteField("");
+
+                    var gameNum = 0;
+                    foreach (var gameInfo in view.GameDetails)
+                    {
+                        gameNum++;
+                        WriteHeader(csvWriter, gameNum, gameInfo);
+                        csvWriter.NextRecord();
+                        csvWriter.WriteField("");
+                        csvWriter.WriteField(gameInfo.MatchReplayUrl);
+                        csvWriter.WriteField(gameInfo.TeamOnBlueSide);
+                        if (gameInfo.HomeTeamForfeit)
+                        {
+                            csvWriter.WriteField("AwayTeam by HomeTeam forfeit");
+                            break;
+                        }
+                        if (gameInfo.AwayTeamForfeit)
+                        {
+                            csvWriter.WriteField("HomeTeam by AwayTeam forfeit");
+                            break;
+                        }
+                        csvWriter.WriteField(gameInfo.BlueSideWinner ? "Blue" : "Red");
+                        csvWriter.WriteField(gameInfo.ProdraftSpectateLink);
+                        csvWriter.WriteField(gameInfo.PostGameScreenshot.FileName);
+                        csvWriter.NextRecord();
+                    }
+                }
+                writer.Close();
+            }
+
+            return csvFile;
+        }
+
         private static void WriteHeader(IWriterRow csvWriter, int gameNum)
         {
 
@@ -590,6 +753,17 @@ namespace Domain.Services.Implementations
             csvWriter.WriteField("Red Player");
             csvWriter.WriteField("Red Champion");
 
+        }
+
+        private static void WriteHeader(IWriterRow csvWriter, int gameNum, GameDetail gameDetail)
+        {
+
+            csvWriter.WriteField($"Game {gameNum}");
+            csvWriter.WriteField("Match Replay Url");
+            csvWriter.WriteField("Team on Blue Side");
+            csvWriter.WriteField("Winner");
+            csvWriter.WriteField("ProDraft Spectate Link");
+            csvWriter.WriteField("Post Game Screenshot");
         }
     }
 }

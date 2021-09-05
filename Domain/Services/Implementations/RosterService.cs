@@ -17,7 +17,6 @@ namespace Domain.Services.Implementations
 {
     public class RosterService : IRosterService
     {
-        private readonly ILogger _logger;
         private readonly ISummonerMapper _summonerMapper;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly ITeamPlayerRepository _teamPlayerRepository;
@@ -34,15 +33,13 @@ namespace Domain.Services.Implementations
         private readonly IScheduleRepository _scheduleRepository;
         private readonly IScheduleMapper _scheduleMapper;
 
-        public RosterService(ILogger logger, ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
+        public RosterService(ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, ISeasonInfoRepository seasonInfoRepository,
             IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper,
             IAlternateAccountRepository alternateAccountRepository, IMatchDetailRepository matchDetailRepository, ISummonerRoleMapper roleMapper,
             IMatchMvpRepository matchMvpRepository, IScheduleRepository scheduleRepository, IScheduleMapper scheduleMapper)
         {
-            _logger = logger ??
-                      throw new ArgumentNullException(nameof(logger));
             _summonerMapper = summonerMapper ??
                               throw new ArgumentNullException(nameof(summonerMapper));
             _summonerInfoRepository = summonerInfoRepository ??

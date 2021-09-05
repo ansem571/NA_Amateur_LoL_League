@@ -7,6 +7,7 @@ using Domain.Helpers;
 
 namespace Domain.Views
 {
+    [Obsolete("Currently not in use, will remove if Riot does not update their Match History 9/4/2021")]
     public class MatchSubmissionView
     {
         /// <summary>

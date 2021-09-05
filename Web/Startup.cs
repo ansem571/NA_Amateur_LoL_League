@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -89,7 +90,7 @@ namespace Web
 
             //DeleteBadImages();
 
-            Task.Run(() => SetupChampionCache(services)).Wait();
+            //Task.Run(() => SetupChampionCache(services)).Wait();
             services.AddMvc(o =>
                 {
                     o.Conventions.Add(new CommaSeparatedQueryStringConvention());
@@ -246,11 +247,11 @@ namespace Web
         {
             if (env.IsDevelopment())
             {
-            app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler("/home/Error");
             }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -271,7 +272,7 @@ namespace Web
                     template: "{controller=UserProfile}/{action=PlayerProfile}");
             });
             app.UseCors("CorsPolicy");
-
+            app.UseMiddleware<ErrorMiddleware>();
             app
                 .UseSwagger()
                 .UseSwaggerUI(c =>

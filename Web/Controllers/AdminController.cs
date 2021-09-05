@@ -20,21 +20,17 @@ namespace Web.Controllers
     {
         private readonly IAdminService _adminService;
         private readonly ILogger _logger;
-        private readonly IDivisionService _divisionService;
         private readonly IPlayoffService _playoffService;
-        private readonly ISeasonInfoService _seasonInfoService;
         private readonly IUserService _userService;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IRosterService _rosterService;
 
-        public AdminController(IAdminService adminService, ILogger logger, IDivisionService divisionService, IPlayoffService playoffService, ISeasonInfoService seasonInfoService, 
+        public AdminController(IAdminService adminService, ILogger logger,IPlayoffService playoffService,
             IUserService userService, ISummonerInfoRepository summonerInfoRepository, IRosterService rosterService)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _divisionService = divisionService ?? throw new ArgumentNullException(nameof(divisionService));
             _playoffService = playoffService ?? throw new ArgumentNullException(nameof(playoffService));
-            _seasonInfoService = seasonInfoService ?? throw new ArgumentNullException(nameof(seasonInfoService));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));

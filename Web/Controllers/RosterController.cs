@@ -23,13 +23,13 @@ namespace Web.Controllers
         private readonly UserManager<UserEntity> _userManager;
         private readonly ILogger _logger;
         private readonly IScheduleService _scheduleService;
-        private readonly IMatchDetailService _googleDriveService;
+        private readonly IMatchDetailService _matchDetailService;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IScheduleRepository _scheduleRepository;
         private readonly IGameInfoService _gameInfoService;
 
         public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
-            ILogger logger, IScheduleService scheduleService, IMatchDetailService googleDriveService, 
+            ILogger logger, IScheduleService scheduleService, IMatchDetailService matchDetailService, 
             ISummonerInfoRepository summonerInfoRepository, IScheduleRepository scheduleRepository,
             IGameInfoService gameInfoService)
         {
@@ -38,7 +38,7 @@ namespace Web.Controllers
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
-            _googleDriveService = googleDriveService ?? throw new ArgumentNullException(nameof(googleDriveService));
+            _matchDetailService = matchDetailService ?? throw new ArgumentNullException(nameof(matchDetailService));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
             _scheduleRepository = scheduleRepository ?? throw new ArgumentNullException(nameof(scheduleRepository));
             _gameInfoService = gameInfoService ?? throw new ArgumentNullException(nameof(gameInfoService));
@@ -237,33 +237,34 @@ namespace Web.Controllers
             return RedirectToAction("ViewRosterAsync", new { rosterId });
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> SendMatchDataAsync(int weekNumber, Guid scheduleId)
+        public async Task<IActionResult> SendMatchDetailsAsync(int weekNumber, Guid scheduleId)
         {
             var scheduleTask = _scheduleRepository.GetScheduleAsync(scheduleId);
             var schedule = await scheduleTask;
             var matchInfoTask = _gameInfoService.GetGameInfoForMatch(scheduleId);
             var matchInfo = await matchInfoTask;
             var playersList = await _accountService.GetAllValidPlayers(matchInfo.HomeTeam, matchInfo.AwayTeam);
-            var view = new MatchSubmissionView
+            var view = new SimplifiedMatchSubmissionView
             {
                 Week = !schedule.IsPlayoffMatch ? $"Week {weekNumber}" : $"Playoff {weekNumber}",
                 HomeTeamName = matchInfo.HomeTeam,
                 AwayTeamName = matchInfo.AwayTeam,
                 ScheduleId = scheduleId,
                 ValidPlayers = playersList,
-                GameInfos = matchInfo.GameInfos
+                GameDetails = matchInfo.GameDetails
             };
             return View(view);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendMatchDataAsync(MatchSubmissionView view)
+        public async Task<IActionResult> SendMatchDetailsAsync(SimplifiedMatchSubmissionView view)
         {
             try
             {
                 var user = await _userManager.GetUserAsync(User);
-                view.GameInfos = view.GameInfos.Where(x => x.GamePlayed || x.AwayTeamForfeit || x.HomeTeamForfeit)
+                view.GameDetails = view.GameDetails.Where(x => x.GamePlayed || x.AwayTeamForfeit || x.HomeTeamForfeit)
                     .ToList();
                 var isNullCheck = false;
                 if (user == null)
@@ -271,57 +272,22 @@ namespace Web.Controllers
                     throw new Exception("You were logged out unexpectedly. Im sorry.");
                 }
                 var userPlayer = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
-                foreach (var gameInfo in view.GameInfos)
+                foreach (var gameInfo in view.GameDetails)
                 {
-                    isNullCheck = Properties<GameInfo>.HasEmptyProperties(gameInfo);
-                    if (isNullCheck)
+                    isNullCheck = Properties<GameDetail>.HasEmptyProperties(gameInfo);
+                    if(isNullCheck)
                     {
-                        if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
-                        {
-                            isNullCheck = false;
-                            continue;
-                        }
-
                         break;
-                    }
-
-                    isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.BlueTeam);
-                    if (isNullCheck)
-                    {
-                        if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
-                        {
-                            isNullCheck = false;
-                            continue;
-                        }
-
-                        break;
-                    }
-
-                    isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.RedTeam);
-                    if (isNullCheck)
-                    {
-                        if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
-                        {
-                            isNullCheck = false;
-                            continue;
-                        }
-
-                        break;
-                    }
-
-                    if (gameInfo.BlueTeam.IsDefault() || gameInfo.RedTeam.IsDefault())
-                    {
-                        throw new Exception("You did not assign a player to their champion");
                     }
                 }
 
-                if (!view.GameInfos.Any() || view.GameInfos.Count < 2 || isNullCheck)
+                if (!view.GameDetails.Any() || view.GameDetails.Count < 2 || isNullCheck)
                 {
                     throw new Exception("Form was not setup right");
                 }
 
 
-                var result = await _googleDriveService.SendFileData(view, userPlayer);
+                var result = await _matchDetailService.SendFileData(view, userPlayer);
 
                 if (!result)
                 {
@@ -346,6 +312,116 @@ namespace Web.Controllers
             view.StatusMessage = StatusMessage;
             return View(view);
         }
+
+        //[HttpGet]
+        //public async Task<IActionResult> SendMatchDataAsync(int weekNumber, Guid scheduleId)
+        //{
+        //    var scheduleTask = _scheduleRepository.GetScheduleAsync(scheduleId);
+        //    var schedule = await scheduleTask;
+        //    var matchInfoTask = _gameInfoService.GetGameInfoForMatch(scheduleId);
+        //    var matchInfo = await matchInfoTask;
+        //    var playersList = await _accountService.GetAllValidPlayers(matchInfo.HomeTeam, matchInfo.AwayTeam);
+        //    var view = new MatchSubmissionView
+        //    {
+        //        Week = !schedule.IsPlayoffMatch ? $"Week {weekNumber}" : $"Playoff {weekNumber}",
+        //        HomeTeamName = matchInfo.HomeTeam,
+        //        AwayTeamName = matchInfo.AwayTeam,
+        //        ScheduleId = scheduleId,
+        //        ValidPlayers = playersList,
+        //        GameInfos = matchInfo.GameInfos
+        //    };
+        //    return View(view);
+        //}
+
+        //[HttpPost]
+        //public async Task<IActionResult> SendMatchDataAsync(MatchSubmissionView view)
+        //{
+        //    try
+        //    {
+        //        var user = await _userManager.GetUserAsync(User);
+        //        view.GameInfos = view.GameInfos.Where(x => x.GamePlayed || x.AwayTeamForfeit || x.HomeTeamForfeit)
+        //            .ToList();
+        //        var isNullCheck = false;
+        //        if (user == null)
+        //        {
+        //            throw new Exception("You were logged out unexpectedly. Im sorry.");
+        //        }
+        //        var userPlayer = await _summonerInfoRepository.ReadOneByUserIdAsync(user.Id);
+        //        foreach (var gameInfo in view.GameInfos)
+        //        {
+        //            isNullCheck = Properties<GameInfo>.HasEmptyProperties(gameInfo);
+        //            if (isNullCheck)
+        //            {
+        //                if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
+        //                {
+        //                    isNullCheck = false;
+        //                    continue;
+        //                }
+
+        //                break;
+        //            }
+
+        //            isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.BlueTeam);
+        //            if (isNullCheck)
+        //            {
+        //                if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
+        //                {
+        //                    isNullCheck = false;
+        //                    continue;
+        //                }
+
+        //                break;
+        //            }
+
+        //            isNullCheck = Properties<TeamInfo>.HasEmptyProperties(gameInfo.RedTeam);
+        //            if (isNullCheck)
+        //            {
+        //                if (gameInfo.HomeTeamForfeit || gameInfo.AwayTeamForfeit)
+        //                {
+        //                    isNullCheck = false;
+        //                    continue;
+        //                }
+
+        //                break;
+        //            }
+
+        //            if (gameInfo.BlueTeam.IsDefault() || gameInfo.RedTeam.IsDefault())
+        //            {
+        //                throw new Exception("You did not assign a player to their champion");
+        //            }
+        //        }
+
+        //        if (!view.GameInfos.Any() || view.GameInfos.Count < 2 || isNullCheck)
+        //        {
+        //            throw new Exception("Form was not setup right");
+        //        }
+
+
+        //        var result = await _googleDriveService.SendFileData(view, userPlayer);
+
+        //        if (!result)
+        //        {
+        //            throw new Exception($"Failed to send match data for: {view.FileName}");
+        //        }
+
+        //        StatusMessage = "Successfully submitted match data. Stats will be reflected soon.";
+        //    }
+        //    catch (RiotSharpException e)
+        //    {
+        //        StatusMessage = $"{e.Message} Note. This is an error with Riot's Api. Please contact Ansem571 to let him know";
+        //        _logger.LogError(e, StatusMessage);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        StatusMessage = e.Message;
+        //        _logger.LogError(e, StatusMessage);
+        //    }
+
+        //    var playersList = await _accountService.GetAllValidPlayers(view.HomeTeamName, view.AwayTeamName);
+        //    view.ValidPlayers = playersList;
+        //    view.StatusMessage = StatusMessage;
+        //    return View(view);
+        //}
 
         public async Task<IActionResult> StandingsAsync()
         {
