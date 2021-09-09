@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Services.Interfaces;
-using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -99,12 +98,6 @@ namespace Web.Controllers
         {
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            var url = HttpContext.Request.GetUri();
-            var urlStr = url.ToString();
-            if (urlStr.Contains("azurewebsites"))
-            {
-                return Redirect("http://www.casualeal.com/Account/Login");
-            }
 
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -282,12 +275,6 @@ namespace Web.Controllers
         [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
         {
-            var url = HttpContext.Request.GetUri();
-            var urlStr = url.ToString();
-            if (urlStr.Contains("azurewebsites"))
-            {
-                return Redirect("http://www.casualeal.com/Account/Register");
-            }
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
