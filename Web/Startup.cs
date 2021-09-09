@@ -70,6 +70,12 @@ namespace Web
                             Version = version
                         });
                 });
+            services.Configure<CookiePolicyOptions>(o =>
+            {
+                o.CheckConsentNeeded = context => true;
+                o.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
 
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
@@ -94,7 +100,7 @@ namespace Web
             services.AddMvc(o =>
                 {
                     o.Conventions.Add(new CommaSeparatedQueryStringConvention());
-                    o.ModelMetadataDetailsProviders.Add(new RequiredBindingMetadataProvider());
+                    o.ModelMetadataDetailsProviders.Add(new RequiredBindingMetadataProvider());    
                 })
             .AddJsonOptions(o =>
             {
@@ -245,14 +251,19 @@ namespace Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-            app.Map("/health", lapp => lapp.Run(async ctx => ctx.Response.StatusCode = 200));
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+            }
 
             app.UseStaticFiles();
 
             app.UseAuthentication();
-
+            app.UseCookiePolicy();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -262,7 +273,6 @@ namespace Web
                     name: "PlayerProfile",
                     template: "{controller=UserProfile}/{action=PlayerProfile}");
             });
-            app.UseCors("CorsPolicy");
             app.UseMiddleware<ErrorMiddleware>();
             app
                 .UseSwagger()
