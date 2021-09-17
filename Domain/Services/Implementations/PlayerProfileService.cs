@@ -26,7 +26,7 @@ namespace Domain.Services.Implementations
         private readonly IAlternateAccountMapper _alternateAccountMapper;
         private readonly ITierDivisionMapper _tierDivisionMapper;
         private readonly IMatchDetailRepository _matchDetailRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<PlayerProfileService> _logger;
 
         //Skarner Alston Reztip pentakill 5/29/2019
         //Perfect Game ABCDE vs TDK semi finals 10/17/2019
@@ -34,7 +34,7 @@ namespace Domain.Services.Implementations
         public PlayerProfileService(ISummonerInfoRepository summonerInfoRepository, IAchievementRepository achievementRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository, IAlternateAccountRepository alternateAccountRepository,
             IPlayerStatsRepository playerStatsRepository, ISeasonInfoRepository seasonInfoRepository, IPlayerStatsMapper playerStatsMapper,
-            IAlternateAccountMapper alternateAccountMapper, ITierDivisionMapper tierDivisionMapper, IMatchDetailRepository matchDetailRepository, ILogger logger)
+            IAlternateAccountMapper alternateAccountMapper, ITierDivisionMapper tierDivisionMapper, IMatchDetailRepository matchDetailRepository, ILogger<PlayerProfileService> logger)
         {
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
             _achievementRepository = achievementRepository ?? throw new ArgumentNullException(nameof(achievementRepository));

@@ -20,7 +20,7 @@ namespace Web.ApiControllers
     public class AdminsController : Controller
     {
         private readonly IAdminService _adminService;
-        private readonly ILogger _logger;
+        private readonly ILogger _logger; 
         private readonly IDivisionService _divisionService;
         private readonly IPlayoffService _playoffService;
         private readonly ISeasonInfoService _seasonInfoService;

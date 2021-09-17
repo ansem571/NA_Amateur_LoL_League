@@ -19,7 +19,7 @@ namespace Domain.Services.Implementations
     {
         private readonly string DefaultText = "--Select a Summoner Name--";
 
-        private readonly ILogger _logger;
+        private readonly ILogger<AccountService> _logger;
         private readonly ISummonerMapper _summonerMapper;
         private readonly IAlternateAccountMapper _alternateAccountMapper;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
@@ -33,7 +33,7 @@ namespace Domain.Services.Implementations
         private const int RequestingSummonerCount = 6;
         private const int TeamRosterMaxCount = 7;
 
-        public AccountService(ILogger logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
+        public AccountService(ILogger<AccountService> logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
             ISummonerInfoRepository summonerInfoRepository, IAlternateAccountRepository alternateAccountRepository,
             IRequestedSummonerRepository requestedSummonerRepository, ITeamPlayerRepository teamPlayerRepository,
             ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository, IBlacklistRepository blacklistRepository)

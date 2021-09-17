@@ -2,11 +2,14 @@
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Helpers;
 using Domain.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -26,6 +30,8 @@ namespace Web
 {
     public class Startup
     {
+        public IWebHostEnvironment Environment { get; set; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -46,36 +52,8 @@ namespace Web
                 "http://ceal.gg",
                 "https://ceal.gg",
             };
-            services
-                .AddMemoryCache()
-                .AddMyServices(Configuration)
-                .AddLogging(x=> {
-                    x.ClearProviders();
-                    x.AddConsole();
-                    x.AddDebug();
-                    })
-                .AddCors(options =>
-                {
-                    services.AddCors(o => o.AddPolicy("AllowSpecificOrigin", p => p.WithOrigins(origins.ToArray())));
-                })
-                .AddSwaggerGen(c =>
-                {
-                    var assemblyName = Assembly.GetExecutingAssembly().GetName();
-                    var version =
-                        $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
-                    c.SwaggerDoc(version,
-                        new Info
-                        {
-                            Title = $"{assemblyName.Name} {version}",
-                            Version = version
-                        });
-                });
-            services.Configure<CookiePolicyOptions>(o =>
-            {
-                o.CheckConsentNeeded = context => true;
-                o.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-
+            services.AddDistributedMemoryCache();
+            services.AddMemoryCache();
 
             services.AddIdentity<UserEntity, UserRoleEntity>()
                 .AddDefaultTokenProviders();
@@ -97,17 +75,30 @@ namespace Web
             //DeleteBadImages();
 
             //Task.Run(() => SetupChampionCache(services)).Wait();
-            services.AddMvc(o =>
-                {
-                    o.Conventions.Add(new CommaSeparatedQueryStringConvention());
-                    o.ModelMetadataDetailsProviders.Add(new RequiredBindingMetadataProvider());    
-                })
-            .AddJsonOptions(o =>
+            //services
+            //    .AddMvc(o =>
+            //    {
+            //        o.Conventions.Add(new CommaSeparatedQueryStringConvention());
+            //        o.ModelMetadataDetailsProviders.Add(new RequiredBindingMetadataProvider());
+            //        //o.EnableEndpointRouting = false;
+            //    })
+            //.AddJsonOptions(o =>
+            //{
+            //    o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            //    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            //    o.JsonSerializerOptions.IgnoreNullValues = true;
+            //});
+            services.AddMyServices(Configuration);
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+            services.AddAuthorization(options =>
             {
-                o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                o.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
-                o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
             });
+            services.AddMvc(options =>
+            options.SuppressAsyncSuffixInActionNames = false);
         }
 
         private async Task SetupChampionCache(IServiceCollection services)
@@ -186,7 +177,7 @@ namespace Web
                 }
             }
         }
-               
+
         private async Task CreateModeratorRole(IServiceCollection services)
         {
             var builder = services.BuildServiceProvider();
@@ -249,40 +240,40 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-            }
+            Environment = env;
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseRouting();
+            //app.UseCors();
             app.UseAuthentication();
-            app.UseCookiePolicy();
-            app.UseMvc(routes =>
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-                routes.MapRoute(
-                    name: "PlayerProfile",
-                    template: "{controller=UserProfile}/{action=PlayerProfile}");
+                //endpoints.Map("/health", HealthRequest);
+                endpoints.MapRazorPages();
+                endpoints.MapDefaultControllerRoute();
+                //endpoints.MapControllers();
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                // endpoints.MapControllerRoute("PlayerProfile", "{controller=UserProfile}/{action=PlayerProfile}");
             });
-            app.UseMiddleware<ErrorMiddleware>();
-            app
-                .UseSwagger()
-                .UseSwaggerUI(c =>
-                {
-                    var assemblyName = Assembly.GetExecutingAssembly().GetName();
-                    var version =
-                        $"v{assemblyName.Version.Major}.{assemblyName.Version.Minor}.{assemblyName.Version.Build}";
-                    c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"{assemblyName.Name} {version}");
-                });
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute(
+            //        name: "default",
+            //        template: "{controller=Home}/{action=Index}/{id?}");
+            //    routes.MapRoute(
+            //        name: "PlayerProfile",
+            //        template: "{controller=UserProfile}/{action=PlayerProfile}");
+            //});
+        }
+
+        private async Task<int> HealthRequest(HttpContext context)
+        {
+            await Task.CompletedTask;
+            return context.Response.StatusCode = 200;
         }
     }
 }

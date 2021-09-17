@@ -15,11 +15,11 @@ namespace Domain.Services.Implementations
 {
     public class EmailService : IEmailService
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<EmailService> _logger;
         private readonly ILookupRepository _lookupRepository;
         private readonly IPhoneMapper _phoneMapper;
 
-        public EmailService(ILogger logger, ILookupRepository lookupRepository, IPhoneMapper phoneMapper)
+        public EmailService(ILogger<EmailService> logger, ILookupRepository lookupRepository, IPhoneMapper phoneMapper)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _lookupRepository = lookupRepository ?? throw new ArgumentNullException(nameof(lookupRepository));

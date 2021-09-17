@@ -1,0 +1,14 @@
+﻿@model Domain.Views.AlternateAccountView
+@using (Html.BeginForm("AlternateAccounts"))
+{
+<tr>
+    <td>
+        <label asp-for="AlternateName"></label>
+        <input asp-for="AlternateName"/>
+    </td>
+    <td>
+        <label asp-for="OpGgUrlLink"></label>
+        <input asp-for="OpGgUrlLink"/>
+    </td>
+</tr>
+}

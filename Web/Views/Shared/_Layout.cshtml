@@ -43,10 +43,12 @@
                     }
                     @if (showSeason)
                     {
-                        <li><a asp-area="" asp-controller="Roster" asp-action="ViewAllRostersAsync">Official Rosters</a></li>
+                        <li><a asp-area="" asp-controller="OfficialRosters" asp-action="Index">Official Rosters</a></li>
                         <li><a asp-area="" asp-controller="Schedule" asp-action="Index">Schedule</a></li>
                     }
-                    <li><a asp-area="" asp-controller="Roster" asp-action="StandingsAsync">Standings</a></li>
+                    <li><form asp-controller="Roster" asp-action="StandingsAsync" method="get">
+                            <button class="btn-link" type="submit">Standings</button>
+</form></li>
 
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")

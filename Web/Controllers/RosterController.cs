@@ -7,6 +7,7 @@ using Domain.Helpers;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Domain.Views;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ using Web.Models.Roster;
 
 namespace Web.Controllers
 {
+    [AllowAnonymous]
     public class RosterController : Controller
     {
         private readonly IAccountService _accountService;
@@ -29,7 +31,7 @@ namespace Web.Controllers
         private readonly IGameInfoService _gameInfoService;
 
         public RosterController(IAccountService accountService, IRosterService rosterService, UserManager<UserEntity> userManager,
-            ILogger logger, IScheduleService scheduleService, IMatchDetailService matchDetailService, 
+            ILogger logger, IScheduleService scheduleService, IMatchDetailService matchDetailService,
             ISummonerInfoRepository summonerInfoRepository, IScheduleRepository scheduleRepository,
             IGameInfoService gameInfoService)
         {
@@ -48,6 +50,7 @@ namespace Web.Controllers
         public string StatusMessage { get; set; }
 
         //Views all summoners
+
         public async Task<IActionResult> Index(string sortOrder)
         {
             ViewBag.SummonerName = string.IsNullOrEmpty(sortOrder) ? "summoner_desc" : "";
@@ -124,7 +127,7 @@ namespace Web.Controllers
             return View(model);
         }
 
-        [HttpGet]
+        [Route("/TeamCreationViewAsync")]
         public async Task<IActionResult> TeamCreationViewAsync()
         {
             var model = await _accountService.GetRequestedPlayersAsync();
@@ -132,7 +135,6 @@ namespace Web.Controllers
             return View("TeamCreationView", model);
         }
 
-        [HttpGet]
         public async Task<IActionResult> ViewAllRostersAsync()
         {
             var model = await _rosterService.GetSeasonInfoView();
@@ -141,6 +143,7 @@ namespace Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> ViewRosterAsync(Guid rosterId)
         {
             var rosterTask = _rosterService.GetRosterAsync(rosterId);
@@ -275,7 +278,7 @@ namespace Web.Controllers
                 foreach (var gameInfo in view.GameDetails)
                 {
                     isNullCheck = Properties<GameDetail>.HasEmptyProperties(gameInfo);
-                    if(isNullCheck)
+                    if (isNullCheck)
                     {
                         break;
                     }
@@ -423,6 +426,7 @@ namespace Web.Controllers
         //    return View(view);
         //}
 
+        [HttpGet]
         public async Task<IActionResult> StandingsAsync()
         {
             try

@@ -11,12 +11,10 @@ namespace Domain.Season3Services.Implementations
     public class UserService : IUserService
     {
         private readonly UserManager<UserEntity> _userManager;
-        private readonly RoleManager<UserRoleEntity> _userRoleManager;
         private readonly IBlacklistRepository _blacklistRepository;
-        public UserService(UserManager<UserEntity> userManager, RoleManager<UserRoleEntity> userRoleManager, IBlacklistRepository blacklistRepository)
+        public UserService(UserManager<UserEntity> userManager, IBlacklistRepository blacklistRepository)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _userRoleManager = userRoleManager ?? throw new ArgumentNullException(nameof(userRoleManager));
             _blacklistRepository = blacklistRepository ?? throw new ArgumentNullException(nameof(blacklistRepository));
         }
 

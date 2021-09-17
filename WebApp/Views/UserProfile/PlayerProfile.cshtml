@@ -1,0 +1,139 @@
+﻿@model Domain.Views.PlayerProfileView
+@{
+    ViewBag.Title = $"{Model.PlayerName} Achievements";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h3>Alternate Accounts</h3>
+@if (Model.AlternateAccountViews.Any())
+{
+    <table class="table table-bordered">
+        <tr>
+            <th>Alternate Name</th>
+            <th>Op.gg url</th>
+        </tr>
+        @foreach (var alt in Model.AlternateAccountViews)
+        {
+        <tr>
+            <td>
+                @alt.AlternateName
+            </td>
+            <td>
+                <a href="@alt.OpGgUrlLink" target="_blank">@alt.OpGgUrlLink</a>
+            </td>
+        </tr>
+        }
+    </table>
+}
+else
+{
+    <label>No alternate accounts have been listed for this account. If you believe this is incorrect. Contract the Tribunal</label>
+}
+
+<h4>Current Team: @Model.TeamName</h4>
+<table class="table table-bordered">
+    <tr>
+        <th>Season Stats</th>
+        <th>Rank</th>
+        <th>Kills (total)</th>
+        <th>Deaths (total)</th>
+        <th>Assists (total)</th>
+        <th>KDA</th>
+        <th>CS/MIN</th>
+        <th>Gold/Min</th>
+        <th>KP</th>
+        <th>Vision Score</th>
+    </tr>
+
+    @if (!Model.PlayerStats.Any())
+    {
+        <tr>
+            <td>Current Season</td>
+            <td>
+                @Model.Rank.ToString()
+            </td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+    }
+    else
+    {
+        foreach (var playerStats in Model.PlayerStats)
+        {
+            <tr>
+                <td>
+                    Season @playerStats.Key
+                </td>
+                <td>
+                    @Model.Rank.ToString()
+                </td>
+                <td>
+                    @*Kills*@
+                    @playerStats.Value.Kills
+                </td>
+                <td>
+                    @*Deaths*@
+                    @playerStats.Value.Deaths
+                </td>
+                <td>
+                    @*Assists*@
+                    @playerStats.Value.Assists
+                </td>
+                <td>
+                    @*KDA*@
+                    @playerStats.Value.Kda
+                </td>
+                <td>
+                    @*CS/Min*@
+                    @playerStats.Value.CSperMin
+                </td>
+                <td>
+                    @*Gold/Min*@
+                    @playerStats.Value.DamagePerMin
+                </td>
+                <td>
+                    @*KP*@
+                    @playerStats.Value.Kp %
+                </td>
+                <td>
+                    @*Vision Score*@
+                    @playerStats.Value.VisionScore
+                </td>
+            </tr>
+        }
+    }
+
+</table>
+
+<h4>Achievements (All time)</h4>
+<table class="table table-bordered">
+    <tr>
+        <th>Achievement</th>
+        <th>Season Achieved</th>
+        <th>On Team (if applicable)</th>
+    </tr>
+    @foreach (var achievement in Model.Achievements.OrderBy(x => x.AchievedDate))
+    {
+        <tr>
+            <td>@achievement.Achievement</td>
+            <td>@achievement.Season</td>
+            @{
+                if (string.IsNullOrEmpty(achievement.AchievedTeam))
+                {
+                    <td>N/A</td>
+                }
+                else
+                {
+                    <td>@achievement.AchievedTeam</td>
+                }
+            }
+        </tr>
+    }
+</table>

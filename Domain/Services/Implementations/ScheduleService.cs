@@ -14,7 +14,7 @@ namespace Domain.Services.Implementations
 {
     public class ScheduleService : IScheduleService
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<ScheduleService> _logger;
         private readonly ITeamRosterRepository _teamRosterRepository;
         private readonly ISeasonInfoRepository _seasonInfoRepository;
         private readonly IDivisionRepository _divisionRepository;
@@ -22,7 +22,7 @@ namespace Domain.Services.Implementations
         private readonly IScheduleMapper _scheduleMapper;
         private readonly IRosterService _rosterService;
 
-        public ScheduleService(ILogger logger, ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository,
+        public ScheduleService(ILogger<ScheduleService> logger, ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository,
             IDivisionRepository divisionRepository, IScheduleRepository scheduleRepository, IScheduleMapper scheduleMapper,
             IRosterService rosterService)
         {

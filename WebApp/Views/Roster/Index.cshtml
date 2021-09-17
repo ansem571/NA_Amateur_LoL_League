@@ -1,0 +1,64 @@
+﻿@using System.Web
+@model Domain.Views.FpSummonerView
+@{
+    ViewBag.Title = "Summoners";
+
+    var registeredPlayers = Model.SummonerInfos.Where(x => x.IsRegistered).ToList();
+    var eSubsOnly = Model.SummonerInfos.Where(x => !x.IsRegistered && x.IsEsubOnly).ToList();
+    var remaining = Model.SummonerInfos.Where(x => !x.IsRegistered && !x.IsEsubOnly).ToList();
+}
+
+<h2>@ViewData["Title"]</h2>
+<table class="table table-bordered" @*style="color: black"*@>
+    <tr>
+        <th>@Html.ActionLink(string.Concat("Summoner Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.SummonerName })</th>
+        <th>@Html.ActionLink(string.Concat("Role ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.Role })</th>
+        @*<th><button onclick="OrderByTeamName('@registeredPlayers', 'SummonerName')">SummonerName &#x21F5;</button></th>
+            <th><button onclick="OrderByTeamName('@registeredPlayers', 'Role')">Role</button></th>*@
+        <th>Off Role</th>
+        <th>@Html.ActionLink(string.Concat("Rank ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.TierDivision })</th>
+        <th>Previous Season Rank (if available)</th>
+        <th>op.gg link</th>
+        <th>@Html.ActionLink(string.Concat("Team Name ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.TeamName })</th>
+        <th>@Html.ActionLink(string.Concat("E-Sub only ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.ESub })</th>
+        @*<th>@Html.ActionLink(string.Concat("Academy Player ", HttpUtility.HtmlDecode("&#x21F5;")), "Index", new { sortOrder = ViewBag.AcademyPlayer })</th>*@
+        <th>Discord Handle</th>
+    </tr>
+    @foreach (var item in Model.SummonerInfos)
+    {
+        <tr>
+            <td style="word-wrap:break-word">
+                <form asp-controller="UserProfile" asp-action="PlayerProfile" method="get">
+                    <input type="hidden" name="userId" value="@item.UserId" />
+                    <button class="btn-link" type="submit">@item.SummonerName</button>
+                </form>
+
+            </td>
+            <td>@item.Role.ToString()</td>
+            <td>@item.OffRole.ToString()</td>
+            <td>@item.TierDivision.ToString()</td>
+            @if (item.PreviousSeasonTierDivision != null)
+            {
+                <td>@item.PreviousSeasonTierDivision.Value.ToString()</td>
+            }
+            else
+            {
+                <td>N/A</td>
+            }
+            <td style="max-width:10% !important; word-break:break-all;"><a href="@item.OpGgUrl" target="_blank">@item.OpGgUrl</a></td>
+            @{
+                if (item.TeamName == "Unassigned")
+                {
+                    <td>@item.TeamName</td>
+                }
+                else
+                {
+                    <td>@Html.ActionLink(item.TeamName, "ViewRosterAsync", "Roster", new { rosterId = item.RosterId })</td>
+                }
+            }
+            <td>@item.IsEsubOnly</td>
+            @*<td>@item.IsAcademyPlayer</td>*@
+            <td>@item.DiscordHandle</td>
+        </tr>
+    }
+</table>

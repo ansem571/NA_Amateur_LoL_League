@@ -1,0 +1,146 @@
+﻿@using Domain.Enums
+@model Domain.Views.SeasonInfoView
+@{
+    ViewBag.Title = "Official Rosters";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row icon-row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                @Model.SeasonInfo.SeasonName
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                Season Starts: @Model.SeasonInfo.SeasonStartDate
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                Registration Closes: @Model.SeasonInfo.ClosedRegistrationDate
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    &#x2605; means they are the captain
+</div>
+@{
+    if (!Model.Rosters.Any())
+    {
+        <div class="row">No official rosters yet. Check back later.</div>
+    }
+    else
+    {
+        var divisions = Model.Rosters.GroupBy(x => x.Division.DivisionName).ToDictionary(x => x.Key, x => x.ToList());
+        foreach (var division in divisions)
+        {
+            <div class="row">
+                <label>@division.Key</label>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Team Name</th>
+                        @{
+                            const int minTeamCount = 5;
+                            var maxTeamSize = division.Value.Max(x => x.Players.Count());
+                            var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+                            for (var i = 0; i < teamCount; i++)
+                            {
+                                var index = i + 1;
+                                <th>
+                                    <div>
+
+                                        @if (index > minTeamCount)
+                                        {
+                                            <div>Bench @(index - minTeamCount)</div>
+                                        }
+                                        else
+                                        {
+                                            <div>@((SummonerRoleEnum)index)</div>
+                                        }
+                                    </div>
+                                </th>
+                            }
+                        }
+                        <th>Wins</th>
+                        <th>Losses</th>
+                    </tr>
+                    @foreach (var team in division.Value.OrderBy(x => x.TeamTierScore))
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
+                            @{
+                                for (var i = 0; i < teamCount; i++)
+                                {
+                                    var player = team.Players.ElementAtOrDefault(i);
+                                    if (player == null)
+                                    {
+                                        <td></td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            @if (player.SummonerName == team.Captain)
+                                            {
+                                            <div>
+                                                @player.SummonerName &#x2605;
+                                            </div>
+                                            }
+                                            else
+                                            {
+                                            <div>
+                                                @player.SummonerName
+                                            </div>
+                                            }
+                                            @if (player.AlternateAccounts.Any())
+                                            {
+                                                <button id="{{'showDetailedInfoButton'@team.TeamName.Replace("'", "&quot;")@i}}" onclick="showDetailedInfo('@team.TeamName.Replace("'", "&quot;")', '@i')">+</button>
+                                                <div id="{{'showDetailedInfo'@team.TeamName.Replace("'", "&quot;")@i}}" style="display: none">
+                                                    @foreach (var alt in player.AlternateAccounts)
+                                                    {
+                                                        <div>@alt.AlternateName</div>
+                                                    }
+                                                </div>
+                                            }
+                                        </td>
+                                    }
+                                }
+                            }
+                            <td>@team.Wins</td>
+                            <td>@team.Loses</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    }
+}
+
+<script>
+    function showDetailedInfo() {
+        //alert("showDetailedInfo called");
+        if (arguments.length < 2)
+            return;
+        var teamName = arguments[0];
+        var index = arguments[1];
+        //alert("{{'showDetailedInfo'" + teamName + index + "}}");
+        var x = document.getElementById("{{'showDetailedInfo'" + teamName + index + "}}");
+        var y = document.getElementById("{{'showDetailedInfoButton'" + teamName + index + "}}");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            y.innerHTML = "-";
+        }
+        else {
+            x.style.display = "none";
+            y.innerHTML = "+";
+        }
+    }
+</script>

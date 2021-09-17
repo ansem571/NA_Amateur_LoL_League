@@ -24,7 +24,7 @@ namespace Domain.Services.Implementations
 {
     public class MatchDetailService : IMatchDetailService
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<MatchDetailService> _logger;
         private readonly IEmailService _emailService;
         private readonly ISeasonInfoRepository _seasonInfoRepository;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
@@ -40,7 +40,7 @@ namespace Domain.Services.Implementations
 
         private readonly string _wwwRootDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
-        public MatchDetailService(ILogger logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository, ISummonerInfoRepository summonerInfoRepository,
+        public MatchDetailService(ILogger<MatchDetailService> logger, IEmailService emailService, IPlayerStatsRepository playerStatsRepository, ISummonerInfoRepository summonerInfoRepository,
             ISeasonInfoRepository seasonInfoRepository, IMatchDetailRepository matchDetailRepository, IMatchMvpRepository matchMvpRepository,
             IChampionStatsRepository championStatsRepository, IScheduleService scheduleService, ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             IAchievementRepository achievementRepository, ILookupRepository lookupRepository)

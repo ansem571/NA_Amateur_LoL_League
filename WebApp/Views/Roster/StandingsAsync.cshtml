@@ -1,0 +1,47 @@
+﻿@model Dictionary<string, IEnumerable<Domain.Views.RosterView>>
+@{
+    ViewBag.Title = "Standings";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@*<div class="row" style="font-size: 20px !important">
+    Link to all game records <a target="_blank" href="https://docs.google.com/spreadsheets/d/1HxPPaEdix2vSltZm8R4meydlLqmypha9xYn4NTq-5iM/edit?usp=sharing">here</a>.
+</div>*@
+<div class="row" style="font-size: 20px !important">
+    Link to Record of Games Doc <a target="_blank" href="https://docs.google.com/spreadsheets/d/1HxPPaEdix2vSltZm8R4meydlLqmypha9xYn4NTq-5iM/edit?usp=sharing">here</a>.
+</div>
+<br/>
+@{
+    if (!Model.ToList().Any())
+    {
+        <div class="row">No official rosters yet. Check back later.</div>
+    }
+    else
+    {
+        foreach (var division in Model)
+        {
+            <div class="row">
+                <label>@division.Key</label>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Team Name</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                    </tr>
+                    @foreach (var team in division.Value)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(team.TeamName, "ViewRosterAsync", "Roster", new { rosterId = team.RosterId })</td>
+                            <td>@team.Wins</td>
+                            <td>@team.Loses</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    }
+}
+
+<script>
+</script>

@@ -18,7 +18,7 @@ namespace Domain.Services.Implementations
 {
     public class AdminService : IAdminService
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<AdminService> _logger;
         private readonly ILookupRepository _lookupRepository;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly ITeamPlayerRepository _teamPlayerRepository;
@@ -31,7 +31,7 @@ namespace Domain.Services.Implementations
 
         private const int MinTeamCountRequirement = 5;
 
-        public AdminService(ILogger logger, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
+        public AdminService(ILogger<AdminService> logger, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, IRosterService rosterService, ITierDivisionMapper tierDivisionMapper, IPlayerStatsRepository playerStatsRepository,
             ISeasonInfoRepository seasonInfoRepository)

@@ -1,0 +1,308 @@
+﻿@using DAL.Entities.UserData
+@using Domain.Enums
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<UserEntity> SignInManager
+@inject UserManager<UserEntity> UserManager
+@inject RoleManager<UserRoleEntity> UserRoleManager
+@model Web.Models.Roster.RosterViewModel
+
+@{
+    ViewBag.Title = Model.RosterView.TeamName;
+    var user = await UserManager.GetUserAsync(User);
+    var userIsAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var userIsTribunal = user != null && await UserManager.IsInRoleAsync(user, "Tribunal");
+}
+
+<h2>@ViewData["Title"]</h2>
+@{
+
+    if (Model.IsCaptain || userIsTribunal)
+    {
+        <div class="row">
+            <button style="color: black !important" class="btn" onclick="renameTeam()">Rename team?</button>
+
+            <form asp-controller="Roster" asp-action="UpdateTeamNameAsync" method="post" id="updateRoster" style="display: none">
+                <input style="color: black !important" type="text" name="newTeamName" />
+                <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+                <button style="color: black !important" class="btn" type="submit">Submit name change</button>
+            </form>
+        </div>
+        <br/>
+
+    }
+    if (Model.IsCaptain || userIsAdmin)
+    {
+        <div class="row">
+            <button class="btn">
+                @Html.ActionLink("Update Roster Lineup", "UpdateRosterLineup", "Roster", new { rosterId = Model.RosterView.RosterId })
+            </button>
+        </div>
+    }
+}
+<div class="row">
+    @Model.StatusMessage
+</div>
+<div class="row icon-row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                Division: @Model.RosterView.Division.DivisionName
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-2">
+        <div class="card">
+            <div class="card-body">
+                Win/Loss: @Model.RosterView.Wins-@Model.RosterView.Loses
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-2">
+        <div class="card">
+            <div class="card-body">
+                Team Logo
+            </div>
+        </div>
+        <a class="thumbnail" target="_blank" href="@Model.RosterView.FileSource">
+            <img src="@Model.RosterView.FileSource" alt="Default Image" />
+        </a>
+        @if (Model.IsCaptain)
+        {
+            <form asp-controller="Roster" asp-action="UploadLogoAsync" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" />
+                <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+                <button class="btn" style="color: black !important" type="submit">Upload File</button>
+            </form>
+        }
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <a href="@Model.TeamOpGg" target="_blank">
+                    Team Op.GG Link
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <table class="table table-bordered">
+        <tr>
+            <th></th>
+            <th>Name (&#x2605; is captain)</th>
+            <th>Rank</th>
+            <th>Kills (total)</th>
+            <th>Deaths (total)</th>
+            <th>Assists (total)</th>
+            <th>KDA</th>
+            <th>CS/MIN</th>
+            <th>Gold/Min</th>
+            <th>KP</th>
+            <th>Vision Score</th>
+            <th>MVP Score</th>
+        </tr>
+        @{
+            const int minTeamCount = 5;
+            var maxTeamSize = Model.RosterView.Players.Count();
+            var teamCount = minTeamCount < maxTeamSize ? maxTeamSize : minTeamCount;
+
+            for (var i = 0; i < teamCount; i++)
+            {
+                var player = Model.RosterView.Players.ToList()[i];
+                var index = i + 1;
+                <tr>
+                    <td>
+                        @if (index > minTeamCount)
+                        {
+                            <div>Bench @(index - minTeamCount)</div>
+                        }
+                        else
+                        {
+                            <div>@((SummonerRoleEnum)index)</div>
+                        }
+                    </td>
+                    @if (player.SummonerName == Model.RosterView.Captain)
+                    {
+                        <td>
+                            <form asp-controller="UserProfile" asp-action="PlayerProfile" method="get">
+                                <input type="hidden" name="userId" value="@player.UserId" />
+                                <button class="btn-link" type="submit">@player.SummonerName &#x2605;</button>
+                            </form>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            <form asp-controller="UserProfile" asp-action="PlayerProfile" method="get">
+                                <input type="hidden" name="userId" value="@player.UserId" />
+                                <button class="btn-link" type="submit">@player.SummonerName</button>
+                            </form>
+                            @{
+                                if (Model.IsCaptain && !string.IsNullOrEmpty(player.SummonerName))
+                                {
+                                    @*<form asp-controller="Roster" asp-action="SetPlayerAsSubAsync" method="post">
+                                            <input type="hidden" name="summonerName" value="@player.SummonerName" />
+                                            <input type="hidden" name="rosterId" value="@Model.RosterView.RosterId" />
+                                            <button type="submit">SetAsSub</button>
+                                        </form>*@
+                                }
+                            }
+                        </td>
+                    }
+                    <td>
+                        @*Rank*@
+                        @player.TierDivision
+                    </td>
+                    @{
+                        if (player.PlayerStats == null)
+                        {
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>-1</td>
+                        }
+                        else
+                        {
+                            <td>
+                                @*Kills*@
+                                @player.PlayerStats.Kills
+                            </td>
+                            <td>
+                                @*Deaths*@
+                                @player.PlayerStats.Deaths
+                            </td>
+                            <td>
+                                @*Assists*@
+                                @player.PlayerStats.Assists
+                            </td>
+                            <td>
+                                @*KDA*@
+                                @player.PlayerStats.Kda
+                            </td>
+                            <td>
+                                @*CS/Min*@
+                                @player.PlayerStats.CSperMin
+                            </td>
+                            <td>
+                                @*Gold/Min*@
+                                @player.PlayerStats.DamagePerMin
+                            </td>
+                            <td>
+                                @*KP*@
+                                @player.PlayerStats.Kp %
+                            </td>
+                            <td>
+                                @*Vision Score*@
+                                @player.PlayerStats.VisionScore
+                            </td>
+                            <td>
+                                @* Mvp Score *@
+                                @player.PlayerStats.MvpVotes
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        }
+    </table>
+</div>
+
+
+<div class="row">
+    <div class="card center-block">
+        <div class="card-body">
+            Team Schedule (Times are based in EST)
+        </div>
+    </div>
+    <table class="table table-bordered">
+        <tr>
+            <th>HomeTeam</th>
+            <th>AwayTeam</th>
+            <th>HomeTeamScore</th>
+            <th>AwayTeamScore</th>
+            <th>Week Of</th>
+            <th>Start Time</th>
+            <th>Casters</th>
+            @{
+                if (Model.IsCaptain || userIsTribunal)
+                {
+                    <th>Captains Only</th>
+                }
+            }
+        </tr>
+        @{
+            var weekNumber = 0;
+            foreach (var week in Model.ScheduleLineup.OrderBy(x => x.WeekOf).ThenBy(y => y.PlayTime))
+            {
+                if (week.IsPlayoffMatch)
+                {
+                    weekNumber = 0;
+                }
+                weekNumber++;
+                <tr>
+                    <td>@week.HomeTeam</td>
+                    <td>@week.AwayTeam</td>
+                    <td>@week.HomeTeamScore</td>
+                    <td>@week.AwayTeamScore</td>
+                    <td>@Convert.ToDateTime(week.WeekOf.ToString("MM/dd/yyyy"))</td>
+                    @{
+                        if (week.PlayTime == null)
+                        {
+                            <td>TBD</td>
+                        }
+                        else
+                        {
+                            <td>@Convert.ToDateTime(week.PlayTime.Value.ToString("MM/dd/yyyy hh:mm tt"))</td>
+                        }
+                    }
+                    @{
+                        if (string.IsNullOrEmpty(week.CasterName))
+                        {
+                            <td>TBD</td>
+                        }
+                        else
+                        {
+                            <td>@week.CasterName</td>
+                        }
+                    }
+                    @{
+                        if (Model.IsCaptain || userIsTribunal)
+                        {
+                            <td>
+                                <button style="color: black !important" onclick="@("window.location.href='" + Url.Action("SendMatchDetailsAsync", "Roster", new {weekNumber, week.ScheduleId}) + "'");"
+                                        class="btn">
+                                    Send Match Detail Data
+                                </button>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        }
+    </table>
+</div>
+
+<script>
+    function renameTeam() {
+        var x = document.getElementById("updateRoster");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+    function setRosterLineup() {
+        var x = document.getElementById("updateRosterLineup");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+</script>

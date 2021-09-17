@@ -1,0 +1,193 @@
+﻿@using System.Globalization
+@using DAL.Entities.UserData
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<UserEntity> SignInManager
+@inject UserManager<UserEntity> UserManager
+@inject RoleManager<UserRoleEntity> UserRoleManager
+
+@model Dictionary<string, List<Domain.Views.ScheduleView>>
+@{
+    ViewData["Title"] = "All schedules";
+}
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var isTribunal = user != null && await UserManager.IsInRoleAsync(user, "Tribunal");
+    var isModerator = user != null && await UserManager.IsInRoleAsync(user, "Moderator");
+}
+
+<h2>@ViewData["Title"]</h2>
+@{
+    @*if (isAdmin)
+    {
+        <button class="bigRedButton center-block">``
+            @Html.ActionLink("Create Schedules", "CreateScheduleAsync")
+        </button>
+    }*@
+    if (!Model.Any())
+    {
+        <div class="card center-block">
+            <div class="card-body">
+                This will be filled after all teams are finalized, please wait until AFTER 4/23/2021
+            </div>
+        </div>
+
+        if (isAdmin)
+        {
+            <button class="bigRedButton center-block">
+                @Html.ActionLink("Create Schedules", "CreateScheduleAsync")
+            </button>
+        }
+    }
+    else
+    {
+        if (user != null)
+        {
+            <div class="row ">
+                <div class="card center-block col-md-3">
+                    <div class="card-body">
+                        Caster Schedule
+                        <a href="https://teamup.com/ksnyxqmyx6657hmtdm" target="_blank"> Link</a>
+                    </div>
+                </div>
+            </div>
+            <br/>
+        }
+        foreach (var divisionSchedule in Model)
+        {
+            <div class="row">
+                <div class="card center-block">
+                    <div class="card-body">
+                        @divisionSchedule.Key Team Schedule (Times are based in EST)
+                    </div>
+                </div>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>HomeTeam</th>
+                        <th>AwayTeam</th>
+                        <th>HomeTeamScore</th>
+                        <th>AwayTeamScore</th>
+                        <th>Week Of</th>
+                        <th>Start Time</th>
+                        <th>Casters</th>
+                        @if (isAdmin)
+                        {
+                            <th>Admin stuff</th>
+                        }
+                    </tr>
+                    @foreach (var week in divisionSchedule.Value.OrderBy(x => x.WeekOf).ThenBy(y => y.PlayTime))
+                    {
+                        <tr>
+                            <td>@week.HomeTeam</td>
+                            <td>@week.AwayTeam</td>
+                            <td>@week.HomeTeamScore</td>
+                            <td>@week.AwayTeamScore</td>
+                            <td>@Convert.ToDateTime(week.WeekOf.ToString("MM/dd/yyyy"))</td>
+                            @{
+                                if (week.PlayTime == null)
+                                {
+                                    <td>
+                                        TBD
+                                        @if (isAdmin || isTribunal || isModerator)
+                                        {
+                                            <button style="color: black !important" class="btn" id="{{'showScheduleButton'@week.ScheduleId}}" onclick="showSchedule('@week.ScheduleId')">+</button>
+                                            <form asp-controller="Schedule" asp-action="AssignPlayTimeAsync" method="post" id="{{'showSchedule'@week.ScheduleId}}" style="display: none">
+                                                <input style="color: black !important" type="datetime-local" name="playTime" />
+                                                <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                                <button style="color: black !important" class="center-block btn">Submit play time</button>
+                                            </form>
+                                        }
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>@Convert.ToDateTime(week.PlayTime.Value.ToString("MM/dd/yyyy hh:mm tt", CultureInfo.InvariantCulture))</td>
+                                }
+                            }
+                            @{
+                                if (string.IsNullOrEmpty(week.CasterName))
+                                {
+                                    <td>
+                                        TBD
+                                        @if (isAdmin || isTribunal || isModerator)
+                                        {
+                                            <button style="color: black !important" class="btn" id="{{'showCasterButton'@week.ScheduleId}}" onclick="showCaster('@week.ScheduleId')">+</button>
+                                            <form asp-controller="Schedule" asp-action="AssignCastersAsync" method="post" id="{{'showCaster'@week.ScheduleId}}" style="display: none">
+                                                <input style="color: black !important" type="text" name="names" />
+                                                <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                                <button class="center-block btn">Submit casters</button>
+                                            </form>
+
+                                        }
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>@week.CasterName</td>
+                                }
+                            }
+                            @if (isAdmin || isTribunal)
+                            {
+                                <td>
+                                    <button style="color: black !important" class="btn" id="{{'showUpdateMatchScoreButton'@week.ScheduleId}}" onclick="updateMatchScore('@week.ScheduleId')">+</button>
+                                    <form asp-controller="Schedule" asp-action="UpdateMatchScores" method="post" id="{{'showUpdateMatchScore'@week.ScheduleId}}" style="display: none">
+                                        <input type="hidden" name="scheduleId" value="@week.ScheduleId" />
+                                        <input type="hidden" name="homeTeam" value="@week.HomeTeam" />
+                                        <input type="hidden" name="awayTeam" value="@week.AwayTeam" />
+                                        <label>HomeScore</label>
+                                        <input style="color: black !important" type="text" name="homeScore" />
+                                        <label>AwayScore</label>
+                                        <input style="color: black !important" type="text" name="awayScore" />
+                                        <button style="color: black !important" class="center-block btn">Submit scores</button>
+                                    </form>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    }
+}
+
+<script>
+    function showSchedule(scheduleId) {
+        var x = document.getElementById("{{'showSchedule'" + scheduleId + "}}");
+        var y = document.getElementById("{{'showScheduleButton'" + scheduleId + "}}");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            y.innerHTML = "-";
+        }
+        else {
+            x.style.display = "none";
+            y.innerHTML = "+";
+        }
+    }
+
+    function showCaster(scheduleId) {
+        var x = document.getElementById("{{'showCaster'" + scheduleId + "}}");
+        var y = document.getElementById("{{'showCasterButton'" + scheduleId + "}}");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            y.innerHTML = "-";
+        }
+        else {
+            x.style.display = "none";
+            y.innerHTML = "+";
+        }
+    }
+
+    function updateMatchScore(scheduleId) {
+        var x = document.getElementById("{{'showUpdateMatchScore'" + scheduleId + "}}");
+        var y = document.getElementById("{{'showUpdateMatchScoreButton'" + scheduleId + "}}");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            y.innerHTML = "-";
+        }
+        else {
+            x.style.display = "none";
+            y.innerHTML = "+";
+        }
+    }
+</script>
