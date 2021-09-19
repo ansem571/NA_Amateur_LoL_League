@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="jQuery" Version="3.4.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.3" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
@@ -30,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="LogFiles\stdout\" />
     <Folder Include="wwwroot\logos\" />
     <Folder Include="wwwroot\Auth\" />
     <Folder Include="wwwroot\MatchCsvs\" />
