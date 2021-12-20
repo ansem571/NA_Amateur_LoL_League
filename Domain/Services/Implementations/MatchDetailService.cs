@@ -129,6 +129,12 @@ namespace Domain.Services.Implementations
 
             await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", messageBody, view.FileName, attachments, new List<string> { "CEALmodliaison@gmail.com" });
 
+            var di = new DirectoryInfo(Path.Combine(_wwwRootDirectory, "MatchCsvs"));
+            foreach(var file in di.EnumerateFiles())
+            {
+                file.Delete();
+            }
+
             return true;
         }
 

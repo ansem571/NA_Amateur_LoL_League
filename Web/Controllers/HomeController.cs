@@ -5,6 +5,7 @@ using DAL.Entities.UserData;
 using Domain.Helpers;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Web.Models;
@@ -19,13 +20,17 @@ namespace Web.Controllers
         private readonly IAccountService _accountService;
         private readonly IBlacklistRepository _blacklistRepository;
         private readonly SignInManager<UserEntity> _signInManager;
+        private readonly IEmailService _emailService;
 
-        public HomeController(UserManager<UserEntity> userManager, IAccountService accountService, IBlacklistRepository blacklistRepository, SignInManager<UserEntity> signInManager)
+        public HomeController(UserManager<UserEntity> userManager, IAccountService accountService, 
+            IBlacklistRepository blacklistRepository, SignInManager<UserEntity> signInManager,
+            IEmailService emailService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _blacklistRepository = blacklistRepository ?? throw new ArgumentNullException(nameof(blacklistRepository));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         [TempData]
@@ -83,7 +88,30 @@ namespace Web.Controllers
 
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            // Get the details of the exception that occurred
+            var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+
+            if (exceptionFeature != null)
+            {
+                // Get which route the exception occurred at
+                string routeWhereExceptionOccurred = exceptionFeature.Path;
+
+                // Get the exception that occurred
+                Exception exceptionThatOccurred = exceptionFeature.Error;
+
+                // TODO: Do something with the exception
+                // Log it with Serilog?
+                // Send an e-mail, text, fax, or carrier pidgeon?  Maybe all of the above?
+                // Whatever you do, be careful to catch any exceptions, otherwise you'll end up with a blank page and throwing a 500
+
+                var body = $"Route: {routeWhereExceptionOccurred}\r\n" +
+                            $"Exception: {exceptionThatOccurred.Message}\r\n" +
+                            $"Inner Exception: {exceptionThatOccurred.InnerException?.Message}\r\n" +
+                            $"Stack Trace: {exceptionThatOccurred.StackTrace}";
+                _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", body, "Error occured").Wait();
+            }
+
+            return View();
         }
     }
 }

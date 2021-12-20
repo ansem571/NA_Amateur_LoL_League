@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using DAL.Entities.UserData;
 using Domain.Helpers;
 using Domain.Repositories.Interfaces;
+using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -97,8 +98,13 @@ namespace Web
                 .RequireAuthenticatedUser()
                 .Build();
             });
+            var builder = services.BuildServiceProvider();
+            var emailService = builder.GetService<IEmailService>();
             services.AddMvc(options =>
-            options.SuppressAsyncSuffixInActionNames = false);
+            {
+                options.SuppressAsyncSuffixInActionNames = false;
+                options.Filters.Add(new ErrorHandlingFilter(emailService));
+            });
         }
 
         private async Task SetupChampionCache(IServiceCollection services)
@@ -244,6 +250,7 @@ namespace Web
         {
             Environment = env;
 
+            app.UseExceptionHandler("/Home/Error");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
