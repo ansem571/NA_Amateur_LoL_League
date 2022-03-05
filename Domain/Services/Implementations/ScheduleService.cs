@@ -180,7 +180,8 @@ namespace Domain.Services.Implementations
             var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
             var schedulesTask = _scheduleRepository.GetAllUpdatedMatchesAsync(seasonInfo.Id);
             var rostersTask = _rosterService.GetSeasonInfoView();
-
+            var rosters = await rostersTask;
+            _logger.LogInformation(rosters.Rosters.FirstOrDefault()?.TeamName ?? "No Roster test");
             var rostersGrouped = (await rostersTask).Rosters.GroupBy(x => x.Division.DivisionName)
                 .ToDictionary(x => x.Key, x => x.ToList());
             var schedules = (await schedulesTask).Where(x => !x.IsPlayoffMatch).ToList();

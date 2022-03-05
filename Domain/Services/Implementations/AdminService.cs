@@ -64,7 +64,7 @@ namespace Domain.Services.Implementations
             var summonersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
-            var summoners = (await summonersTask).ToList();
+            var summoners = (await summonersTask).Where(x=>x.IsValidPlayer).ToList();
             var rosters = await rostersTask;
 
             var view = new SummonerTeamCreationView

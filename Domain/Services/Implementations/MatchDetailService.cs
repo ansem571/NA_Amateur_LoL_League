@@ -79,6 +79,12 @@ namespace Domain.Services.Implementations
 
         public async Task<bool> SendFileData(SimplifiedMatchSubmissionView view, SummonerInfoEntity userPlayer)
         {
+            //var di = new DirectoryInfo(Path.Combine(_wwwRootDirectory, "MatchCsvs"));
+            //foreach (var file in di.EnumerateFiles())
+            //{
+            //    file.Delete();
+            //}
+
             var addMatchStats = await UpdateStatsAsync(view, userPlayer);
             if (!addMatchStats)
             {
@@ -129,12 +135,12 @@ namespace Domain.Services.Implementations
 
             await _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", messageBody, view.FileName, attachments, new List<string> { "CEALmodliaison@gmail.com" });
 
-            var di = new DirectoryInfo(Path.Combine(_wwwRootDirectory, "MatchCsvs"));
-            foreach(var file in di.EnumerateFiles())
-            {
-                file.Delete();
-            }
-
+            //var di = new DirectoryInfo(Path.Combine(_wwwRootDirectory, "MatchCsvs"));
+            //foreach (var file in di.EnumerateFiles())
+            //{
+            //    if(file.Name != csvDataFile)
+            //    file.Delete();
+            //}
             return true;
         }
 
@@ -354,13 +360,13 @@ namespace Domain.Services.Implementations
                 {
                     mvpEntity.RedMvp = redMvp.Id;
                 }
-                if (!string.IsNullOrEmpty(gameInfo.HonoraryBlueOppMvp) && honoraryBlueOppMvp != null && 
+                if (!string.IsNullOrEmpty(gameInfo.HonoraryBlueOppMvp) && honoraryBlueOppMvp != null &&
                     honoraryBlueOppMvp.Id != mvpEntity.HonoraryBlueOppMvp)
                 {
                     mvpEntity.HonoraryBlueOppMvp = honoraryBlueOppMvp.Id;
                 }
 
-                if (!string.IsNullOrEmpty(gameInfo.HonoraryRedOppMvp) && honoraryRedOppMvp != null && 
+                if (!string.IsNullOrEmpty(gameInfo.HonoraryRedOppMvp) && honoraryRedOppMvp != null &&
                     honoraryRedOppMvp.Id != mvpEntity.HonoraryRedOppMvp)
                 {
                     mvpEntity.HonoraryRedOppMvp = honoraryRedOppMvp.Id;

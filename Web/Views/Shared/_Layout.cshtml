@@ -1,6 +1,6 @@
 ﻿@using Domain.Helpers
 @{
-    var showSeason = TimeZoneExtensions.GetCurrentTime() > new DateTime(2022, 01, 14);
+    var showSeason = TimeZoneExtensions.GetCurrentTime() > new DateTime(2022, 01, 17);
 }
 
 <html>
@@ -46,7 +46,7 @@
                         <li><a asp-area="" asp-controller="OfficialRosters" asp-action="Index">Official Rosters</a></li>
                         <li><a asp-area="" asp-controller="Schedule" asp-action="Index">Schedule</a></li>
                     }
-                    <li><form asp-controller="Roster" asp-action="StandingsAsync">Standings</form></li>
+                    <li><a asp-area="" asp-controller="Roster" asp-action="StandingsAsync">Standings</a></li>
 
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")

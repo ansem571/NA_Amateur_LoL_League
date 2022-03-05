@@ -15,21 +15,16 @@ namespace Web.Models.Roster
 
         private string Setup()
         {
-            var str = "https://na.op.gg/summoner/userName=";
+            var str = "https://na.op.gg/multisearch/na?summoners=";
 
-            var urls = RosterView.Players.Select(x => x.OpGgUrl).ToList();
-            foreach (var url in urls)
+            var summonerNames = RosterView.Players.Select(x => x.SummonerName).ToList();
+            foreach (var summonerName in summonerNames)
             {
-                if (url == null)
-                {
-                    continue;
-                }
-                var urlSecure = url.Replace("http:", "https:");
-                var urlName = urlSecure.Replace("https://na.op.gg/summoner/userName=", "");
-                str += $"{urlName},";
+
+                str += $"{summonerName},";
             }
 
-            str = str.Substring(0, str.Length - 1);
+            str = str[0..^1];
             return str;
         }
     }
