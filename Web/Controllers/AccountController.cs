@@ -49,7 +49,7 @@ namespace Web.Controllers
 
             if (user == null)
             {
-                var returnUrl = "http://www.casualeal.com/Account/SuccessfulPayment";
+                var returnUrl = "http://ceal.gg/Account/SuccessfulPayment";
                 return RedirectToAction("Login", routeValues: new { returnUrl });
             }
             await _accountService.UpdateSummonerValidAsync(user);
@@ -64,7 +64,7 @@ namespace Web.Controllers
 
             if (user == null)
             {
-                var returnUrl = "http://www.casualeal.com/Account/RegisteredForAcademy";
+                var returnUrl = "http://ceal.gg/Account/RegisteredForAcademy";
                 return RedirectToAction("Login", routeValues: new { returnUrl });
             }
             await _accountService.UpdateSummonerValidAsync(user, true);
@@ -85,7 +85,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                var returnUrl = "http://www.casualeal.com/Account/RegisterForSeason";
+                var returnUrl = "http://ceal.gg/Account/RegisterForSeason";
                 return RedirectToAction("Login", routeValues: new { returnUrl });
             }
             var summoner = await _accountService.GetSummonerViewAsync(user);
@@ -163,7 +163,7 @@ namespace Web.Controllers
 
             if (user == null)
             {
-                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWith2fa");
+                return RedirectToAction("Login", routeValues: "http://ceal.gg/Account/LoginWith2fa");
             }
 
             var model = new LoginWith2faViewModel { RememberMe = rememberMe };
@@ -185,7 +185,7 @@ namespace Web.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWith2fa");
+                return RedirectToAction("Login", routeValues: "http://ceal.gg/Account/LoginWith2fa");
             }
 
             var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
@@ -218,7 +218,7 @@ namespace Web.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWithRecoveryCode");
+                return RedirectToAction("Login", routeValues: "http://ceal.gg/Account/LoginWithRecoveryCode");
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -239,7 +239,7 @@ namespace Web.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return RedirectToAction("Login", routeValues: "http://www.casualeal.com/Account/LoginWithRecoveryCode");
+                return RedirectToAction("Login", routeValues: "http://ceal.gg/Account/LoginWithRecoveryCode");
             }
 
             var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
@@ -426,7 +426,7 @@ namespace Web.Controllers
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
                 {
-                    var returnUrl = $"http://www.casualeal.com/Account/ConfirmEmail?userId={userId}code={code}";
+                    var returnUrl = $"http://ceal.gg/Account/ConfirmEmail?userId={userId}code={code}";
                     return RedirectToAction("Login", routeValues: new { returnUrl });
                 }
 

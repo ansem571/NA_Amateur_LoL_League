@@ -9,6 +9,7 @@ namespace Domain.Repositories.Interfaces
     {
         Task<TeamRosterEntity> GetByTeamNameAsync(string teamName, Guid? seasonInfoId);
         Task<TeamRosterEntity> GetByTeamIdAsync(Guid id);
+        Task<IEnumerable<TeamRosterEntity>> GetAllTeamsAsync();
         Task<IEnumerable<TeamRosterEntity>> GetAllTeamsAsync(Guid? seasonInfoId);
         Task<TeamRosterEntity> GetTeamAsync(Guid seasonId, IEnumerable<Guid> summonerId);
 

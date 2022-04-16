@@ -19,5 +19,7 @@ namespace Domain.Services.Interfaces
 
         Task<bool> UpdateRosterLineupAsync(UpdateRosterLineupView view);
         Task<IEnumerable<ScheduleView>> GetTeamSchedule(Guid rosterId);
+
+        Task<bool> DeleteOldLogos(bool allLogos);
     }
 }

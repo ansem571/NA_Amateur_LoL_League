@@ -31,7 +31,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                var returnUrl = "http://www.casualeal.com/Summoner/Index";
+                var returnUrl = "http://ceal.gg/Summoner/Index";
                 return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }         
 
@@ -53,7 +53,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                var returnUrl = "http://www.casualeal.com/Summoner/Index";
+                var returnUrl = "http://ceal.gg/Summoner/Index";
                 return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
@@ -77,7 +77,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                var returnUrl = "http://www.casualeal.com/Summoner/RequestPlayers";
+                var returnUrl = "http://ceal.gg/Summoner/RequestPlayers";
                 return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 
@@ -98,7 +98,7 @@ namespace Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                var returnUrl = "http://www.casualeal.com/Summoner/RequestPlayers";
+                var returnUrl = "http://ceal.gg/Summoner/RequestPlayers";
                 return RedirectToAction("Login", "Account", routeValues: new { returnUrl });
             }
 

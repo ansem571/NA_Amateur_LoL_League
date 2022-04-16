@@ -135,6 +135,8 @@ namespace Web.Controllers
             return View("TeamCreationView", model);
         }
 
+        [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> ViewAllRostersAsync()
         {
             var model = await _rosterService.GetSeasonInfoView();
@@ -427,10 +429,11 @@ namespace Web.Controllers
         //}
 
         [HttpGet]
-        public async Task<IActionResult> StandingsAsync()
+        public async Task<IActionResult> CurrentStandingsAsync()
         {
             try
             {
+                _logger.LogInformation("Navigated to Current Standings Async");
                 var standingsSortedRoster = await _scheduleService.SetupStandings();
 
                 return View(standingsSortedRoster);

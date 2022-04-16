@@ -32,13 +32,15 @@ namespace Domain.Services.Implementations
         private readonly IMatchMvpRepository _matchMvpRepository;
         private readonly IScheduleRepository _scheduleRepository;
         private readonly IScheduleMapper _scheduleMapper;
+        private readonly ILogger _logger;
 
         public RosterService(ISummonerMapper summonerMapper, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, ISeasonInfoRepository seasonInfoRepository,
             IDivisionRepository divisionRepository, IPlayerStatsRepository playerStatsRepository, IPlayerStatsMapper playerStatsMapper,
             IAlternateAccountRepository alternateAccountRepository, IMatchDetailRepository matchDetailRepository, ISummonerRoleMapper roleMapper,
-            IMatchMvpRepository matchMvpRepository, IScheduleRepository scheduleRepository, IScheduleMapper scheduleMapper)
+            IMatchMvpRepository matchMvpRepository, IScheduleRepository scheduleRepository, IScheduleMapper scheduleMapper,
+            ILogger logger)
         {
             _summonerMapper = summonerMapper ??
                               throw new ArgumentNullException(nameof(summonerMapper));
@@ -70,6 +72,8 @@ namespace Domain.Services.Implementations
                                   throw new ArgumentNullException(nameof(scheduleRepository));
             _scheduleMapper = scheduleMapper ??
                               throw new ArgumentNullException(nameof(scheduleMapper));
+            _logger = logger ??
+                    throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<SeasonInfoView> GetSeasonInfoView()
@@ -83,14 +87,12 @@ namespace Domain.Services.Implementations
 
             //TODO: Uncomment when ready to push
             var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
-
             var rostersTask = GetAllRosters(seasonInfo);
+            var rosters = (await rostersTask).ToList();
 
             var divisions = (await _divisionRepository.GetAllForSeasonAsync(seasonInfo.Id)).ToList();
             try
             {
-                var rosters = (await rostersTask).ToList();
-
                 foreach (var rosterView in rosters)
                 {
                     var division = divisions.First(x =>
@@ -108,6 +110,7 @@ namespace Domain.Services.Implementations
             catch (Exception)
             {
                 //no rosters finalized yet
+
             }
 
             view.SeasonInfo = new SeasonInfoViewPartial
@@ -171,15 +174,15 @@ namespace Domain.Services.Implementations
                     TeamTierScore = roster.TeamTierScore.GetValueOrDefault()
                 };
 
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/logos", roster.Id.ToString());
-                if (File.Exists(path))
-                {
-                    var byteData = await File.ReadAllBytesAsync(path);
-                    var base64 = Convert.ToBase64String(byteData);
-                    var type = GetContentType(path);
-                    var imgSrc = String.Format($"data:{type};base64,{base64}");
-                    rosterView.FileSource = imgSrc;
-                }
+                //var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/logos", roster.Id.ToString());
+                //if (File.Exists(path))
+                //{
+                //    var byteData = await File.ReadAllBytesAsync(path);
+                //    var base64 = Convert.ToBase64String(byteData);
+                //    var type = GetContentType(path);
+                //    var imgSrc = String.Format($"data:{type};base64,{base64}");
+                //    rosterView.FileSource = imgSrc;
+                //}
                 rosterView.Cleanup();
                 list.Add(rosterView);
             }
@@ -187,6 +190,33 @@ namespace Domain.Services.Implementations
             return list;
         }
 
+        public async Task<bool> DeleteOldLogos(bool allLogos)
+        {
+            try
+            {
+                var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
+                var rosterIds = (await _teamRosterRepository.GetAllTeamsAsync()).ToList().Where(x => x.SeasonInfoId != seasonInfo.Id).Select(x => x.Id);
+
+                var di = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\logos"));
+                var files = di.GetFiles().ToList();
+                _logger.LogInformation($"Directory: {di.FullName}");
+                _logger.LogInformation($"Files Count: {files.Count}");
+                foreach (var file in files)
+                {
+                    if (allLogos || (!allLogos && rosterIds.Any(x => file.Name.Contains(x.ToString()))))
+                    {
+                        file.Delete();
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                var message = allLogos ? "Including current" : "Excluding Current";
+                _logger.LogError($"Error deleting logos: {message}. {e.Message}", e);
+                return false;
+            }
+        }
 
         /// <summary>
         /// For Roster specific View
@@ -312,7 +342,7 @@ namespace Domain.Services.Implementations
                 var playerId = playerStat.Key.SummonerId;
                 var playerMvps =
                     (mvpStats.SelectMany(x => x.Value)
-                    .Where(x => x.BlueMvp == playerId || x.RedMvp == playerId || 
+                    .Where(x => x.BlueMvp == playerId || x.RedMvp == playerId ||
                         x.HonoraryBlueOppMvp == playerId || x.HonoraryRedOppMvp == playerId))
                     .GroupBy(x => (x.TeamScheduleId, x.Game))
                     .ToDictionary(x => x.Key, x => x.FirstOrDefault());
@@ -432,7 +462,7 @@ namespace Domain.Services.Implementations
             roster.Wins += wins;
             roster.Loses += loses;
 
-            roster.Points += (int) (wins * 1.5);
+            roster.Points += (int)(wins * 1.5);
             var result = await _teamRosterRepository.UpdateAsync(roster);
             return result;
         }

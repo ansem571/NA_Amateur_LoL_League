@@ -27,6 +27,10 @@ namespace Domain.Repositories.Implementations
         {
             return await _table.ReadOneAsync(id);
         }
+        public async Task<IEnumerable<TeamRosterEntity>> GetAllTeamsAsync()
+        {
+            return await _table.ReadAllAsync();
+        }
 
         public async Task<IEnumerable<TeamRosterEntity>> GetAllTeamsAsync(Guid? seasonInfoId)
         {

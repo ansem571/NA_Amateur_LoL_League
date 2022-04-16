@@ -1,10 +1,11 @@
 ﻿@model string
 @{
     ViewData["Title"] = "Admin page";
+    var allLogos = false;
 }
 <h4>@ViewData["Title"]</h4>
 <div class="row">
-    @Html.Partial("_StatusMessage", @Model)
+    @Html.PartialAsync("_StatusMessage", @Model)
 </div>
 <div class="row">
     <p>
@@ -51,4 +52,17 @@
         Go to swagger
     </p>
     <button style="color: black;" onclick="@("window.location.href='" + Url.Action("GoToSwagger", "Admin") + "' ");" class="btn">Go to swagger</button>
+</div>
+<div class="row">
+    <p>
+        By clicking the Button below, you will delete old logos
+    </p>
+    <form asp-controller="Admin" asp-action="DeleteOldLogosAsync" method="get">
+        <div class="form-group">
+            <label>Delete All Logos?</label>
+            <input type="checkbox" asp-for="@allLogos" />
+            <button style="color: black;" class="btn">Delete Logos</button>
+        </div>
+    </form>
+
 </div>

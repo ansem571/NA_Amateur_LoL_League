@@ -45,8 +45,20 @@ namespace Web.Controllers
             return View(model: StatusMessage);
         }
 
-
         [HttpGet]
+
+        [Authorize(Roles = "Admin, Tribunal, Moderator")]
+
+        public async Task<IActionResult> DeleteOldLogosAsync(bool allLogos)
+        {
+            var result = await _rosterService.DeleteOldLogos(allLogos);
+
+            StatusMessage = result ? "Deleted Logos" : "Failed Logo Deletion, look at logs";
+
+            return Index();
+        }
+
+        [HttpPost]
         [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> CreateTeamAsync()
         {

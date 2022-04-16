@@ -5,6 +5,7 @@ using DAL.Entities.UserData;
 using Domain.Helpers;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ using Web.Models.ManageViewModels;
 
 namespace Web.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly UserManager<UserEntity> _userManager;
@@ -22,7 +24,7 @@ namespace Web.Controllers
         private readonly SignInManager<UserEntity> _signInManager;
         private readonly IEmailService _emailService;
 
-        public HomeController(UserManager<UserEntity> userManager, IAccountService accountService, 
+        public HomeController(UserManager<UserEntity> userManager, IAccountService accountService,
             IBlacklistRepository blacklistRepository, SignInManager<UserEntity> signInManager,
             IEmailService emailService)
         {
@@ -35,7 +37,7 @@ namespace Web.Controllers
 
         [TempData]
         public string StatusMessage { get; set; }
-        
+
         public async Task<IActionResult> Index()
         {
             var seasonInfoTask = _accountService.GetSeasonInfoAsync();
@@ -108,10 +110,15 @@ namespace Web.Controllers
                             $"Exception: {exceptionThatOccurred.Message}\r\n" +
                             $"Inner Exception: {exceptionThatOccurred.InnerException?.Message}\r\n" +
                             $"Stack Trace: {exceptionThatOccurred.StackTrace}";
+
+                StatusMessage = body;
                 _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", body, "Error occured").Wait();
             }
-
-            return View();
+            var model = new ErrorViewModel 
+            { 
+                StatusMessage = StatusMessage 
+            };
+            return View(model);
         }
     }
 }

@@ -46,10 +46,10 @@ namespace Web
             var origins = new List<string>
             {
                 "http://localhost",
-                "http://casuauleal.com",
-                "https://casuauleal.com",
                 "http://www.casualeal.com",
-                "https://www.casuauleal.com",
+                "https://www.casualeal.com",
+                "http://casualeal.com",
+                "https://casualeal.com",
                 "http://ceal.gg",
                 "https://ceal.gg",
             };
