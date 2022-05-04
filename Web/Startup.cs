@@ -100,10 +100,11 @@ namespace Web
             });
             var builder = services.BuildServiceProvider();
             var emailService = builder.GetService<IEmailService>();
+            var logger = builder.GetService<ILogger<ErrorHandlingFilter>>();
             services.AddMvc(options =>
             {
                 options.SuppressAsyncSuffixInActionNames = false;
-                options.Filters.Add(new ErrorHandlingFilter(emailService));
+                options.Filters.Add(new ErrorHandlingFilter(emailService, logger));
             });
         }
 

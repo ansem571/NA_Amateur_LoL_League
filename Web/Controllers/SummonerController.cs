@@ -107,6 +107,8 @@ namespace Web.Controllers
             {
                 if (!tempList.Select(x => x.SummonerName).Contains(summoner.SummonerName))
                 {
+                    if (summoner.SummonerName == null)
+                        continue;
                     tempList.Add(summoner);
                 }
             }

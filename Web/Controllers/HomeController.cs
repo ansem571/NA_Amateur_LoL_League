@@ -92,7 +92,7 @@ namespace Web.Controllers
         {
             // Get the details of the exception that occurred
             var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
-
+            StatusMessage = "";
             if (exceptionFeature != null)
             {
                 // Get which route the exception occurred at

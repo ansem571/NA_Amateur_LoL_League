@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DAL.Databases.Interfaces;
 using DAL.Entities.LeagueInfo;
 using DAL.Entities.UserData;
 using Domain.Exceptions;
@@ -32,11 +33,13 @@ namespace Domain.Services.Implementations
         private const int AltenateAccountsCount = 3;
         private const int RequestingSummonerCount = 6;
         private const int TeamRosterMaxCount = 7;
+        private readonly IDatabase _database;
 
         public AccountService(ILogger<AccountService> logger, ISummonerMapper summonerMapper, IAlternateAccountMapper alternateAccountMapper,
             ISummonerInfoRepository summonerInfoRepository, IAlternateAccountRepository alternateAccountRepository,
             IRequestedSummonerRepository requestedSummonerRepository, ITeamPlayerRepository teamPlayerRepository,
-            ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository, IBlacklistRepository blacklistRepository)
+            ITeamRosterRepository teamRosterRepository, ISeasonInfoRepository seasonInfoRepository, IBlacklistRepository blacklistRepository,
+            IDatabase database)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -58,6 +61,7 @@ namespace Domain.Services.Implementations
                                     throw new ArgumentNullException(nameof(seasonInfoRepository));
             _blacklistRepository = blacklistRepository ??
                                     throw new ArgumentNullException(nameof(blacklistRepository));
+            _database = database ?? throw new ArgumentNullException(nameof(database));
         }
 
         public async Task<bool> CreateSummonerInfoAsync(SummonerInfoView view, UserEntity user)
@@ -343,11 +347,28 @@ namespace Domain.Services.Implementations
                     deleteList.Add(oldEntity.Value);
                 }
             }
-
-            var createTask = _requestedSummonerRepository.CreateAsync(createList);
-            var updateTask = _requestedSummonerRepository.UpdateAsync(updateList);
-            var deleteTask = _requestedSummonerRepository.DeleteAsync(deleteList);
-            return await createTask && await updateTask && await deleteTask;
+            bool result = false;
+            using (var uow = await _database.CreateUnitOfWorkAsync())
+            {
+                try
+                {
+                    uow.BeginTransaction();
+                    var createTask = _requestedSummonerRepository.CreateAsync(createList, uow);
+                    var updateTask = _requestedSummonerRepository.UpdateAsync(updateList, uow);
+                    var deleteTask = _requestedSummonerRepository.DeleteAsync(deleteList, uow);
+                    //var createTask = _requestedSummonerRepository.CreateAsync(createList, uow);
+                    //var updateTask = _requestedSummonerRepository.UpdateAsync(updateList, uow);
+                    //var deleteTask = _requestedSummonerRepository.DeleteAsync(deleteList, uow);
+                    result = await createTask && await updateTask && await deleteTask;
+                    uow.Commit();
+                }
+                catch (Exception)
+                {
+                    uow.Rollback();
+                    throw;
+                }
+            }
+            return result;
         }
 
         public async Task<FpSummonerView> GetFpSummonerView()

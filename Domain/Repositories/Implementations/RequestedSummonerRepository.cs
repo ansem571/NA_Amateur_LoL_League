@@ -29,17 +29,17 @@ namespace Domain.Repositories.Implementations
             return entities;
         }
 
-        public async Task<bool> CreateAsync(IEnumerable<SummonerRequestEntity> entities)
+        public async Task<bool> CreateAsync(IEnumerable<SummonerRequestEntity> entities, IUnitOfWork uow = null)
         {
             var list = entities.ToList();
             if (!list.Any())
             {
                 return true;
             }
-            return await _table.InsertAsync(list) == list.Count;
+            return await _table.InsertAsync(list, uow) == list.Count;
         }
 
-        public async Task<bool> UpdateAsync(IEnumerable<SummonerRequestEntity> entities)
+        public async Task<bool> UpdateAsync(IEnumerable<SummonerRequestEntity> entities, IUnitOfWork uow = null)
         {
             var list = entities.ToList();
             if (!list.Any())
@@ -47,10 +47,10 @@ namespace Domain.Repositories.Implementations
                 return true;
             }
 
-            return await _table.UpdateAsync(list);
+            return await _table.UpdateAsync(list, uow);
         }
 
-        public async Task<bool> DeleteAsync(IEnumerable<SummonerRequestEntity> entities)
+        public async Task<bool> DeleteAsync(IEnumerable<SummonerRequestEntity> entities, IUnitOfWork uow = null)
         {
             var list = entities.ToList();
             if (!list.Any())
@@ -58,7 +58,7 @@ namespace Domain.Repositories.Implementations
                 return true;
             }
 
-            return await _table.DeleteAsync(list);
+            return await _table.DeleteAsync(list, uow);
         }
     }
 }

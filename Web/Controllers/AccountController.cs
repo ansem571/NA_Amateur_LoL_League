@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web;
 using DAL.Entities.UserData;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
@@ -298,6 +299,7 @@ namespace Web.Controllers
                         _logger.LogInformation($"User {user.Email} created a new account with password.");
 
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = HttpUtility.UrlEncode(code);
                         var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
                         await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
@@ -418,6 +420,7 @@ namespace Web.Controllers
         {
             try
             {
+                code = HttpUtility.UrlDecode(code);
                 if (userId == null || code == null)
                 {
                     return RedirectToAction(nameof(HomeController.Index), "Home");
@@ -432,6 +435,11 @@ namespace Web.Controllers
 
                 var result = await _userManager.ConfirmEmailAsync(user, code);
                 _logger.LogInformation($"Email confirmation? {result.Succeeded}");
+                if (!result.Succeeded)
+                {
+                    code = HttpUtility.UrlDecode(code);
+                    result = await _userManager.ConfirmEmailAsync(user, code);
+                }
 
                 if (!result.Succeeded)
                 {
@@ -473,6 +481,7 @@ namespace Web.Controllers
                 // For more information on how to enable account confirmation and password reset please
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                code = HttpUtility.UrlEncode(code);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
                 await _emailSender.SendEmailAsync(model.Email,
                    $"Please reset your password by clicking here: <a href='{callbackUrl}' target='_blank'>link</a>",
@@ -499,7 +508,8 @@ namespace Web.Controllers
             {
                 throw new ApplicationException("A code must be supplied for password reset.");
             }
-            var model = new ResetPasswordViewModel { Code = code };
+
+            var model = new ResetPasswordViewModel { Code = HttpUtility.UrlDecode(code) };
             return View(model);
         }
 
@@ -519,6 +529,11 @@ namespace Web.Controllers
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (!result.Succeeded)
+            {
+                var decoded = HttpUtility.UrlDecode(model.Code);
+                result = await _userManager.ResetPasswordAsync(user, decoded, model.Password);
+            }
             if (result.Succeeded)
             {
                 return RedirectToAction(nameof(ResetPasswordConfirmation));

@@ -81,7 +81,7 @@ namespace DAL.Data.Implementations
 
             try
             {
-                await conn.InsertAsync(item, unitOfWork?.Transaction);
+                await conn.InsertAsync(item, unitOfWork?.Transaction, 60);
                 return 1;
             }
             finally
@@ -116,7 +116,7 @@ namespace DAL.Data.Implementations
 
                 var sql = $"insert into {_tableName.Bracket(Database.GetStartBracket(), Database.GetEndBracket())} ({sbColumns}) values ({sbParams})";
 
-                return await conn.ExecuteAsync(sql, items, unitOfWork?.Transaction);
+                return await conn.ExecuteAsync(sql, items, unitOfWork?.Transaction, 60);
             }
             finally
             {
@@ -132,7 +132,7 @@ namespace DAL.Data.Implementations
             var conn = unitOfWork?.Connection ?? await Database.CreateOpenConnectionAsync();
             try
             {
-                return await conn.UpdateAsync(item, unitOfWork?.Transaction);
+                return await conn.UpdateAsync(item, unitOfWork?.Transaction, 60);
             }
             finally
             {
@@ -177,7 +177,7 @@ namespace DAL.Data.Implementations
                     }
                 }
 
-                return (await conn.ExecuteAsync(sb.ToString(), items, unitOfWork?.Transaction)) > 0;
+                return (await conn.ExecuteAsync(sb.ToString(), items, unitOfWork?.Transaction, 60)) > 0;
             }
             finally
             {
@@ -193,7 +193,7 @@ namespace DAL.Data.Implementations
             var conn = unitOfWork?.Connection ?? await Database.CreateOpenConnectionAsync();
             try
             {
-                return await conn.DeleteAsync(item, unitOfWork?.Transaction);
+                return await conn.DeleteAsync(item, unitOfWork?.Transaction, 60);
             }
             finally
             {
@@ -209,7 +209,7 @@ namespace DAL.Data.Implementations
             var conn = unitOfWork?.Connection ?? await Database.CreateOpenConnectionAsync();
             try
             {
-                return await conn.DeleteAsync(items, unitOfWork?.Transaction);
+                return await conn.DeleteAsync(items, unitOfWork?.Transaction, 60);
             }
             finally
             {
@@ -227,7 +227,7 @@ namespace DAL.Data.Implementations
             {
                 return (await conn.ExecuteAsync(
                            $@"delete from {_tableName.Bracket(Database.GetStartBracket(), Database.GetEndBracket())} where {where}",
-                           param, unitOfWork?.Transaction)) >= 1;
+                           param, unitOfWork?.Transaction, 60)) >= 1;
             }
             finally
             {
