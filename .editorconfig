@@ -2,3 +2,9 @@
 
 # CS1591: Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS1591.severity = none
+
+# ASP0000: Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+dotnet_diagnostic.ASP0000.severity = none
+
+# CS0618: Type or member is obsolete
+dotnet_diagnostic.CS0618.severity = silent

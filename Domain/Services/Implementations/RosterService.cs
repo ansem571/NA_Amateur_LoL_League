@@ -341,16 +341,16 @@ namespace Domain.Services.Implementations
             {
                 var playerId = playerStat.Key.SummonerId;
                 var playerMvps =
-                    (mvpStats.SelectMany(x => x.Value)
+                    mvpStats.SelectMany(x => x.Value)
                     .Where(x => x.BlueMvp == playerId || x.RedMvp == playerId ||
-                        x.HonoraryBlueOppMvp == playerId || x.HonoraryRedOppMvp == playerId))
+                        x.HonoraryBlueOppMvp == playerId || x.HonoraryRedOppMvp == playerId)
                     .GroupBy(x => (x.TeamScheduleId, x.Game))
                     .ToDictionary(x => x.Key, x => x.FirstOrDefault());
                 var mvpPoints = 0d;
                 if (playerMvps.Any())
                 {
                     var matches =
-                        (matchDetails.SelectMany(x => x.Value).Where(x => x.PlayerId == playerId)).GroupBy(x => (x.TeamScheduleId, x.Game)).ToDictionary(
+                        matchDetails.SelectMany(x => x.Value).Where(x => x.PlayerId == playerId).GroupBy(x => (x.TeamScheduleId, x.Game)).ToDictionary(
                             x => x.Key, x => x.FirstOrDefault());
                     mvpPoints = CalculateMvpPoints(playerMvps, matches, scheduleIds);
                 }
@@ -399,7 +399,7 @@ namespace Domain.Services.Implementations
             {
                 extension = GetMimeTypes().FirstOrDefault(x => x.Value.Equals(file.ContentType)).Key;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return (false, "This file extension is not supported");
             }

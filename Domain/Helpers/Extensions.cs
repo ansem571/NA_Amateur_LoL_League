@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -9,6 +11,15 @@ namespace Domain.Helpers
         public static bool IsNullOrEmpty(this object obj)
         {
             return obj == null || string.IsNullOrWhiteSpace(obj.ToString());
+        }
+
+        public static IEnumerable<IEnumerable<T>> partition<T>(this IEnumerable<T> values, int chunkSize)
+        {
+            while (values.Any())
+            {
+                yield return values.Take(chunkSize).ToList();
+                values = values.Skip(chunkSize).ToList();
+            }
         }
     }
 

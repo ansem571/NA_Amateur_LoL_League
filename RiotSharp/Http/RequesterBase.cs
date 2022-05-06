@@ -73,7 +73,7 @@ namespace RiotSharp.Http
         {
             return arguments
                 .Where(arg => !string.IsNullOrWhiteSpace(arg))
-                .Aggregate(string.Empty, (current, arg) => current + ("&" + arg));
+                .Aggregate(string.Empty, (current, arg) => current + "&" + arg);
         }
 
         protected void HandleRequestFailure(HttpResponseMessage response)

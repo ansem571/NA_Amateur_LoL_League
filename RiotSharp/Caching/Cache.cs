@@ -280,7 +280,7 @@ namespace RiotSharp.Caching
             public bool CanExpire(out TimeSpan tryAfter)
             {
                 tryAfter = _expireAt - DateTime.Now;
-                return (0 > tryAfter.Ticks);
+                return 0 > tryAfter.Ticks;
             }
 
             public void Viewed()

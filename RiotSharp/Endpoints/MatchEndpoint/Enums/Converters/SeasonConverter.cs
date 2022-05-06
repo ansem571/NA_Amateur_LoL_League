@@ -55,7 +55,7 @@ namespace RiotSharp.Endpoints.MatchEndpoint.Enums.Converters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, ((Season)value));
+            serializer.Serialize(writer, (Season)value);
         }
     }
 }

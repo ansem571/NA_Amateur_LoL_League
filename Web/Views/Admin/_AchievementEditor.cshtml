@@ -1,0 +1,11 @@
+﻿@model Domain.Forms.UserAchievementForm
+
+    <li style="padding-bottom:15px">
+        @Html.EditorFor(x => x.UserId)
+        @Html.EditorFor(x => x.Achievement)
+        @Html.EditorFor(x => x.Achievement)
+        @Html.EditorFor(x => x.TeamName)
+        @Html.EditorFor(x => x.AgainstTeam)
+
+        <a href="#" onclick="$(this).parent().remove();">Delete</a>
+    </li>

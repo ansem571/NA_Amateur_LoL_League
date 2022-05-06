@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DAL.Contracts;
+using DAL.Databases.Interfaces;
 using DAL.Entities.LeagueInfo;
+using Domain.Forms;
 using Domain.Helpers;
 using Domain.Mappers.Interfaces;
 using Domain.Repositories.Interfaces;
@@ -28,13 +30,16 @@ namespace Domain.Services.Implementations
         private readonly ITierDivisionMapper _tierDivisionMapper;
         private readonly IPlayerStatsRepository _playerStatsRepository;
         private readonly ISeasonInfoRepository _seasonInfoRepository;
+        private readonly IAchievementRepository _achievementRepository;
+        private readonly IDatabase _database;
 
-        private const int MinTeamCountRequirement = 5;
+
+        //private const int MinTeamCountRequirement = 5;
 
         public AdminService(ILogger<AdminService> logger, ILookupRepository lookupRepository, ISummonerInfoRepository summonerInfoRepository,
             ITeamPlayerRepository teamPlayerRepository, ITeamRosterRepository teamRosterRepository,
             ITeamCaptainRepository teamCaptainRepository, IRosterService rosterService, ITierDivisionMapper tierDivisionMapper, IPlayerStatsRepository playerStatsRepository,
-            ISeasonInfoRepository seasonInfoRepository)
+            ISeasonInfoRepository seasonInfoRepository, IAchievementRepository achievementRepository, IDatabase database)
         {
             _logger = logger ??
                       throw new ArgumentNullException(nameof(logger));
@@ -56,6 +61,11 @@ namespace Domain.Services.Implementations
                                      throw new ArgumentNullException(nameof(playerStatsRepository));
             _seasonInfoRepository = seasonInfoRepository ??
                                     throw new ArgumentNullException(nameof(playerStatsRepository));
+            _achievementRepository = achievementRepository
+                                    ?? throw new ArgumentNullException(nameof(achievementRepository));
+            _database = database
+                                    ?? throw new ArgumentNullException(nameof(database));
+
         }
 
         public async Task<SummonerTeamCreationView> GetSummonersToCreateTeamAsync()
@@ -64,7 +74,7 @@ namespace Domain.Services.Implementations
             var summonersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
             var rostersTask = _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id);
 
-            var summoners = (await summonersTask).Where(x=>x.IsValidPlayer).ToList();
+            var summoners = (await summonersTask).Where(x => x.IsValidPlayer).ToList();
             var rosters = await rostersTask;
 
             var view = new SummonerTeamCreationView
@@ -103,7 +113,7 @@ namespace Domain.Services.Implementations
             return await _rosterService.GetAllRosters();
         }
 
-        public async Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerIds)
+        public async Task<bool> CreateNewTeamAsync(IEnumerable<Guid> summonerIds, float teamTierScore)
         {
             var seasonInfo = await _seasonInfoRepository.GetCurrentSeasonAsync();
 
@@ -129,14 +139,6 @@ namespace Domain.Services.Implementations
                 }
                 var summoners = (await _summonerInfoRepository.GetAllForSummonerIdsAsync(summonerIdsList)).ToList();
 
-
-
-                if (summoners.Count < MinTeamCountRequirement)
-                {
-                    throw new Exception("Cannot make a team with less than 5 players");
-                }
-
-
                 var teamTierScores = new List<int>();
                 var teamPlayers = new List<TeamPlayerEntity>();
                 foreach (var summoner in summoners)
@@ -156,12 +158,11 @@ namespace Domain.Services.Implementations
 
                 var teamsCount = (await _teamRosterRepository.GetAllTeamsAsync(seasonInfo.Id)).Count();
 
-                var teamTierScore = teamTierScores.OrderByDescending(x => x).Take(MinTeamCountRequirement).Sum();
                 var team = new TeamRosterEntity
                 {
                     Id = Guid.NewGuid(),
-                    TeamName = $"Team{teamsCount+1}",
-                    TeamTierScore = teamTierScore / MinTeamCountRequirement,
+                    TeamName = $"Team{teamsCount + 1}",
+                    TeamTierScore = (int)teamTierScore,
                     SeasonInfoId = seasonInfo.Id
                 };
 
@@ -218,7 +219,7 @@ namespace Domain.Services.Implementations
             {
                 return false;
             }
-            
+
             var entity = new TeamCaptainEntity
             {
                 SummonerId = summoner.Id,
@@ -235,6 +236,43 @@ namespace Domain.Services.Implementations
             {
                 await _teamCaptainRepository.DeleteCaptainAsync(captain);
                 return await _teamCaptainRepository.CreateCaptainAsync(entity);
+            }
+        }
+
+        public async Task<bool> InsertAchievement(IEnumerable<UserAchievementForm> forms)
+        {
+            try
+            {
+                using (var uow = await _database.CreateUnitOfWorkAsync())
+                {
+                    var partitions = forms.partition(10);
+                    var list = new List<AchievementEntity>();
+                    foreach (var subSetForms in partitions)
+                    {
+                        foreach (var form in subSetForms)
+                        {
+                            var achievement = new AchievementEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = form.UserId,
+                                Achievement = form.Achievement,
+                                AchievedDate = form.Date,
+                                AchievedTeam = form.TeamName
+                            };
+                            list.Add(achievement);
+                        }
+                        if (!await _achievementRepository.InsertAsync(list))
+                        {
+                            throw new Exception("An error occured when inserting achievement(s)");
+                        }
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error inserting new achievement(s). Contact Ansem571");
+                throw e;
             }
         }
 
@@ -397,6 +435,7 @@ namespace Domain.Services.Implementations
             return await insertResult && await updateResult;
         }
 
+        [Obsolete("No longer in use")]
         public async Task<bool> UpdateRosterTierScoreAsync()
         {
             var rosters = await _rosterService.GetAllRosters();
@@ -410,7 +449,7 @@ namespace Domain.Services.Implementations
                     var divisionScore = int.Parse((await _lookupRepository.GetLookupEntity(divisionId)).Value);
                     teamTierScores.Add(divisionScore + player.CurrentLp);
                 }
-                var currentScore = teamTierScores.OrderByDescending(x => x).Take(MinTeamCountRequirement).Sum() / MinTeamCountRequirement;
+                var currentScore = teamTierScores.OrderByDescending(x => x).Take(5).Sum() / 5;
                 var rosterEntity = await _teamRosterRepository.GetByTeamIdAsync(roster.RosterId);
                 rosterEntity.TeamTierScore = currentScore;
                 try

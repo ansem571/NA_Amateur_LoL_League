@@ -41,6 +41,9 @@ namespace Web.Controllers
         [TempData]
         public string ErrorMessage { get; set; }
 
+        [TempData]
+        public string StatusMessage { get; set; }
+
 
         [HttpGet]
         [AllowAnonymous]
@@ -484,8 +487,9 @@ namespace Web.Controllers
                 code = HttpUtility.UrlEncode(code);
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, code, Request.Scheme);
                 await _emailSender.SendEmailAsync(model.Email,
-                   $"Please reset your password by clicking here: <a href='{callbackUrl}' target='_blank'>link</a>",
+                   $"Please reset your password by clicking here: <a href='{callbackUrl}' target='_blank'>{callbackUrl}</a>",
                     "Reset Password");
+                StatusMessage = callbackUrl;
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));
             }
 
@@ -497,7 +501,7 @@ namespace Web.Controllers
         [AllowAnonymous]
         public IActionResult ForgotPasswordConfirmation()
         {
-            return View();
+            return View(model: StatusMessage);
         }
 
         [HttpGet]

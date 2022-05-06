@@ -23,7 +23,7 @@ namespace RiotSharp.Misc.Converters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, (long)(((TimeSpan)value).TotalSeconds));
+            serializer.Serialize(writer, (long)((TimeSpan)value).TotalSeconds);
         }
     }
 }

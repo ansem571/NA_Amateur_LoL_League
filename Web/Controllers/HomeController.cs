@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Web.Models;
 using Web.Models.Home;
 using Web.Models.ManageViewModels;
@@ -100,6 +101,7 @@ namespace Web.Controllers
 
                 // Get the exception that occurred
                 Exception exceptionThatOccurred = exceptionFeature.Error;
+                var json = JsonConvert.SerializeObject(exceptionThatOccurred);
 
                 // TODO: Do something with the exception
                 // Log it with Serilog?
@@ -111,7 +113,7 @@ namespace Web.Controllers
                             $"Inner Exception: {exceptionThatOccurred.InnerException?.Message}\r\n" +
                             $"Stack Trace: {exceptionThatOccurred.StackTrace}";
 
-                StatusMessage = body;
+                StatusMessage = json;
                 _emailService.SendEmailAsync("casualesportsamateurleague@gmail.com", body, "Error occured").Wait();
             }
             var model = new ErrorViewModel 

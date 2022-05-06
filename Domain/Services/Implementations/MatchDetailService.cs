@@ -180,7 +180,7 @@ namespace Domain.Services.Implementations
             var registeredPlayersTask = _summonerInfoRepository.GetAllValidSummonersAsync();
             var previousListedMvpsTask = _matchMvpRepository.ReadAllForTeamScheduleId(view.ScheduleId);
             var registeredPlayers = (await registeredPlayersTask).ToDictionary(x => x.SummonerName.ToLowerInvariant(), x => x);
-            var matchDictionary = (await matchesTask);
+            var matchDictionary = await matchesTask;
             var mvpDetails = (await previousListedMvpsTask).OrderBy(x => x.Game).ToDictionary(x => x.Game, x => x);
 
             var divisionId = await divisionTask;

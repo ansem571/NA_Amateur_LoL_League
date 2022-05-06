@@ -8,7 +8,7 @@
 }
 
 <h2>@ViewData["Title"]</h2>
-@Html.Partial("_StatusMessage", Model.StatusMessage)
+<partial name="_StatusMessage" model="Model.StatusMessage" />
 @if (Model.IsValid)
 {
     <div class="row">
@@ -93,5 +93,5 @@
 </div>
 
 @section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
+        <partial name="_ValidationScriptsPartial" />
 }

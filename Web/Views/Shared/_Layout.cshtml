@@ -45,28 +45,28 @@
                     {
                         <li><a asp-area="" asp-controller="Roster" asp-action="ViewAllRostersAsync">Official Rosters</a></li>
                         <li><a asp-area="" asp-controller="Schedule" asp-action="Index">Schedule</a></li>
+                        <li><a asp-area="" asp-controller="Roster" asp-action="CurrentStandingsAsync">Standings</a></li>
                     }
-                    <li><a asp-area="" asp-controller="Roster" asp-action="CurrentStandingsAsync">Standings</a></li>
 
                 </ul>
-                @await Html.PartialAsync("_LoginPartial")
+                <partial name="_LoginPartial" />
             </div>
         </div>
     </nav>
-<div class="container body-content">
-    <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="checkbox">
-            <input type="checkbox" id="checkbox" />
-            <div class="slider round"></div>
-        </label>
-        <em>Enable Dark Mode!</em>
+    <div class="container body-content">
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox" />
+                <div class="slider round"></div>
+            </label>
+            <em>Enable Dark Mode!</em>
+        </div>
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; 2019 - Casual eSports Amateur League LLC</p>
+        </footer>
     </div>
-    @RenderBody()
-    <hr/>
-    <footer>
-        <p>&copy; 2019 - Casual eSports Amateur League LLC</p>
-    </footer>
-</div>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>

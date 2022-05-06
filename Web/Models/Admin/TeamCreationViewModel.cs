@@ -8,6 +8,7 @@ namespace Web.Models.Admin
     {
         public SummonerTeamCreationView AllSummoners { get; set; }
         public string SelectedSummonersJoint { get; set; }
+        public int TeamTierScore { get; set; }
         public IEnumerable<Guid> SelectedSummoners => Setup();
         public string StatusMessage { get; set; }
 

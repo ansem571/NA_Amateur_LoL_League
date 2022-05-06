@@ -24,7 +24,7 @@ namespace RiotSharp.Misc.Converters
             var token = JToken.Load(reader);
             if (token.Value<string>() == null) return null;
             var str = token.Value<string>();
-            return (MapType)(Enum.Parse(typeof(MapType), str));
+            return (MapType)Enum.Parse(typeof(MapType), str);
         }
 
         /// <inheritdoc />

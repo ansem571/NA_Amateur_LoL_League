@@ -25,7 +25,7 @@ namespace Web.Controllers
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IRosterService _rosterService;
 
-        public AdminController(IAdminService adminService, ILogger logger,IPlayoffService playoffService,
+        public AdminController(IAdminService adminService, ILogger logger, IPlayoffService playoffService,
             IUserService userService, ISummonerInfoRepository summonerInfoRepository, IRosterService rosterService)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
@@ -46,9 +46,7 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-
-        [Authorize(Roles = "Admin, Tribunal, Moderator")]
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteOldLogosAsync(bool allLogos)
         {
             var result = await _rosterService.DeleteOldLogos(allLogos);
@@ -85,7 +83,7 @@ namespace Web.Controllers
                     return RedirectToAction("CreateTeamAsync");
                 }
 
-                var result = await _adminService.CreateNewTeamAsync(viewModel.SelectedSummoners);
+                var result = await _adminService.CreateNewTeamAsync(viewModel.SelectedSummoners, viewModel.TeamTierScore);
 
                 if (result)
                 {
@@ -100,6 +98,43 @@ namespace Web.Controllers
 
             StatusMessage = "Error creating team";
             return RedirectToAction("CreateTeamAsync");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin, Tribunal")]
+        public async Task<IActionResult> AddNewAchievementsAsync()
+        {
+            var players = await _summonerInfoRepository.GetAllSummonersAsync();
+
+            var viewModel = new AchievementViewModel
+            {
+                Summoners = players,
+                Forms = new List<UserAchievementForm>()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin, Tribunal")]
+        public async Task<IActionResult> AddNewAchievementsAsync(AchievementViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                StatusMessage = "ModelState is invalid";
+                return RedirectToAction("AddNewAchievementsAsync");
+            }
+
+            var result = await _adminService.InsertAchievement(viewModel.Forms);
+
+            if (result)
+            {
+                StatusMessage = "You have added new achievement(s)";
+                return RedirectToAction("AddNewAchievementsAsync");
+            }
+
+            StatusMessage = "Error adding achievement(s)";
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
@@ -149,17 +184,13 @@ namespace Web.Controllers
         {
             try
             {
-                //var result = await _adminService.UpdateRosterTierScoreAsync();
-                //if (!result)
-                //{
-                //    throw new Exception("Failed to update roster tier scores");
-                //}
-                await Task.Delay(0);
+                await Task.Delay(10);
                 StatusMessage = "Fuck you Karen";
                 return RedirectToAction("Index");
             }
             catch (Exception e)
             {
+                await Task.Delay(10);
                 StatusMessage = e.Message;
                 _logger.LogError(e, StatusMessage);
                 return RedirectToAction("Index");
