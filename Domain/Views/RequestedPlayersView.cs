@@ -11,6 +11,8 @@ namespace Domain.Views
         public List<PartialSummonerView> Summoners { get; set; }
         public List<SummonerRoleEnum> LookingForSummonerRoles => LookingForRoles();
         public string LookingForString => string.Join(", ", LookingForSummonerRoles);
+        public string TeamString => string.Join(", ", TeamStringId());
+
 
         private List<SummonerRoleEnum> LookingForRoles()
         {
@@ -27,6 +29,13 @@ namespace Domain.Views
             }
 
             return listOfRoles;
+        }
+
+        private List<Guid> TeamStringId()
+        {
+            var listOfPlayers = Summoners.Select(x => x.SummonerId);
+            listOfPlayers = listOfPlayers.Where(x => x != Guid.Empty);
+            return listOfPlayers.ToList();
         }
 
         public void CleanupList()
@@ -88,6 +97,7 @@ namespace Domain.Views
         public string SummonerName { get; set; }
         public SummonerRoleEnum RoleForTeam { get; set; }
         public TierDivisionEnum Rank { get; set; }
+        public Guid SummonerId { get; set; }
 
         public override bool Equals(object obj)
         {

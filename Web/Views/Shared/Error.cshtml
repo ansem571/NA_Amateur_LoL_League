@@ -9,7 +9,7 @@
 <h3>Development Mode</h3>
 <p>
     Please Contact Ansem571 on Discord about this issue. Let him know what you were doing when this occured.
-    @Html.PartialAsync("_StatusMessage", @Model)
+    @await Html.PartialAsync("_StatusMessage", @Model)
 </p>
 
 @if (!Domain.Helpers.Extensions.IsNullOrEmpty(Model.RequestId))

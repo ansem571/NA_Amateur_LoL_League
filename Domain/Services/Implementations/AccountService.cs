@@ -500,7 +500,8 @@ namespace Domain.Services.Implementations
                 {
                     SummonerName = summonerMapped.SummonerName,
                     RoleForTeam = summonerMapped.Role,
-                    Rank = summonerMapped.TierDivision
+                    Rank = summonerMapped.TierDivision,
+                    SummonerId = summoner.Id
                 };
 
                 var existingGroup = list.FirstOrDefault(x => x.Summoners.Contains(partial));
@@ -537,7 +538,8 @@ namespace Domain.Services.Implementations
                     {
                         SummonerName = requestedMapped.SummonerName,
                         RoleForTeam = requestedMapped.Role,
-                        Rank = requestedMapped.TierDivision
+                        Rank = requestedMapped.TierDivision,
+                        SummonerId = requestedSummoner.Id
                     };
 
                     var view = list.FirstOrDefault(x => x.Summoners.Contains(requestedPartail));

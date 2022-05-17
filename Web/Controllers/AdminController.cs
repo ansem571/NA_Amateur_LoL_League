@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DAL.Entities.UserData;
 using Domain.Forms;
 using Domain.Repositories.Interfaces;
 using Domain.Season3Services.Interfaces;
@@ -9,6 +10,7 @@ using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Models.Admin;
@@ -24,9 +26,10 @@ namespace Web.Controllers
         private readonly IUserService _userService;
         private readonly ISummonerInfoRepository _summonerInfoRepository;
         private readonly IRosterService _rosterService;
+        private readonly UserManager<UserEntity> _userManager;
 
         public AdminController(IAdminService adminService, ILogger logger, IPlayoffService playoffService,
-            IUserService userService, ISummonerInfoRepository summonerInfoRepository, IRosterService rosterService)
+            IUserService userService, ISummonerInfoRepository summonerInfoRepository, IRosterService rosterService, UserManager<UserEntity> userManager)
         {
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -34,6 +37,7 @@ namespace Web.Controllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _summonerInfoRepository = summonerInfoRepository ?? throw new ArgumentNullException(nameof(summonerInfoRepository));
             _rosterService = rosterService ?? throw new ArgumentNullException(nameof(rosterService));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         [TempData]
@@ -53,10 +57,10 @@ namespace Web.Controllers
 
             StatusMessage = result ? "Deleted Logos" : "Failed Logo Deletion, look at logs";
 
-            return Index();
+            return RedirectToAction("Index");
         }
 
-        [HttpPost]
+        [HttpGet]
         [Authorize(Roles = "Admin, Tribunal")]
         public async Task<IActionResult> CreateTeamAsync()
         {
@@ -66,7 +70,8 @@ namespace Web.Controllers
             {
                 AllSummoners = model,
                 SelectedSummonersJoint = "",
-                StatusMessage = StatusMessage
+                StatusMessage = StatusMessage,
+                TeamTierScore = 0
             };
             return View(viewModel);
         }
